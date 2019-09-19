@@ -1,5 +1,7 @@
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.function.Supplier;
 
 public class Bot {
     private static String botHelp = "This is a simple chat bot." +
@@ -9,64 +11,41 @@ public class Bot {
             "\r\n\tdate -- print current date and time" +
             "\r\n\tstop -- exit chat bot";
 
+    private static String welcomeText = "Welcome. This is simple chat bot v0.2";
+
+    private static String aboutText = "about"; //TODO
+    // TODO вынести весь текст в json или отдельный класс
+
     public static void main(String[] args) {
-        String welcome = "Welcome. This is simple chat bot v0.1";
-        if (args.length > 1) {
-            System.out.println(args[0]);
-            System.out.println(args[1]);
-            parseArguments(args);
-        }
+        System.out.println(welcomeText);
+        Map<String, Supplier<String>> commands = new HashMap<>();
+        commands.put("-new", NoteMaker::addNote);
+        commands.put("-remove", NoteMaker::removeNote);
+        commands.put("-all", NoteMaker::showAllNotes); // Здесь просто добавляем все возможные функции.
+        commands.put("-exit", Bot::exit);
+        commands.put("-help", Bot::help);
+        commands.put("-about", Bot::about);
+
         Scanner in = new Scanner(System.in);
-        System.out.println(welcome);
-        List<String> currentCommand = Arrays.asList(in.nextLine().split(" "));
-        String respond = "";
+        String currentCommand = in.nextLine();
         while (true) {
-            switch (currentCommand.get(0)) {
-                case "echo":
-                    respond = echo(currentCommand);
-                    break;
-                case "date":
-                    respond = date();
-                    break;
-                case "help":
-                    respond = botHelp;
-                    break;
-                case "stop":
-                    return;
+            if (commands.containsKey(currentCommand)) {
+                System.out.println(commands.get(currentCommand).get());
             }
-            System.out.println(respond);
-            respond = "";
-            currentCommand = Arrays.asList(in.nextLine().split(" "));
+            currentCommand = in.nextLine();
         }
     }
 
-    public static String echo(List<String> currentCommand) {
-        String respond = "";
-        for (int i = 1; i < currentCommand.size(); i++) {
-            respond += currentCommand.get(i) + " ";
-        }
-        return respond;
+    private static String exit() {
+        System.exit(0);
+        return null; // Только потому что все остальные методы в словаре должны возвращать значения.
     }
 
-    public static String date() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("E HH:mm:ss zzz dd/MM/yyyy ");
-        Date date = new Date();
-        return dateFormat.format(date);
-    }
-
-    public static String botHelp() {
+    private static String help() {
         return botHelp;
     }
 
-
-    private static void parseArguments(String[] args) {
-        switch (args[1]) {
-            case "-h":
-            case "--help":
-                System.out.println(botHelp);
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
+    private static String about() {
+        return aboutText;
     }
 }
