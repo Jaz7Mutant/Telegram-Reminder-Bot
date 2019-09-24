@@ -1,21 +1,20 @@
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class NoteMaker {
     private static List<Note> notes; //Все заметки
     private static Map<LocalDateTime, Note> currentDayNotes; //События, которые произойдут сегодня. Ключ -- дата и время напоминания
+    private static Timer timer = new Timer();
 
     public NoteMaker() {
         //TODO: конструктор или просто все проинициализировать
     }
 
-    public static String addNote() throws ParseException {
+    public static String addNote() {
         Scanner in = new Scanner(System.in);
         System.out.println("Write your note");
         String noteText = in.nextLine();
@@ -49,24 +48,26 @@ public class NoteMaker {
         //  return null
     }
 
-    private static void printNotice(Note note) {
-        throw new UnsupportedOperationException();
-        // Чисто утилитарная функция. В ручную не вызывается.
-        //TODO
-    }
-
     private static void updateCurrentDayNotes() {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd: HH:mm:ss");
+        //TODO: Убирает прошедшие события (из всех и из сегодняшних), загружает новые, проходя по всем из notes.
+        // Добавляет в отложенный запуск событие.
+
         LocalDateTime today = LocalDateTime.now();
         for (Note note:notes) {
             if (note.getEventDate().isBefore(today)){
-                notes.remove(notes.indexOf(note));
+                notes.remove(note);
             }
-
+            if (note.getRemindDate().toLocalDate().compareTo(today.toLocalDate()) == 0){
+                currentDayNotes.put(note.getRemindDate(),note); //Добавляет заметку в буфер заметок с напоминанием сегодня
+            }                                                                           // TODO: ReFUCKtor this shit
+            if (note.getEventDate().toLocalDate().compareTo(today.toLocalDate()) == 0){
+                currentDayNotes.put(note.getEventDate(),note);
+            }
         }
-        //TODO: Убирает прошедшие события (из всех и из сегодняшних), загружает новые, проходя по всем из notes.
-        // Добавляет в отложенный запуск событие.
-        //Timer timer = new Timer();
-        //timer.schedule(MyTimeTask extends TimerTask);
+
+        for (Note note:currentDayNotes.values()){  //Создает напоминания на сегодня -- функции, показывающие тект.
+            timer.schedule(new NotePrinter(note.getText()),Date.from(note.getRemindDate().atZone(ZoneId.systemDefault()).toInstant()));
+        }
+        currentDayNotes.clear();
     }
 }
