@@ -1,6 +1,11 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public class NoteMaker {
     private static List<Note> notes; //Все заметки
@@ -10,8 +15,21 @@ public class NoteMaker {
         //TODO: конструктор или просто все проинициализировать
     }
 
-    public static String addNote() {
-        throw new UnsupportedOperationException();
+    public static String addNote() throws ParseException {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Write your note");
+        String noteText = in.nextLine();
+        System.out.println("When ? Write the date in yyyy-MM-dd: HH:mm:ss format");
+        String stringEventDate = in.nextLine();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd: HH:mm:ss");
+        LocalDateTime eventDate = LocalDateTime.parse(stringEventDate, formatter);
+        System.out.println("When ? Write the date in yyyy-MM-dd: HH:mm:ss format");
+        String stringRemindDate = in.nextLine();
+        LocalDateTime remindDate = LocalDateTime.parse(stringRemindDate, formatter);
+        Note note = new Note(noteText, eventDate, remindDate);
+        notes.add(note);
+        updateCurrentDayNotes();
+        return "You have a new note {0} on {1}, remind on {2}".format(noteText, eventDate, remindDate);
         //TODO: Спрашивает у пользователя String noteText, LocalDateTime noticeDate, LocalDateTime eventDate
         // Добавляет новую заметку в лист заметок.
         // Вызывает updateCurrentDayNotes.
@@ -38,7 +56,14 @@ public class NoteMaker {
     }
 
     private static void updateCurrentDayNotes() {
-        throw new UnsupportedOperationException();
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd: HH:mm:ss");
+        LocalDateTime today = LocalDateTime.now();
+        for (Note note:notes) {
+            if (note.getEventDate().isBefore(today)){
+                notes.remove(notes.indexOf(note));
+            }
+
+        }
         //TODO: Убирает прошедшие события (из всех и из сегодняшних), загружает новые, проходя по всем из notes.
         // Добавляет в отложенный запуск событие.
         //Timer timer = new Timer();
