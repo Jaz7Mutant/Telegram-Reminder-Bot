@@ -6,13 +6,19 @@
 
     <groupId>Jaz7</groupId>
     <artifactId>chat-bot</artifactId>
-    <version>0.2-pre-alpha</version>
+    <version>0.3-pre-alpha</version>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13-beta-3</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <properties>

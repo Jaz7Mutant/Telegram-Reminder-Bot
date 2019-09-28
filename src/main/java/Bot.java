@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 public class Bot {
     private static String botHelp = "This is a simple chat bot." +
@@ -10,42 +9,43 @@ public class Bot {
             "\r\n\techo <args> -- print <args>" +
             "\r\n\tdate -- print current date and time" +
             "\r\n\tstop -- exit chat bot";
-
-    private static String welcomeText = "Welcome. This is simple chat bot v0.2";
-
-    private static String aboutText = "about"; //TODO
-    // TODO вынести весь текст в json или отдельный класс
+    private static String welcomeText = "Welcome. This is simple chat bot v0.3 alpha";
+    private static String aboutText = "about"; //TODO вынести весь текст в json или отдельный класс
+    private static UserIO userIO = new ConsoleIO();
 
     public static void main(String[] args) {
-        System.out.println(welcomeText);
-        Map<String, Supplier<String>> commands = new HashMap<>();
+        userIO.showMessage(welcomeText);
+        Map<String, Consumer<String>> commands = new HashMap<>();
         commands.put("-new", NoteMaker::addNote);
         commands.put("-remove", NoteMaker::removeNote);
-        commands.put("-all", NoteMaker::showAllNotes); // Здесь просто добавляем все возможные функции.
+        commands.put("-all", NoteMaker::showAllNotes);
         commands.put("-exit", Bot::exit);
         commands.put("-help", Bot::help);
         commands.put("-about", Bot::about);
+        commands.put("-echo", Bot::echo);
 
-        Scanner in = new Scanner(System.in);
-        String currentCommand = in.nextLine();
-        while (true) {
-            if (commands.containsKey(currentCommand)) {
-                System.out.println(commands.get(currentCommand).get());
+        String currentCommand = "";
+        while (!currentCommand.equals("-exit")) {
+            currentCommand = userIO.getUserText(null);
+            if (commands.containsKey(currentCommand.split(" ")[0])) {
+                commands.get(currentCommand).accept(currentCommand);
             }
-            currentCommand = in.nextLine();
         }
     }
 
-    private static String exit() {
+    private static void exit(String _s) {
         System.exit(0);
-        return null; // Только потому что все остальные методы в словаре должны возвращать значения.
     }
 
-    private static String help() {
-        return botHelp;
+    private static void help(String _s) {
+        userIO.showMessage(botHelp);
     }
 
-    private static String about() {
-        return aboutText;
+    private static void about(String _s) {
+        userIO.showMessage(aboutText);
+    }
+
+    private static void echo(String s){
+        userIO.showMessage(s.substring(5));
     }
 }

@@ -5,10 +5,10 @@ public class Note {
     private LocalDateTime eventDate;
     private LocalDateTime remindDate;
 
-    public Note(String text, LocalDateTime eventDate, LocalDateTime noticeDate) {
+    public Note(String text, LocalDateTime eventDate, LocalDateTime remindDate) {
         this.text = text;
         this.eventDate = eventDate;
-        this.remindDate = noticeDate;
+        this.remindDate = remindDate;
     }
 
     public String getText() {
