@@ -18,4 +18,9 @@ public class ConsoleIO implements UserIO {
     public void showList(String prompt, String[] elements) {
         throw new UnsupportedOperationException(); //TODO;
     }
+
+    @Override
+    public String getUserId() {
+        return null;
+    }
 }
