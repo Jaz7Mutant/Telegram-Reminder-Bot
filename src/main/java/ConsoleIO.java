@@ -1,12 +1,18 @@
+import java.io.*;
+import java.util.Scanner;
+
 public class ConsoleIO implements UserIO {
+
     @Override
-    public void showMessage(String message) {
-        throw new UnsupportedOperationException(); //TODO;
+    public void showMessage(String message){
+        System.out.print(message);
     }
 
     @Override
     public String getUserText(String prompt) {
-        throw new UnsupportedOperationException(); //TODO;
+        System.out.println(prompt);
+        Scanner in = new Scanner(System.in);
+        return in.nextLine();
     }
 
     @Override
