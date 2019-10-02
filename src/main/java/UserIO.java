@@ -6,4 +6,6 @@ public interface UserIO {
     public int getOnClickButton(String[] buttons);
 
     public void showList(String prompt, String[] elements);
+
+    public String getUserId();
 }

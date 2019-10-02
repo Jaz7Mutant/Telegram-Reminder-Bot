@@ -20,10 +20,11 @@ public class Bot {
 
     public static void main(String[] args) {
         userIO.showMessage(welcomeText);
+        NoteMaker noteMaker = new NoteMaker(new ConsoleIO(), 60);
         Map<String, Consumer<String>> commands = new HashMap<>();
-        commands.put("-new", NoteMaker::addNote);
-        commands.put("-remove", NoteMaker::removeNote);
-        commands.put("-all", NoteMaker::showAllNotes);
+        commands.put("-new", noteMaker::addNote);
+        commands.put("-remove", noteMaker::removeNote);
+        commands.put("-all", noteMaker::showUserNotes);
         commands.put("-exit", Bot::exit);
         commands.put("-help", Bot::help);
         commands.put("-authors", Bot::authors);
@@ -32,18 +33,18 @@ public class Bot {
 
         String currentCommand = "";
         while (!currentCommand.equals("-exit")) {
-            currentCommand = userIO.getUserText("");
-            if (commands.containsKey(currentCommand.split(" ")[0])) {
-                commands.get(currentCommand.split(" ")[0]).accept(currentCommand);
+            currentCommand = userIO.getUserText(null);
+            if (commands.containsKey(currentCommand.split(" ")[0])) { // TODO: userId
+                commands.get(currentCommand).accept(currentCommand);
             }
         }
     }
 
-    private static void exit(String _s) {
+    private static void exit(String userId) {
         System.exit(0);
     }
 
-    private static void help(String _s) {
+    private static void help(String userId) {
         userIO.showMessage(botHelp);
     }
 
