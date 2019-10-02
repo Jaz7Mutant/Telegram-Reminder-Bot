@@ -6,14 +6,14 @@ import java.util.function.Consumer;
 
 public class Bot {
     private static String botHelp = "This is a bot-reminder." +
-            "\r\nKeys: \r\n\t[-h], [--help] -- show help" +
-            "\r\nFunctions:\r\n\thelp -- show help" +
-            "\r\n\techo <args> -- print <args>" +
-            "\r\n\tdate -- print current date and time" +
-            "\r\n\tnew -- create new note" +
-            "\r\n\tremove -- remove note" +
-            "\r\n\tall -- show all your notes" +
-            "\r\n\tstop -- exit chat bot";
+            "\r\nFunctions:\r\n\t-help -- show help" +
+            "\r\n\t-echo <args> -- print <args>" +
+            "\r\n\t-authors -- print authors" +
+            "\r\n\t-date -- print current date and time" +
+            "\r\n\t-new -- create new note" +
+            "\r\n\t-remove -- remove note" +
+            "\r\n\t-all -- show all your notes" +
+            "\r\n\t-stop -- exit chat bot";
     private static String welcomeText = "Welcome. This is bot-reminder v0.3 alpha";
     private static String authors = "Tolstoukhov Daniil, Gorbunova Sofia, 2019"; //TODO вынести весь текст в json или отдельный класс
     private static UserIO userIO = new ConsoleIO();
@@ -25,17 +25,17 @@ public class Bot {
         commands.put("-new", noteMaker::addNote);
         commands.put("-remove", noteMaker::removeNote);
         commands.put("-all", noteMaker::showUserNotes);
-        commands.put("-exit", Bot::exit);
+        commands.put("-stop", Bot::exit);
         commands.put("-help", Bot::help);
         commands.put("-authors", Bot::authors);
         commands.put("-echo", Bot::echo);
         commands.put("-date", Bot::date);
 
         String currentCommand = "";
-        while (!currentCommand.equals("-exit")) {
+        while (true) {
             currentCommand = userIO.getUserText(null);
-            if (commands.containsKey(currentCommand.split(" ")[0])) { // TODO: userId
-                commands.get(currentCommand).accept(currentCommand);
+            if (!currentCommand.replaceAll("\\s+", "").equals("") && commands.containsKey(currentCommand.split(" ")[0])) { // TODO: userId
+                commands.get(currentCommand.split(" ")[0]).accept(currentCommand);
             }
         }
     }
@@ -57,6 +57,8 @@ public class Bot {
     }
 
     private static void echo(String s){
-        userIO.showMessage(s.substring(6));
+        if (s.length() > 6) {
+            userIO.showMessage(s.substring(6));
+        }
     }
 }

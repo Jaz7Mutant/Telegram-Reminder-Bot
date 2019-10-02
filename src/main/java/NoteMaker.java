@@ -28,9 +28,16 @@ public class NoteMaker {
         userIO.showMessage("Set the date of remind");
         LocalDateTime remindDate = dateTimeParser.getDateTimeWithOffset(userIO, eventDate);
 
-        notes.add(new Note(userId, noteText, eventDate, remindDate)); //TODO: usedID
+        notes.add(new Note(
+                //userId,
+                noteText, eventDate, remindDate)); //TODO: usedID
         notePrinter.run();
-        userIO.showMessage("You have a new note {0}... with remind on {1}".format(noteText.substring(0, 20), remindDate));
+        int stringLimit = 20;
+        if (noteText.length() < 20){
+            stringLimit = noteText.length();
+        }
+        userIO.showMessage("You have a new note \""
+                + noteText.substring(0, stringLimit) + "...\" with remind on " + remindDate);
     }
 
     public void removeNote(String userId) { //TODO: userId

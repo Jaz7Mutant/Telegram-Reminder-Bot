@@ -6,8 +6,10 @@ public class Note {
     private LocalDateTime eventDate;
     private LocalDateTime remindDate;
 
-    public Note(String userId, String text, LocalDateTime eventDate, LocalDateTime remindDate) {
-        this.userId = userId;
+    public Note(
+            //String userId,
+            String text, LocalDateTime eventDate, LocalDateTime remindDate) {
+        //this.userId = userId;
         this.text = text;
         this.eventDate = eventDate;
         this.remindDate = remindDate;

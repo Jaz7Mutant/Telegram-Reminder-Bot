@@ -10,7 +10,7 @@ import java.util.GregorianCalendar;
 public class DateTimeParser {
     public LocalDateTime getDateTime(UserIO userIO){
         LocalDateTime currentDate = LocalDateTime.now();
-        Calendar userDate = new GregorianCalendar();
+        Calendar userDate = new GregorianCalendar(); //TODO: не работает
         userDate.set(Calendar.YEAR, getYear(userIO,currentDate));
         userDate.set(Calendar.MONTH, getMonth(userIO, currentDate));
         userDate.set(Calendar.DAY_OF_MONTH, getDay(userIO,getDaysInMonth(userDate)));
@@ -79,7 +79,7 @@ public class DateTimeParser {
 
     private int getMonth(UserIO userIO, LocalDateTime currentDate){
         userIO.showMessage("Choose month");
-        String[] months = new String[13];
+        String[] months = new String[12];
         for (int i = 0; i < 12; i++){
             months[i] = currentDate.plusMonths(i).getMonth().toString();
         }
