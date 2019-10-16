@@ -49,7 +49,7 @@ public class TestBot {
     @Test
     public void testJsonSerialize(){
         SortedSet<Note> notes = new TreeSet<Note>(Comparator.comparing(Note::getRemindDate));
-        Note note1 = new Note("note1",LocalDateTime.of(2019,10,30,22,50),
+        Note note1 = new Note("","note1",LocalDateTime.of(2019,10,30,22,50),
                 LocalDateTime.of(2019,9,29,0,0));
         notes.add(note1);
         JsonNoteSerializer jsonNoteSerializer = new JsonNoteSerializer();
@@ -73,9 +73,9 @@ public class TestBot {
     @Test
     public void testJsonDeserialize(){
         SortedSet<Note> notes = new TreeSet<Note>(Comparator.comparing(Note::getRemindDate));
-        Note note1 = new Note("note1",LocalDateTime.of(2019,10,30,22,50),
+        Note note1 = new Note("","note1",LocalDateTime.of(2019,10,30,22,50),
                 LocalDateTime.of(2019,9,29,0,0));
-        Note note2 = new Note("note2",LocalDateTime.of(2019,11,30,22,50),
+        Note note2 = new Note("","note2",LocalDateTime.of(2019,11,30,22,50),
                 LocalDateTime.of(2019,10,10,10,10));
         notes.add(note2);
         notes.add(note1);

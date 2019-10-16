@@ -1,22 +1,22 @@
 import java.time.LocalDateTime;
 
 public class Note {
-    private String userId;
+    private long chatId;
     private String text;
     private LocalDateTime eventDate;
     private LocalDateTime remindDate;
 
     public Note(
-            //String userId,
+            long userId,
             String text, LocalDateTime eventDate, LocalDateTime remindDate) {
-        //this.userId = userId;
+        this.chatId = userId;
         this.text = text;
         this.eventDate = eventDate;
         this.remindDate = remindDate;
     }
 
-    public String getUserId(){
-        return userId;
+    public long getChatId(){
+        return chatId;
     }
 
     public String getText() {
@@ -29,5 +29,11 @@ public class Note {
 
     public LocalDateTime getRemindDate() {
         return remindDate;
+    }
+
+
+
+    public void deleteBeforehandRemind(){
+        remindDate = eventDate;
     }
 }

@@ -1,27 +1,23 @@
-import java.io.*;
 import java.util.Scanner;
 
 public class ConsoleIO implements UserIO {
 
     @Override
-    public void showMessage(String message){
+    public void showMessage(String message, long chatId){
         System.out.println(message);
     }
 
     @Override
-    public String getUserText(String prompt) {
+    public String getUserText(String prompt, long chatId) {
         if (prompt != null) {
             System.out.println(prompt);
         }
-//        else {
-//            System.out.println();
-//        }
         Scanner in = new Scanner(System.in);
         return in.nextLine();
     }
 
     @Override
-    public int getOnClickButton(String[] buttons) {
+    public int getOnClickButton(String[] buttons, long chatId) {
         for (int i = 0; i < buttons.length; i++){
             System.out.println((i+1) + ". " + buttons[i]);
         }
@@ -34,7 +30,7 @@ public class ConsoleIO implements UserIO {
     }
 
     @Override
-    public void showList(String prompt, String[] elements) {
+    public void showList(String prompt, String[] elements, long chatId) {
         System.out.println(prompt);
         for (int i = 0; i < elements.length; i++) {
             String str = elements[i];
@@ -42,8 +38,8 @@ public class ConsoleIO implements UserIO {
         }
     }
 
-    @Override
-    public String getUserId() {
-        throw new UnsupportedOperationException(); //TODO;
-    }
+//    @Override
+//    public String getChatId() {
+//        throw new UnsupportedOperationException(); //TODO;
+//    }
 }

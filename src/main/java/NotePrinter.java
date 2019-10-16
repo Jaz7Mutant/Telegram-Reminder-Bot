@@ -21,6 +21,7 @@ public class NotePrinter extends TimerTask {
         Note firstNote = notes.first();
         if (firstNote.getRemindDate().isBefore(currentTime)) {
             printNote(firstNote);
+            firstNote.deleteBeforehandRemind();
             if (firstNote.getEventDate().isBefore(currentTime)) {
                 notes.remove(firstNote);
             }
@@ -28,6 +29,7 @@ public class NotePrinter extends TimerTask {
     }
 
     public void printNote(Note note) {
-        //TODO:
+        userIO.showMessage(note.getText(),0);
+        //todo:
     }
 }
