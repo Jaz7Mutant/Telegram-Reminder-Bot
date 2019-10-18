@@ -3,19 +3,22 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 public class StateHolder {
     public UserStates currentState = UserStates.IDLE;
     private UserIO userIO;
-    private long chatId;
+    private String chatId;
     private NoteMaker noteMaker;
 
     private LocalDateTime currentDate;
     private String[] years;
     private String[] months;
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     private String newNoteText = null;
     private int newRawYear = -1;
@@ -27,7 +30,7 @@ public class StateHolder {
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
 
-    public StateHolder(long chatId, UserIO userIO, NoteMaker noteMaker) {
+    public StateHolder(String chatId, UserIO userIO, NoteMaker noteMaker) {
         this.noteMaker = noteMaker;
         this.chatId = chatId;
         this.userIO = userIO;
@@ -51,6 +54,28 @@ public class StateHolder {
                 doNextAddingStep(s);
 
             case SHOWING:
+                List<Note> userNotes = new ArrayList<>();
+                for (Note note : noteMaker.notes) {
+                    if (note.getChatId() == chatId) { //TODO: chatId
+                        userNotes.add(note);
+                    }
+                }
+                int respond = Integer.parseInt(s);
+                switch (respond) {
+                    case 0:
+                        printTodayNotes(userNotes, chatId);
+                        break;
+                    case 1:
+                        printTenUpcomingNotes(userNotes, chatId);
+                        break;
+                    case 2:
+                        printAllNotes(userNotes, chatId);
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + respond);
+                }
+            case REMOVING:
+
         }
     }
 
@@ -212,5 +237,42 @@ public class StateHolder {
             newRawMonth = -1;
             newRawYear = -1;
         }
+    }
+
+    private void printTodayNotes(List<Note> userNotes, String chatId){
+        LocalDateTime currentDate = LocalDateTime.now();
+        List<String> todayNotes = new ArrayList<>();
+        for (Note note : userNotes) {
+            if (note.getEventDate().getDayOfYear() == currentDate.getDayOfYear()
+                    && note.getEventDate().getYear() == currentDate.getYear()) {
+                todayNotes.add(note.getEventDate().format(timeFormatter) + " " + note.getText().substring(0, 10));
+            }
+        }
+        userIO.showList("Today's notes:", todayNotes.toArray(new String[0]), chatId);
+    }
+
+    private void printTenUpcomingNotes(List<Note> userNotes, String chatId){
+        if (userNotes.size() > 10) { // Если меньше 10, то выводятся все заметки
+            String[] upcomingNotes = new String[10];
+            Note currentNote;
+            for (int i = 0; i < 10; i++) {
+                currentNote = userNotes.get(i);
+                upcomingNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
+                        + currentNote.getText().substring(0, 10);
+            }
+            userIO.showList("10 upcoming notes:", upcomingNotes, chatId);
+        }
+        else printAllNotes(userNotes, chatId);
+    }
+
+    private void printAllNotes(List<Note> userNotes, String chatId){
+        String[] formattedUserNotes = new String[userNotes.size()];
+        Note currentNote;
+        for (int i = 0; i < userNotes.size(); i++){
+            currentNote = userNotes.get(i); // Разве так сложно было прикрутить индексацию к листу?????
+            formattedUserNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
+                    + currentNote.getText().substring(0,10);
+        }
+        userIO.showList("Your notes:", formattedUserNotes, chatId);
     }
 }

@@ -29,7 +29,7 @@ public class NotePrinter extends TimerTask {
     }
 
     public void printNote(Note note) {
-        userIO.showMessage(note.getText(),0);
+        userIO.showMessage(note.getText(),note.getChatId());
         //todo:
     }
 }

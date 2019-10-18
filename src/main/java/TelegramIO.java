@@ -10,7 +10,7 @@ public class TelegramIO implements UserIO {
     }
 
     @Override
-    public void showMessage(String message, long chatId) {
+    public void showMessage(String message, String chatId) {
         try {
             bot.execute(new SendMessage()
                     .setChatId(chatId)
@@ -21,17 +21,17 @@ public class TelegramIO implements UserIO {
     }
 
     @Override
-    public String getUserText(String prompt, long chatId) {
+    public String getUserText(String prompt, String chatId) {
         return null;
     }
 
     @Override
-    public int getOnClickButton(String[] buttons, long chatId) {
+    public int getOnClickButton(String[] buttons, String chatId) {
         return 0;
     }
 
     @Override
-    public void showList(String prompt, String[] elements, long chatId) {
+    public void showList(String prompt, String[] elements, String chatId) {
 
     }
 }

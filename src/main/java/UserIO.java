@@ -1,11 +1,11 @@
 public interface UserIO {
-    public void showMessage(String message, long chatId);
+    public void showMessage(String message, String chatId);
 
-    public String getUserText(String prompt, long chatId); //TODO: May be null
+    public String getUserText(String prompt, String chatId); //TODO: May be null
 
-    public int getOnClickButton(String[] buttons, long chatId);
+    public int getOnClickButton(String[] buttons, String chatId);
 
-    public void showList(String prompt, String[] elements, long chatId);
+    public void showList(String prompt, String[] elements, String chatId);
 
     //public String getChatId();
 }
