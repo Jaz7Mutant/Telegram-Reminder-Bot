@@ -1,4 +1,3 @@
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
@@ -14,26 +13,35 @@ public class StateHolder {
     private String chatId;
     private NoteMaker noteMaker;
 
-    private LocalDateTime currentDate;
-    private String[] years;
-    private String[] months;
+    private static LocalDateTime currentDate;
+    public static String[] years;
+    private static String[] months;
+    private static String[] days;
+
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
+    private Calendar newRawDate = new GregorianCalendar();
+    private Calendar newRawRemindDate = new GregorianCalendar();
     private String newNoteText = null;
-    private int newRawYear = -1;
-    private int newRawMonth = -1;
-    private int newRawDay = -1;
-    private LocalTime newRawTime = null;
-    private boolean settingTimeInProcess = false;
-
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
+    public AddingStates addingState;
 
     public StateHolder(String chatId, UserIO userIO, NoteMaker noteMaker) {
         this.noteMaker = noteMaker;
         this.chatId = chatId;
         this.userIO = userIO;
+    }
+
+    public void updateCurrentDate() {
+        currentDate = LocalDateTime.now();
+        years = new String[]{
+                Integer.toString(currentDate.getYear()),
+                Integer.toString(currentDate.plusYears(1).getYear()),
+                "Other"};
+        months = new String[12];
+        for (int i = 0; i < 12; i++) {
+            months[i] = currentDate.plusMonths(i).getMonth().toString();
+        }
     }
 
     public void doNextStep(String s) {
@@ -42,237 +50,250 @@ public class StateHolder {
                 return;
 
             case ADDING:
-                currentDate = LocalDateTime.now();
-                years = new String[]{
-                        Integer.toString(currentDate.getYear()),
-                        Integer.toString(currentDate.plusYears(1).getYear()),
-                        "Other"};
-                months = new String[12];
-                for (int i = 0; i < 12; i++) {
-                    months[i] = currentDate.plusMonths(i).getMonth().toString();
-                }
                 doNextAddingStep(s);
+                return;
 
             case SHOWING:
+                int respond;
                 List<Note> userNotes = new ArrayList<>();
                 for (Note note : noteMaker.notes) {
-                    if (note.getChatId() == chatId) { //TODO: chatId
+                    if (note.getChatId().equals(chatId)) {
                         userNotes.add(note);
                     }
                 }
-                int respond = Integer.parseInt(s);
+                if (userNotes.size() == 0){
+                    userIO.showMessage("You have no notes", chatId);
+                    currentState = UserStates.IDLE;
+                    return;
+                }
+                try {
+                    respond = Integer.parseInt(s);
+                } catch (NumberFormatException e) {
+                    userIO.showMessage("Wrong format", chatId);
+                    return;
+                }
+
                 switch (respond) {
                     case 0:
-                        printTodayNotes(userNotes, chatId);
+                        NotePrinter.printTodayNotes(userNotes, chatId);
                         break;
                     case 1:
-                        printTenUpcomingNotes(userNotes, chatId);
+                        NotePrinter.printTenUpcomingNotes(userNotes, chatId);
                         break;
                     case 2:
-                        printAllNotes(userNotes, chatId);
+                        NotePrinter.printAllNotes(userNotes, chatId);
                         break;
                     default:
                         throw new IllegalStateException("Unexpected value: " + respond);
                 }
+                currentState = UserStates.IDLE;
             case REMOVING:
 
         }
     }
 
     private void doNextAddingStep(String userMessage) {
-        if (newNoteText == null) {
-            newNoteText = userMessage;
-            userIO.showMessage("When will it happen?", chatId);
-            userIO.showMessage("Choose year", chatId);
-            userIO.getOnClickButton(years, chatId);
+        switch (addingState) {
+            case SET_TEXT:
+                if (userMessage == null) {
+                    userIO.showMessage("Wrong format", chatId);
+                    userIO.showMessage("Write your note", chatId);
+                    return;
+                } else {
+                    newNoteText = userMessage;
+                    userIO.showMessage("When will it happen?", chatId);
+                    userIO.showOnClickButton("Choose year", years, chatId);
+                    addingState = AddingStates.SET_YEAR;
+                    return;
+                }
+            case SET_YEAR:
+                setYear(newRawDate, userMessage);
+                return;
+            case SET_REMIND_YEAR:
+                setYear(newRawRemindDate, userMessage);
+                return;
+            case SET_MONTH:
+                setMonth(newRawDate, userMessage);
+                return;
+            case SET_REMIND_MONTH:
+                setMonth(newRawRemindDate, userMessage);
+                return;
+            case SET_DAY:
+                setDay(newRawDate, userMessage);
+                return;
+            case SET_REMIND_DAY:
+                setDay(newRawRemindDate, userMessage);
+                return;
+            case SET_TIME:
+                setTime(newRawDate, userMessage);
+                return;
+            case SET_REMIND_TIME:
+                setTime(newRawRemindDate, userMessage);
+                return;
+            case SET_REMIND:
+                setRemind(userMessage);
+        }
+    }
+
+    private void setYear(Calendar rawDate, String userMessage){
+        int respond;
+        try {
+            respond = Integer.parseInt(userMessage);
+        } catch (NumberFormatException e) {
+            userIO.showMessage("Wrong format", chatId);
             return;
         }
-
-        if (newNoteDate == null) {
-            getDateTime(userMessage);
+        if (respond == years.length - 1) {
+            userIO.showMessage("Set year (yyyy)", chatId);
             return;
         }
+        if (respond < years.length){
+            respond = Integer.parseInt(years[respond]);
+        }
+        else if (respond < currentDate.getYear() || respond > 2035) {
+            userIO.showMessage("Illegal year", chatId);
+            return;
+        }
+        rawDate.set(Calendar.YEAR, respond);
+        userIO.showOnClickButton("Choose month", months, chatId);
+        if (addingState == AddingStates.SET_YEAR) {
+            addingState = AddingStates.SET_MONTH;
+        }
+        else {
+            addingState = AddingStates.SET_REMIND_MONTH;
+        }
+    }
 
-        if (newNoteRemindDate == null) {
-            int respond = Integer.parseInt(userMessage);
-            if (settingTimeInProcess) {
-                getDateTime(userMessage);
+    private void setMonth(Calendar rawDate, String userMessage){
+        int respond;
+        try {
+            respond = Integer.parseInt(userMessage);
+            if (respond > 11) {
+                throw new NumberFormatException();
             }
-            switch (respond) {
-                case 0:
-                    newNoteRemindDate = newNoteDate;
-                    break;
-                case 1:
-                    newNoteRemindDate = newNoteDate.minusHours(1);
-                    break;
-                case 2:
-                    newNoteRemindDate = newNoteDate.minusDays(1);
-                    break;
-                case 3:
-                    newNoteRemindDate = newNoteDate.minusWeeks(1);
-                    break;
-                case 4:
-                    userIO.showMessage("Choose year", chatId);
-                    userIO.getOnClickButton(years, chatId);
-                    settingTimeInProcess = true;
-                    getDateTime(userMessage);
-                    break;
-                default:
-                    throw new IllegalArgumentException();
-            }
+        } catch (NumberFormatException e) {
+            userIO.showMessage("Wrong format", chatId);
             return;
         }
+        rawDate.set(Calendar.MONTH, currentDate.plusMonths(respond - 1).getMonthValue());
 
+        int daysInMonth = getDaysInMonth(rawDate);
+        days = new String[daysInMonth];
+        for (int i = 1; i <= daysInMonth; i++) {
+            days[i - 1] = Integer.toString(i);
+        }
+        userIO.showOnClickButton("Choose day", days, chatId);
+        if (addingState == AddingStates.SET_MONTH) {
+            addingState = AddingStates.SET_DAY;
+        }
+        else{
+            addingState = AddingStates.SET_REMIND_DAY;
+        }
+    }
+
+    private void setDay(Calendar rawDate,String userMessage){
+        int respond;
+        try {
+            respond = Integer.parseInt(userMessage);
+            if (respond > days.length) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            userIO.showMessage("Wrong format", chatId);
+            return;
+        }
+        rawDate.set(Calendar.DAY_OF_MONTH, respond + 1);
+
+        userIO.showMessage("Set time (hh:mm)", chatId);
+        if (addingState == AddingStates.SET_DAY) {
+            addingState = AddingStates.SET_TIME;
+        }
+        else {
+            addingState = AddingStates.SET_REMIND_TIME;
+        }
+    }
+
+    private  void setTime(Calendar rawDate, String userMessage){
+        LocalTime time;
+        try {
+            time = LocalTime.parse(userMessage);
+        } catch (Exception e) {
+            userIO.showMessage("Wrong format", chatId);
+            return;
+        }
+        rawDate.set(Calendar.HOUR_OF_DAY, time.getHour());
+        rawDate.set(Calendar.MINUTE, time.getMinute());
+        newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
+        if (addingState == AddingStates.SET_TIME){
+            addingState = AddingStates.SET_REMIND;
+
+            userIO.showOnClickButton("Set the date of remind", new String[]{
+                    "No remind",
+                    "A hour before",
+                    "A day before",
+                    "A week before",
+                    "Set date..."}, chatId);
+        }
+        else{
+            newNoteRemindDate = LocalDateTime.ofInstant(newRawRemindDate.toInstant(), newRawRemindDate.getTimeZone().toZoneId());
+            finishAddNote();
+        }
+ }
+
+    private void setRemind(String userMessage){
+        int respond;
+        try {
+            respond = Integer.parseInt(userMessage);
+            if (respond > 4){
+                throw new NumberFormatException();
+            }
+        }
+        catch (NumberFormatException e){
+            userIO.showMessage("Wrong format", chatId);
+            return;
+        }
+        newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
+        switch (respond) {
+            case 0:
+                newNoteRemindDate = newNoteDate;
+                break;
+            case 1:
+                newNoteRemindDate = newNoteDate.minusHours(1);
+                break;
+            case 2:
+                newNoteRemindDate = newNoteDate.minusDays(1);
+                break;
+            case 3:
+                newNoteRemindDate = newNoteDate.minusWeeks(1);
+                break;
+            case 4:
+                userIO.showOnClickButton("Choose year", years, chatId);
+                addingState = AddingStates.SET_REMIND_YEAR;
+                return;
+            default:
+                throw new IllegalArgumentException();
+        }
+        finishAddNote();
+    }
+
+    private void finishAddNote(){
         noteMaker.notes.add(new Note(
                 chatId,
                 newNoteText,
                 newNoteDate,
                 newNoteRemindDate));
         noteMaker.notePrinter.run();
+        addingState = AddingStates.IDLE;
+        NoteMaker.userStates.get(chatId).currentState = UserStates.IDLE;
         int stringLimit = 20;
         if (newNoteText.length() < 20) {
             stringLimit = newNoteText.length();
         }
         userIO.showMessage("You have a new note \""
                 + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(dateTimeFormatter), chatId);
-
-        newNoteText = null;
-        newRawYear = -1;
-        newRawMonth = -1;
-        newRawDay = -1;
-        newRawTime = null;
-        settingTimeInProcess = false;
-        newNoteDate = null;
-        newNoteRemindDate = null;
-        currentState = UserStates.IDLE;
     }
 
-    private void getDateTime(String userMessage) {
-
-        if (newRawYear == -1) {
-            int respond = Integer.parseInt(userMessage);
-            if (respond >= years.length - 1) {
-                try {
-                    userIO.showMessage("Set year (yyyy)", chatId);
-                    if (respond == years.length - 1)
-                        return;
-                    if (respond < currentDate.getYear() || respond > 2035) {
-                        throw new ParseException("Illegal year", 1);
-                    }
-                    newRawYear = respond;
-                } catch (ParseException e) {
-                    userIO.showMessage("Wrong format", chatId);
-                    return;
-                }
-            } else {
-                newRawYear = Integer.parseInt(years[respond]);
-            }
-            userIO.showMessage("Choose Month", chatId);
-            userIO.getOnClickButton(months, chatId);
-            return;
-        }
-
-        if (newRawMonth == -1) {
-            int respond = Integer.parseInt(userMessage);
-            newRawMonth = currentDate.plusMonths(respond - 1).getMonthValue();
-
-            userIO.showMessage("choose day", chatId);
-            Calendar _cal = new GregorianCalendar();
-            _cal.set(Calendar.YEAR, newRawYear);
-            _cal.set(Calendar.MONTH, newRawMonth);
-            int daysInMonth = YearMonth.of(_cal.get(Calendar.YEAR), _cal.get(Calendar.MONTH)).lengthOfMonth();
-            String[] days = new String[daysInMonth];
-            for (int i = 1; i <= daysInMonth; i++) {
-                days[i - 1] = Integer.toString(i);
-            }
-            userIO.getOnClickButton(days, chatId);
-            return;
-        }
-
-        if (newRawDay == -1) {
-            int respond = Integer.parseInt(userMessage);
-            newRawDay = respond + 1;
-            userIO.showMessage("Set time (hh:mm)", chatId);
-            return;
-        }
-
-        if (newRawTime == null) {
-            LocalTime time;
-            try {
-                time = LocalTime.parse(userMessage);
-            } catch (Exception e) {
-                userIO.showMessage("Wrong format", chatId);
-                return;
-            }
-            newRawTime = time;
-            return;
-        }
-
-        Calendar userDate = new GregorianCalendar();
-        userDate.set(Calendar.YEAR, newRawYear);
-        userDate.set(Calendar.MONTH, newRawMonth);
-        userDate.set(Calendar.DAY_OF_MONTH, newRawDay);
-        userDate.set(Calendar.HOUR_OF_DAY, newRawTime.getHour());
-        userDate.set(Calendar.MINUTE, newRawTime.getMinute());
-        if (newNoteDate == null) {
-            newNoteDate = LocalDateTime.ofInstant(userDate.toInstant(), userDate.getTimeZone().toZoneId());
-            userIO.showMessage("Set the date of remind", chatId);
-            userIO.getOnClickButton(new String[]{
-                    "No remind",
-                    "A hour before",
-                    "A day before",
-                    "A week before",
-                    "Set date..."}, chatId);
-            newRawTime = null;
-            newRawDay = -1;
-            newRawMonth = -1;
-            newRawYear = -1;
-            return;
-        }
-
-        if (newNoteRemindDate == null) {
-            newNoteRemindDate = newNoteDate = LocalDateTime.ofInstant(userDate.toInstant(), userDate.getTimeZone().toZoneId());
-            newRawTime = null;
-            newRawDay = -1;
-            newRawMonth = -1;
-            newRawYear = -1;
-        }
-    }
-
-    private void printTodayNotes(List<Note> userNotes, String chatId){
-        LocalDateTime currentDate = LocalDateTime.now();
-        List<String> todayNotes = new ArrayList<>();
-        for (Note note : userNotes) {
-            if (note.getEventDate().getDayOfYear() == currentDate.getDayOfYear()
-                    && note.getEventDate().getYear() == currentDate.getYear()) {
-                todayNotes.add(note.getEventDate().format(timeFormatter) + " " + note.getText().substring(0, 10));
-            }
-        }
-        userIO.showList("Today's notes:", todayNotes.toArray(new String[0]), chatId);
-    }
-
-    private void printTenUpcomingNotes(List<Note> userNotes, String chatId){
-        if (userNotes.size() > 10) { // Если меньше 10, то выводятся все заметки
-            String[] upcomingNotes = new String[10];
-            Note currentNote;
-            for (int i = 0; i < 10; i++) {
-                currentNote = userNotes.get(i);
-                upcomingNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                        + currentNote.getText().substring(0, 10);
-            }
-            userIO.showList("10 upcoming notes:", upcomingNotes, chatId);
-        }
-        else printAllNotes(userNotes, chatId);
-    }
-
-    private void printAllNotes(List<Note> userNotes, String chatId){
-        String[] formattedUserNotes = new String[userNotes.size()];
-        Note currentNote;
-        for (int i = 0; i < userNotes.size(); i++){
-            currentNote = userNotes.get(i); // Разве так сложно было прикрутить индексацию к листу?????
-            formattedUserNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                    + currentNote.getText().substring(0,10);
-        }
-        userIO.showList("Your notes:", formattedUserNotes, chatId);
+    private int getDaysInMonth(Calendar calendar) {
+        return YearMonth.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)).lengthOfMonth();
     }
 }

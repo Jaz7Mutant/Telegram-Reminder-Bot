@@ -1,115 +1,138 @@
-//import java.text.ParseException;
 //import java.time.LocalDateTime;
 //import java.time.LocalTime;
 //import java.time.YearMonth;
 //import java.util.Calendar;
-//import java.util.GregorianCalendar;
 //
 //public class DateTimeParser {
-//    public LocalDateTime getDateTime(UserIO userIO){
-//        LocalDateTime currentDate = LocalDateTime.now();
-//        Calendar userDate = new GregorianCalendar();
-//        userDate.set(Calendar.YEAR, getYear(userIO,currentDate));
-//        userDate.set(Calendar.MONTH, getMonth(userIO, currentDate));
-//        userDate.set(Calendar.DAY_OF_MONTH, getDay(userIO,getDaysInMonth(userDate)));
-//        LocalTime time = getTime(userIO);
-//        userDate.set(Calendar.HOUR_OF_DAY, time.getHour());
-//        userDate.set(Calendar.MINUTE, time.getMinute());
+//    private static LocalDateTime currentDate;
+//    public static String[] years;
+//    private static String[] months;
+//    private static String[] days;
+//    private static UserIO userIO;
 //
-//        return LocalDateTime.ofInstant(userDate.toInstant(),userDate.getTimeZone().toZoneId());
+//    public DateTimeParser(UserIO userIO) {
+//        this.userIO = userIO;
 //    }
 //
-//    public LocalDateTime getDateTimeWithOffset(UserIO userIO, LocalDateTime date){
-//        LocalDateTime newDate;
-//        int respond = userIO.getOnClickButton(new String[]{
-//                "No remind",
-//                "A hour before",
-//                "A day before",
-//                "A week before",
-//                "Set date..."}, 0);
-//        switch (respond) {
-//            case 0:
-//                newDate = date;
-//                break;
-//            case 1:
-//                newDate = date.minusHours(1);
-//                break;
-//            case 2:
-//                newDate = date.minusDays(1);
-//                break;
-//            case 3:
-//                newDate = date.minusWeeks(1);
-//                break;
-//            case 4:
-//                newDate = getDateTime(userIO);
-//                break;
-//            default:
-//                throw new IllegalArgumentException();
-//        }
-//        return newDate;
-//    }
-//
-//    private int getYear(UserIO userIO, LocalDateTime currentDate){
-//        userIO.showMessage("Choose year", "");
-//        String[] years = {
+//    public static void updateCurrentDate() {
+//        currentDate = LocalDateTime.now();
+//        years = new String[]{
 //                Integer.toString(currentDate.getYear()),
 //                Integer.toString(currentDate.plusYears(1).getYear()),
 //                "Other"};
-//        int respond = userIO.getOnClickButton(years, 0);
-//        int year;
-//        if (respond > years.length){
-//            while (true){
-//                try {
-//                    year = Integer.parseInt(userIO.getUserText("Set year (yyyy)", 0));
-//                    if (year < currentDate.getYear() || year > 2035) {
-//                        throw new ParseException("Illegal year", 1);
-//                    }
-//                    break;
-//                } catch (ParseException e) {
-//                    userIO.showMessage("Wrong format", "");
-//                }
-//            }
-//        }
-//        else {
-//            year = Integer.parseInt(years[respond]);
-//        }
-//        return year;
-//    }
-//
-//    private int getMonth(UserIO userIO, LocalDateTime currentDate){
-//        userIO.showMessage("Choose month", "");
-//        String[] months = new String[12];
-//        for (int i = 0; i < 12; i++){
+//        months = new String[12];
+//        for (int i = 0; i < 12; i++) {
 //            months[i] = currentDate.plusMonths(i).getMonth().toString();
 //        }
-//        int respond = userIO.getOnClickButton(months, 0);
-//        return currentDate.plusMonths(respond - 1).getMonthValue();
 //    }
 //
-//    private int getDay(UserIO userIO, int daysInMonth){
-//        userIO.showMessage("choose day", 0);
-//        String[] days = new String[daysInMonth];
-//        for (int i = 1; i<=daysInMonth; i++){
-//            days[i-1] = Integer.toString(i);
+//    public static void setYear(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+//        int respond;
+//        try {
+//            respond = Integer.parseInt(userMessage);
+//        } catch (NumberFormatException e) {
+//            userIO.showMessage("Wrong format", chatId);
+//            return;
 //        }
-//        int respond = userIO.getOnClickButton(days, 0);
-//        return respond+1;
+//        if (respond == years.length - 1) {
+//            userIO.showMessage("Set year (yyyy)", chatId);
+//            return;
+//        }
+//        if (respond < years.length) {
+//            respond = Integer.parseInt(years[respond]);
+//        } else if (respond < currentDate.getYear() || respond > 2035) {
+//            userIO.showMessage("Illegal year", chatId);
+//            return;
+//        }
+//        rawDate.set(Calendar.YEAR, respond);
+//        userIO.showOnClickButton("Choose month", months, chatId);
+//        if (addingState == AddingStates.SET_YEAR) {
+//            addingState = AddingStates.SET_MONTH;
+//        } else {
+//            addingState = AddingStates.SET_REMIND_MONTH;
+//        }
 //    }
 //
-//    private LocalTime getTime(UserIO userIO){
-//        LocalTime time;
-//        while (true){
-//            try {
-//                time = LocalTime.parse(userIO.getUserText("Set time (hh:mm)", 0));
-//                break;
-//            } catch (Exception e){
-//                userIO.showMessage("Wrong format", 0);
+//    public static void setMonth(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+//        int respond;
+//        try {
+//            respond = Integer.parseInt(userMessage);
+//            if (respond > 11) {
+//                throw new NumberFormatException();
 //            }
+//        } catch (NumberFormatException e) {
+//            userIO.showMessage("Wrong format", chatId);
+//            return;
 //        }
-//        return time;
+//        rawDate.set(Calendar.MONTH, currentDate.plusMonths(respond - 1).getMonthValue());
+//
+//        int daysInMonth = getDaysInMonth(rawDate);
+//        days = new String[daysInMonth];
+//        for (int i = 1; i <= daysInMonth; i++) {
+//            days[i - 1] = Integer.toString(i);
+//        }
+//        userIO.showOnClickButton("Choose day", days, chatId);
+//        if (addingState == AddingStates.SET_MONTH) {
+//            addingState = AddingStates.SET_DAY;
+//        } else {
+//            addingState = AddingStates.SET_REMIND_DAY;
+//        }
 //    }
 //
-//    private int getDaysInMonth(Calendar calendar){
-//        return YearMonth.of(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)).lengthOfMonth();
+//    public static void setDay(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+//        int respond;
+//        try {
+//            respond = Integer.parseInt(userMessage);
+//            if (respond > days.length) {
+//                throw new NumberFormatException();
+//            }
+//        } catch (NumberFormatException e) {
+//            userIO.showMessage("Wrong format", chatId);
+//            return;
+//        }
+//        rawDate.set(Calendar.DAY_OF_MONTH, respond + 1);
+//
+//        userIO.showMessage("Set time (hh:mm)", chatId);
+//        if (addingState == AddingStates.SET_DAY) {
+//            addingState = AddingStates.SET_TIME;
+//        } else {
+//            addingState = AddingStates.SET_REMIND_TIME;
+//        }
+//    }
+//
+//    public static void setTime(
+//            Calendar rawDate,
+//            String userMessage,
+//            String chatId,
+//            AddingStates addingState,
+//            LocalDateTime newNoteDate,
+//            Calendar newRawDate,
+//            LocalDateTime newNoteRemindDate,
+//            Calendar newRawRemindDate) {
+//        LocalTime time;
+//        try {
+//            time = LocalTime.parse(userMessage);
+//        } catch (Exception e) {
+//            userIO.showMessage("Wrong format", chatId);
+//            return;
+//        }
+//        rawDate.set(Calendar.HOUR_OF_DAY, time.getHour());
+//        rawDate.set(Calendar.MINUTE, time.getMinute());
+//        if (addingState == AddingStates.SET_TIME) {
+//            addingState = AddingStates.SET_REMIND;
+//            newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
+//            userIO.showOnClickButton("Set the date of remind", new String[]{
+//                    "No remind",
+//                    "A hour before",
+//                    "A day before",
+//                    "A week before",
+//                    "Set date..."}, chatId);
+//        } else {
+//            newNoteRemindDate = LocalDateTime.ofInstant(newRawRemindDate.toInstant(), newRawRemindDate.getTimeZone().toZoneId());
+//        }
+//    }
+//
+//    private static int getDaysInMonth(Calendar calendar) {
+//        return YearMonth.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)).lengthOfMonth();
 //    }
 //}
