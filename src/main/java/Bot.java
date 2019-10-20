@@ -17,8 +17,8 @@ public class Bot {
             "\r\n\t/authors -- print authors" +
             "\r\n\t/date -- print current date and time" +
             "\r\n\t/new -- create new note" +
-            //"\r\n\t/remove -- remove note" +
-            //"\r\n\t/all -- show all your notes" + //TODO
+            "\r\n\t/remove -- remove note" +
+            "\r\n\t/all -- show all your notes" +
             "\r\n\t/stop -- exit chat bot";
     private static String welcomeText = "Welcome. This is bot-reminder v0.3 alpha";
     private static String authors = "Tolstoukhov Daniil, Gorbunova Sofia, 2019"; //TODO вынести весь текст в json или отдельный класс

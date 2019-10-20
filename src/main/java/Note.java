@@ -7,11 +7,11 @@ public class Note {
     private LocalDateTime remindDate;
 
     public Note(
-            String userId,
+            String chatId,
             String text,
             LocalDateTime eventDate,
             LocalDateTime remindDate) {
-        this.chatId = userId;
+        this.chatId = chatId;
         this.text = text;
         this.eventDate = eventDate;
         this.remindDate = remindDate;

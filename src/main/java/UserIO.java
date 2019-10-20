@@ -7,7 +7,7 @@ public interface UserIO {
 
     public void showMessage(String message, String chatId);
 
-    public String getUserText(String prompt, String chatId); //TODO: May be null
+    public String getUserText(String prompt, String chatId);
 
     public void showOnClickButton(String header, String[] buttons, String chatId);
 

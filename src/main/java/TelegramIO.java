@@ -76,7 +76,19 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
     @Override
     public void showList(String prompt, String[] elements, String chatId) {
-
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < elements.length; i++){
+            sb.append(i+1);
+            sb.append(". ");
+            sb.append(elements[i]);
+            sb.append("\r\n");
+        }
+        try {
+            execute(new SendMessage().setText(prompt).setChatId(chatId));
+            execute(new SendMessage().setText(sb.toString()).setChatId(chatId));
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -6,14 +6,16 @@ import java.util.SortedSet;
 import java.util.TimerTask;
 
 public class NotePrinter extends TimerTask {
-    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    public static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static UserIO userIO;
+    private static JsonNoteSerializer noteSerializer;
     private SortedSet<Note> notes;
 
-    public NotePrinter(UserIO userIO, SortedSet<Note> notes) {
+    public NotePrinter(UserIO userIO, SortedSet<Note> notes, JsonNoteSerializer noteSerializer) {
         this.userIO = userIO;
         this.notes = notes;
+        this.noteSerializer = noteSerializer;
     }
 
     @Override
@@ -30,15 +32,56 @@ public class NotePrinter extends TimerTask {
             if (firstNote.getEventDate().isBefore(currentTime)) {
                 notes.remove(firstNote);
             }
+            noteSerializer.serializeNotes(notes);
         }
     }
 
-    public void printNote(Note note) {
+    public static List<Note> getUserNotes(NoteMaker noteMaker, String chatId) {
+        List<Note> userNotes = new ArrayList<>();
+        for (Note note : noteMaker.notes) {
+            if (note.getChatId().equals(chatId)) {
+                userNotes.add(note);
+            }
+        }
+        return userNotes;
+    }
+
+    public static UserStates showUsersNotes(String command, String chatId, NoteMaker noteMaker, UserStates currentState){
+        int respond;
+        List<Note> userNotes = getUserNotes(noteMaker, chatId);
+        if (userNotes.size() == 0){
+            userIO.showMessage("You have no notes", chatId);
+            return UserStates.IDLE;
+        }
+        try {
+            respond = Integer.parseInt(command);
+        } catch (NumberFormatException e) {
+            userIO.showMessage("Wrong format", chatId);
+            return currentState;
+        }
+
+        switch (respond) {
+            case 0:
+                printTodayNotes(userNotes, chatId);
+                break;
+            case 1:
+                printTenUpcomingNotes(userNotes, chatId);
+                break;
+            case 2:
+                printAllNotes(userNotes, chatId);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + respond);
+        }
+        return UserStates.IDLE;
+    }
+
+    private void printNote(Note note) {
         userIO.showMessage(note.getText(),note.getChatId());
         //todo:
     }
 
-    public static void printTodayNotes(List<Note> userNotes, String chatId) {
+    private static void printTodayNotes(List<Note> userNotes, String chatId) {
         LocalDateTime currentDate = LocalDateTime.now();
         List<String> todayNotes = new ArrayList<>();
         for (Note note : userNotes) {
@@ -50,7 +93,7 @@ public class NotePrinter extends TimerTask {
         userIO.showList("Today's notes:", todayNotes.toArray(new String[0]), chatId);
     }
 
-    public static void printTenUpcomingNotes(List<Note> userNotes, String chatId) {
+    private static void printTenUpcomingNotes(List<Note> userNotes, String chatId) {
         if (userNotes.size() > 10) { // Если меньше 10, то выводятся все заметки
             String[] upcomingNotes = new String[10];
             Note currentNote;
@@ -63,7 +106,7 @@ public class NotePrinter extends TimerTask {
         } else printAllNotes(userNotes, chatId);
     }
 
-    public static void printAllNotes(List<Note> userNotes, String chatId) {
+    private static void printAllNotes(List<Note> userNotes, String chatId) {
         String[] formattedUserNotes = new String[userNotes.size()];
         Note currentNote;
         for (int i = 0; i < userNotes.size(); i++) {

@@ -9,12 +9,7 @@ public class ConsoleIO implements UserIO {
         String currentCommand = "";
         while (!currentCommand.equals("/exit")) {
             currentCommand = getUserText(null, "");
-//            if (commands.containsKey(currentCommand.split(" ")[0])) { // TODO: userId
-//                commands.get(currentCommand).accept(currentCommand, null);
-//            }
-//            else {
                 Bot.parseCommand(currentCommand, "");
-            //}
         }
     }
 
