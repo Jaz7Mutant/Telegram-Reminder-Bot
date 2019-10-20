@@ -1,117 +1,123 @@
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class DateTimeParser {
-    public LocalDateTime getDateTime(UserIO userIO){
-        LocalDateTime currentDate = LocalDateTime.now();
-        Calendar userDate = new GregorianCalendar();
-        userDate.set(Calendar.YEAR, getYear(userIO,currentDate));
-        userDate.set(Calendar.MONTH, getMonth(userIO, currentDate));
-        userDate.set(Calendar.DAY_OF_MONTH, getDay(userIO,getDaysInMonth(userDate)));
-        userDate.setTime(getTime(userIO));
+    public static String[] years;
+    private static LocalDateTime currentDate;
+    private static String[] months;
+    private static String[] days;
+    private static UserIO userIO;
 
-        return LocalDateTime.ofInstant(userDate.toInstant(),userDate.getTimeZone().toZoneId());
+    public DateTimeParser(UserIO userIO) {
+        DateTimeParser.userIO = userIO;
     }
 
-    public LocalDateTime getDateTimeWithOffset(UserIO userIO, LocalDateTime date){
-        LocalDateTime newDate;
-        int respond = userIO.getOnClickButton(new String[]{
-                "No remind",
-                "A hour before",
-                "A day before",
-                "A week before",
-                "Set date..."});
-        switch (respond) {
-            case 0:
-                newDate = date;
-                break;
-            case 1:
-                newDate = date.minusHours(1);
-                break;
-            case 2:
-                newDate = date.minusDays(1);
-                break;
-            case 3:
-                newDate = date.minusWeeks(1);
-                break;
-            case 4:
-                newDate = getDateTime(userIO);
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
-        return newDate;
-    }
-
-    private int getYear(UserIO userIO, LocalDateTime currentDate){
-        userIO.showMessage("Choose year");
-        String[] years = {
+    public static void updateCurrentDate() {
+        currentDate = LocalDateTime.now();
+        years = new String[]{
                 Integer.toString(currentDate.getYear()),
                 Integer.toString(currentDate.plusYears(1).getYear()),
                 "Other"};
-        int respond = userIO.getOnClickButton(years);
-        int year;
-        if (respond > years.length){
-            DateFormat sdf = new SimpleDateFormat("yyyy");
-            while (true){
-                try {
-                    year = Integer.parseInt(userIO.getUserText("Set year (yyyy)"));
-                    if (year < currentDate.getYear() || year > 2035) {
-                        throw new ParseException("Illegal year", 1);
-                    }
-                    break;
-                } catch (ParseException e) {
-                    userIO.showMessage("Wrong format");
-                }
-            }
-        }
-        else {
-            year = Integer.parseInt(years[respond]);
-        }
-        return year;
-    }
-
-    private int getMonth(UserIO userIO, LocalDateTime currentDate){
-        userIO.showMessage("Choose month");
-        String[] months = new String[13];
-        for (int i = 0; i < 12; i++){
+        months = new String[12];
+        for (int i = 0; i < 12; i++) {
             months[i] = currentDate.plusMonths(i).getMonth().toString();
         }
-        int respond = userIO.getOnClickButton(months);
-        return currentDate.plusMonths(respond).getMonthValue();
     }
 
-    private int getDay(UserIO userIO, int daysInMonth){
-        userIO.showMessage("choose day");
-        String[] days = new String[daysInMonth];
-        for (int i = 1; i<=daysInMonth; i++){
-            days[i-1] = Integer.toString(i);
+    public static AddingStates setYear(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+        int respond;
+        try {
+            respond = Integer.parseInt(userMessage);
+        } catch (NumberFormatException e) {
+            userIO.showMessage("Wrong format", chatId);
+            return addingState;
         }
-        int respond = userIO.getOnClickButton(days);
-        return respond+1;
+        if (respond == years.length - 1) {
+            userIO.showMessage("Set year (yyyy)", chatId);
+            return addingState;
+        }
+        if (respond < years.length) {
+            respond = Integer.parseInt(years[respond]);
+        } else if (respond < currentDate.getYear() || respond > 2035) {
+            userIO.showMessage("Illegal year", chatId);
+            return addingState;
+        }
+        rawDate.set(Calendar.YEAR, respond);
+        userIO.showOnClickButton("Choose month", months, chatId);
+        if (addingState == AddingStates.SET_YEAR) {
+            return AddingStates.SET_MONTH;
+        } else {
+            return AddingStates.SET_REMIND_MONTH;
+        }
     }
 
-    private Date getTime(UserIO userIO){
-        Date time;
-        DateFormat sdf = new SimpleDateFormat("HH:mm");
-        while (true){
-            try {
-                time = sdf.parse(userIO.getUserText("Set time (hh:mm)"));
-                break;
-            } catch (ParseException e) {
-                userIO.showMessage("Wrong format");
+    public static AddingStates setMonth(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+        int respond;
+        try {
+            respond = Integer.parseInt(userMessage);
+            if (respond > 11 || respond < 0) {
+                throw new NumberFormatException();
             }
+        } catch (NumberFormatException e) {
+            userIO.showMessage("Wrong format", chatId);
+            return addingState;
         }
-        return time;
+        rawDate.set(Calendar.MONTH, currentDate.plusMonths(respond - 1).getMonthValue());
+
+        int daysInMonth = getDaysInMonth(rawDate);
+        days = new String[daysInMonth];
+        for (int i = 1; i <= daysInMonth; i++) {
+            days[i - 1] = Integer.toString(i);
+        }
+        userIO.showOnClickButton("Choose day", days, chatId);
+        if (addingState == AddingStates.SET_MONTH) {
+            return AddingStates.SET_DAY;
+        } else {
+            return AddingStates.SET_REMIND_DAY;
+        }
     }
 
-    private int getDaysInMonth(Calendar calendar){
-        return YearMonth.of(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH)).lengthOfMonth();
+    public static AddingStates setDay(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+        int respond;
+        try {
+            respond = Integer.parseInt(userMessage);
+            if (respond > days.length || respond < 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            userIO.showMessage("Wrong format", chatId);
+            return addingState;
+        }
+        rawDate.set(Calendar.DAY_OF_MONTH, respond + 1);
+
+        userIO.showMessage("Set time (hh:mm)", chatId);
+        if (addingState == AddingStates.SET_DAY) {
+            return AddingStates.SET_TIME;
+        } else {
+            return AddingStates.SET_REMIND_TIME;
+        }
+    }
+
+    public static AddingStates setTime(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+        LocalTime time;
+        try {
+            time = LocalTime.parse(userMessage);
+        } catch (Exception e) {
+            userIO.showMessage("Wrong format", chatId);
+            return addingState;
+        }
+        rawDate.set(Calendar.HOUR_OF_DAY, time.getHour());
+        rawDate.set(Calendar.MINUTE, time.getMinute());
+        if (addingState == AddingStates.SET_TIME) {
+            return AddingStates.SET_REMIND;
+        } else {
+            return AddingStates.IDLE;
+        }
+    }
+
+    private static int getDaysInMonth(Calendar calendar) {
+        return YearMonth.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)).lengthOfMonth();
     }
 }

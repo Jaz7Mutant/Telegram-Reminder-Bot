@@ -1,11 +1,15 @@
+import java.util.Map;
+import java.util.function.BiConsumer;
+
 public interface UserIO {
-    public void showMessage(String message);
 
-    public String getUserText(String prompt); //TODO: May be null
+    public void listenCommands(Map<String, BiConsumer<String,String>> commands);
 
-    public int getOnClickButton(String[] buttons);
+    public void showMessage(String message, String chatId);
 
-    public void showList(String prompt, String[] elements);
+    public String getUserText(String prompt, String chatId);
 
-    public String getUserId();
+    public void showOnClickButton(String header, String[] buttons, String chatId);
+
+    public void showList(String prompt, String[] elements, String chatId);
 }

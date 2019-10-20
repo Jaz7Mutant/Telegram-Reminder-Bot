@@ -1,62 +1,113 @@
+import org.telegram.telegrambots.ApiContextInitializer;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.ApiContext;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class Bot {
     private static String botHelp = "This is a bot-reminder." +
-            "\r\nKeys: \r\n\t[-h], [--help] -- show help" +
-            "\r\nFunctions:\r\n\thelp -- show help" +
-            "\r\n\techo <args> -- print <args>" +
-            "\r\n\tdate -- print current date and time" +
-            "\r\n\tnew -- create new note" +
-            "\r\n\tremove -- remove note" +
-            "\r\n\tall -- show all your notes" +
-            "\r\n\tstop -- exit chat bot";
+            "\r\nFunctions:\r\n\t/help -- show help" +
+            "\r\n\t/echo <args> -- print <args>" +
+            "\r\n\t/authors -- print authors" +
+            "\r\n\t/date -- print current date and time" +
+            "\r\n\t/new -- create new note" +
+            "\r\n\t/remove -- remove note" +
+            "\r\n\t/all -- show all your notes" +
+            "\r\n\t/stop -- exit chat bot";
     private static String welcomeText = "Welcome. This is bot-reminder v0.3 alpha";
     private static String authors = "Tolstoukhov Daniil, Gorbunova Sofia, 2019"; //TODO вынести весь текст в json или отдельный класс
-    private static UserIO userIO = new ConsoleIO();
+
+    private static UserIO userIO;
+    private static Map<String, BiConsumer<String,String>> commands = new HashMap<>();
+    private static NoteMaker noteMaker;
+
+    private static String PROXY_HOST = "127.0.0.1" /* proxy host */;
+    private static Integer PROXY_PORT = 9150 /* proxy port */;
+    private static int notePrinterPeriodInSeconds = 60;
 
     public static void main(String[] args) {
-        userIO.showMessage(welcomeText);
-        NoteMaker noteMaker = new NoteMaker(new ConsoleIO(), 60);
-        Map<String, Consumer<String>> commands = new HashMap<>();
-        commands.put("-new", noteMaker::addNote);
-        commands.put("-remove", noteMaker::removeNote);
-        commands.put("-all", noteMaker::showUserNotes);
-        commands.put("-exit", Bot::exit);
-        commands.put("-help", Bot::help);
-        commands.put("-authors", Bot::authors);
-        commands.put("-echo", Bot::echo);
-        commands.put("-date", Bot::date);
+        //userIO.showMessage(welcomeText, ); // TODO В натройках телеги выстаить
+        setUserIO(BotTypes.TELEGRAM_BOT);
 
-        String currentCommand = "";
-        while (!currentCommand.equals("-exit")) {
-            currentCommand = userIO.getUserText(null);
-            if (commands.containsKey(currentCommand.split(" ")[0])) { // TODO: userId
-                commands.get(currentCommand).accept(currentCommand);
-            }
+        commands.put("/new", noteMaker::addNote);
+        commands.put("/remove", noteMaker::removeNote);
+        commands.put("/all", noteMaker::showUserNotes);
+        commands.put("/stop", Bot::exit);
+        commands.put("/help", Bot::help);
+        commands.put("/authors", Bot::authors);
+        commands.put("/echo", Bot::echo);
+        commands.put("/date", Bot::date);
+
+        userIO.listenCommands(commands);
+    }
+
+    public static void parseCommand(String command, String chatId) {
+        if (!NoteMaker.userStates.containsKey(chatId)) {
+            NoteMaker.userStates.put(chatId, new StateHolder(chatId, userIO, noteMaker));
+        }
+        if (commands.containsKey(command.split(" ")[0])
+                && NoteMaker.userStates.get(chatId).currentState == UserStates.IDLE) {
+            commands.get(command.split(" ")[0]).accept(command, chatId);
+        } else {
+            NoteMaker.userStates.get(chatId).doNextStep(command);
         }
     }
 
-    private static void exit(String userId) {
+    private static void exit(String command,String chatId) {
         System.exit(0);
     }
 
-    private static void help(String userId) {
-        userIO.showMessage(botHelp);
+    private static void help(String command, String chatId) {
+        userIO.showMessage(botHelp, chatId);
     }
 
-    private static void authors(String _s) {
-        userIO.showMessage(authors);
+    private static void authors(String command, String chatId) {
+        userIO.showMessage(authors, chatId);
     }
 
-    private static void date(String _s) {
-        userIO.showMessage(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+    private static void date(String command, String chatId) {
+        userIO.showMessage(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), chatId);
     }
 
-    private static void echo(String s){
-        userIO.showMessage(s.substring(6));
+    private static void echo(String command, String chatId) {
+        if (command.length() > 6) {
+            userIO.showMessage(command.substring(6), chatId);
+        }
+    }
+
+    private static void setUserIO(BotTypes botType) {
+        switch (botType) {
+            case CONSOLE_BOT:
+                userIO = new ConsoleIO();
+                noteMaker = new NoteMaker(userIO, notePrinterPeriodInSeconds);
+                userIO.showMessage(welcomeText, null);
+                NoteMaker.userStates.put(null,new StateHolder(null, userIO,noteMaker));
+                return;
+            case TELEGRAM_BOT:
+                ApiContextInitializer.init();
+                TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
+                DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
+                botOptions.setProxyHost(PROXY_HOST);
+                botOptions.setProxyPort(PROXY_PORT);
+                // Select proxy type: [HTTP|SOCKS4|SOCKS5] (default: NO_PROXY)
+                botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
+                TelegramIO myBot = new TelegramIO(botOptions);
+                userIO = myBot;
+                noteMaker = new NoteMaker(myBot, notePrinterPeriodInSeconds);
+                try {
+                    telegramBotsApi.registerBot(myBot);
+                    System.out.println("Bot registered");
+
+                } catch (TelegramApiException e) {
+                    System.out.println("Error is here");
+                    e.printStackTrace();
+                }
+        }
     }
 }
