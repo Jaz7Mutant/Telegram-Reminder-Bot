@@ -87,7 +87,12 @@ public class NotePrinter extends TimerTask {
         for (Note note : userNotes) {
             if (note.getEventDate().getDayOfYear() == currentDate.getDayOfYear()
                     && note.getEventDate().getYear() == currentDate.getYear()) {
-                todayNotes.add(note.getEventDate().format(timeFormatter) + " " + note.getText().substring(0, 10));
+                if (note.getText().length() >=10) {
+                    todayNotes.add(note.getEventDate().format(timeFormatter) + " " + note.getText().substring(0, 10));
+                }
+                else{
+                    todayNotes.add(note.getEventDate().format(timeFormatter) + " " + note.getText());
+                }
             }
         }
         userIO.showList("Today's notes:", todayNotes.toArray(new String[0]), chatId);
@@ -99,8 +104,14 @@ public class NotePrinter extends TimerTask {
             Note currentNote;
             for (int i = 0; i < 10; i++) {
                 currentNote = userNotes.get(i);
-                upcomingNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                        + currentNote.getText().substring(0, 10);
+                if (currentNote.getText().length() >= 10){
+                    upcomingNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
+                            + currentNote.getText().substring(0, 10);
+                }
+                else{
+                    upcomingNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
+                            + currentNote.getText();
+                }
             }
             userIO.showList("10 upcoming notes:", upcomingNotes, chatId);
         } else printAllNotes(userNotes, chatId);
@@ -111,8 +122,14 @@ public class NotePrinter extends TimerTask {
         Note currentNote;
         for (int i = 0; i < userNotes.size(); i++) {
             currentNote = userNotes.get(i);
-            formattedUserNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                    + currentNote.getText().substring(0, 10);
+            if (currentNote.getText().length() >= 10){
+                formattedUserNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
+                        + currentNote.getText().substring(0, 10);
+            }
+            else{
+                formattedUserNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
+                        + currentNote.getText();
+            }
         }
         userIO.showList("Your notes:", formattedUserNotes, chatId);
     }

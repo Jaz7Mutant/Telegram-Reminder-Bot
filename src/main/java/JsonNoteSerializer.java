@@ -21,6 +21,8 @@ public class JsonNoteSerializer implements NoteSerializer {
             writer.beginArray();
             for (Note note: notes) {
                 writer.beginObject();
+                writer.name("chatId");
+                writer.value(note.getChatId());
                 writer.name("note");
                 writer.value(note.getText());
                 writer.name("eventDate");
@@ -45,6 +47,7 @@ public class JsonNoteSerializer implements NoteSerializer {
             JsonReader reader = new JsonReader(new FileReader("Notes.json"));
             reader.beginArray();
             String noteText = null;
+            String chatId = null;
             LocalDateTime eventDate = null;
             while (reader.hasNext()) {
                 JsonToken nextToken = reader.peek();
@@ -53,6 +56,9 @@ public class JsonNoteSerializer implements NoteSerializer {
                 }
                 else if (JsonToken.NAME.equals(nextToken)) {
                     fieldName = reader.nextName();
+                    if ("chatId".equals(fieldName)) {
+                        chatId = reader.nextString();
+                    }
                     if ("note".equals(fieldName)) {
                         noteText = reader.nextString();
                     }
@@ -61,7 +67,7 @@ public class JsonNoteSerializer implements NoteSerializer {
                     }
                     else if ("remindDate".equals(fieldName)) {
                         LocalDateTime remindDate = LocalDateTime.parse(reader.nextString(), formatter);
-                        notes.add(new Note("", noteText, eventDate, remindDate)); //TODO: chatId
+                        notes.add(new Note(chatId, noteText, eventDate, remindDate));
                         reader.endObject();
                     }
                 }

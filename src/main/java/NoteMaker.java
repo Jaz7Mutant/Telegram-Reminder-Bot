@@ -12,8 +12,8 @@ public class NoteMaker {
         userStates = new HashMap<String, StateHolder>();
         this.userIO = userIO;
         noteSerializer = new JsonNoteSerializer();
-        //notes = noteSerializer.deserializeNotes(); // TODO когда десериализатор поправишь, то заработает
-        notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate));
+        notes = noteSerializer.deserializeNotes();
+        //notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate));
         notePrinter = new NotePrinter(userIO, notes, noteSerializer);
         dateTimeParser = new DateTimeParser(userIO);
         Timer timer = new Timer();
@@ -27,7 +27,7 @@ public class NoteMaker {
         // Показывает результат операции (напр. "Заметка установлена на *дата*")
 
         userStates.get(chatId).currentState = UserStates.ADDING;
-        DateTimeParser.updateCurrentDate();
+        DateTimeParser.updateCurrentDate(); //здесь не dateTimeParser нужно использовать?
         userStates.get(chatId).addingState = AddingStates.SET_TEXT;
         userIO.showMessage("Write your note", chatId);
     }
