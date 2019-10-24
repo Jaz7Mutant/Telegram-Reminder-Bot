@@ -1,3 +1,7 @@
+package inputOutput;
+
+import bot.BotController;
+
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
@@ -9,7 +13,7 @@ public class ConsoleIO implements UserIO {
         String currentCommand = "";
         while (!currentCommand.equals("/exit")) {
             currentCommand = getUserText(null, "");
-                Bot.parseCommand(currentCommand, "");
+                BotController.parseCommand(currentCommand, "");
         }
     }
 
@@ -24,14 +28,19 @@ public class ConsoleIO implements UserIO {
             System.out.println(prompt);
         }
         Scanner in = new Scanner(System.in);
-        return in.nextLine();
+        String userInput = in.nextLine();
+        try {
+            return Integer.toString(Integer.parseInt(userInput) - 1);
+        } catch (NumberFormatException e) {
+            return userInput;
+        }
     }
 
     @Override
     public void showOnClickButton(String header, String[] buttons, String chatId) {
         System.out.println(header);
         for (int i = 0; i < buttons.length; i++){
-            System.out.println((i) + ". " + buttons[i]);
+            System.out.println((i + 1) + ". " + buttons[i]);
         }
     }
 

@@ -1,3 +1,4 @@
+import bot.BotController;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,7 +11,7 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class TestBot {
+public class TestBotController {
 
     //public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -28,19 +29,19 @@ public class TestBot {
 
     @Test
     public void testEcho() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Bot bot = new Bot();
-        Method method = Bot.class.getDeclaredMethod("echo", String.class);
+        BotController botController = new BotController();
+        Method method = BotController.class.getDeclaredMethod("echo", String.class);
         method.setAccessible(true);
-        method.invoke((Object)bot, (Object)"-echo test");
+        method.invoke((Object) botController, (Object)"-echo test");
         Assert.assertEquals("test", output.toString());
     }
 
     @Test
     public void testDate() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Bot bot = new Bot();
-        Method method = Bot.class.getDeclaredMethod("date", String.class);
+        BotController botController = new BotController();
+        Method method = BotController.class.getDeclaredMethod("date", String.class);
         method.setAccessible(true);
-        method.invoke((Object)bot, (Object)"-date");
+        method.invoke((Object) botController, (Object)"-date");
         Assert.assertEquals(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 output.toString());
     }

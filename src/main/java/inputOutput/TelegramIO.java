@@ -1,3 +1,6 @@
+package inputOutput;
+
+import bot.BotController;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -5,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import reminder.Reminder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +19,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
     private static final String botUserName = "SimpleAutoReminderBot";
     private static final String botToken = "932793430:AAEe098f_fG7JYPrBupkqaxKRqcarQvUNKo";
 
-    protected TelegramIO(DefaultBotOptions botOptions) { // TODO ?
+    public TelegramIO(DefaultBotOptions botOptions) { // TODO ?
         super(botOptions);
     }
 
@@ -94,15 +98,15 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
     @Override
     public void onUpdateReceived(Update update) {
         //todo
-        // Note maker -> note Handler
+        // reminder.Note maker -> note Handler
         // В нем прокидываем сообщение пользователя или кнопке в doNextStep
         // если команда, то в noteHandler, если нет, то в State holder
         if(update.hasCallbackQuery()){
-            NoteMaker.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
+            Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
                     .doNextStep(update.getCallbackQuery().getData());
         }
         else if (update.hasMessage()){
-            Bot.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+            BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
         }
     }
 

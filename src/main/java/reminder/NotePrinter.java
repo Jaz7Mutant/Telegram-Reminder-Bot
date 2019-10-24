@@ -1,3 +1,7 @@
+package reminder;
+
+import inputOutput.UserIO;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -6,8 +10,8 @@ import java.util.SortedSet;
 import java.util.TimerTask;
 
 public class NotePrinter extends TimerTask {
-    public static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     private static UserIO userIO;
     private static JsonNoteSerializer noteSerializer;
     private SortedSet<Note> notes;
@@ -36,9 +40,9 @@ public class NotePrinter extends TimerTask {
         }
     }
 
-    public static List<Note> getUserNotes(NoteMaker noteMaker, String chatId) {
+    public static List<Note> getUserNotes(Reminder reminder, String chatId) {
         List<Note> userNotes = new ArrayList<>();
-        for (Note note : noteMaker.notes) {
+        for (Note note : reminder.notes) {
             if (note.getChatId().equals(chatId)) {
                 userNotes.add(note);
             }
@@ -46,9 +50,9 @@ public class NotePrinter extends TimerTask {
         return userNotes;
     }
 
-    public static UserStates showUsersNotes(String command, String chatId, NoteMaker noteMaker, UserStates currentState){
+    public static UserStates showUsersNotes(String command, String chatId, Reminder reminder, UserStates currentState){
         int respond;
-        List<Note> userNotes = getUserNotes(noteMaker, chatId);
+        List<Note> userNotes = getUserNotes(reminder, chatId);
         if (userNotes.size() == 0){
             userIO.showMessage("You have no notes", chatId);
             return UserStates.IDLE;

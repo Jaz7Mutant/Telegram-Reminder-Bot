@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>Jaz7</groupId>
-    <artifactId>chat-bot</artifactId>
-    <version>0.3-pre-alpha</version>
+    <artifactId>chat-botController</artifactId>
+    <version>0.4-pre-alpha</version>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -58,7 +58,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>Bot</mainClass>
+                                    <mainClass>bot.BotController</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
