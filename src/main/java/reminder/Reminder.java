@@ -1,19 +1,26 @@
-import java.util.*;
+package reminder;
 
-public class NoteMaker {
+import inputOutput.UserIO;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.Timer;
+
+public class Reminder {
     public final SortedSet<Note> notes; //Все заметки
     private UserIO userIO;
     public NotePrinter notePrinter;
     public DateTimeParser dateTimeParser;
-    public static Map<String, StateHolder> userStates;
+    public static Map<String, NoteKeeper> userStates;
     private JsonNoteSerializer noteSerializer;
 
-    public NoteMaker(UserIO userIO, int notePrinterPeriodInSeconds) {
-        userStates = new HashMap<String, StateHolder>();
+    public Reminder(UserIO userIO, int notePrinterPeriodInSeconds) {
+        userStates = new HashMap<String, NoteKeeper>();
         this.userIO = userIO;
         noteSerializer = new JsonNoteSerializer();
         notes = noteSerializer.deserializeNotes();
-        //notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate));
+        //notes = new TreeSet<>(Comparator.comparing(reminder.Note::getRemindDate));
         notePrinter = new NotePrinter(userIO, notes, noteSerializer);
         dateTimeParser = new DateTimeParser(userIO);
         Timer timer = new Timer();
@@ -27,7 +34,7 @@ public class NoteMaker {
         // Показывает результат операции (напр. "Заметка установлена на *дата*")
 
         userStates.get(chatId).currentState = UserStates.ADDING;
-        DateTimeParser.updateCurrentDate(); //здесь не dateTimeParser нужно использовать?
+        DateTimeParser.updateCurrentDate();
         userStates.get(chatId).addingState = AddingStates.SET_TEXT;
         userIO.showMessage("Write your note", chatId);
     }

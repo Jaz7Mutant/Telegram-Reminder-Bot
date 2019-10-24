@@ -1,6 +1,9 @@
+package reminder;
+
+import inputOutput.UserIO;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.Calendar;
 
 public class DateTimeParser {
@@ -110,6 +113,23 @@ public class DateTimeParser {
         }
         rawDate.set(Calendar.HOUR_OF_DAY, time.getHour());
         rawDate.set(Calendar.MINUTE, time.getMinute());
+        if (LocalDateTime.ofInstant(
+                rawDate.toInstant(),
+                rawDate.getTimeZone().toZoneId()).isBefore(LocalDateTime.now())) {
+            userIO.showMessage("Wrong date", chatId);
+            int daysInMonth = getDaysInMonth(rawDate);
+            days = new String[daysInMonth];
+            for (int i = 1; i <= daysInMonth; i++) {
+                days[i - 1] = Integer.toString(i);
+            }
+            userIO.showOnClickButton("Choose day", days, chatId);
+            if (addingState == AddingStates.SET_TIME){
+                return AddingStates.SET_DAY;
+            }
+            else {
+                return AddingStates.SET_REMIND_DAY;
+            }
+        }
         if (addingState == AddingStates.SET_TIME) {
             return AddingStates.SET_REMIND;
         } else {
@@ -118,6 +138,6 @@ public class DateTimeParser {
     }
 
     private static int getDaysInMonth(Calendar calendar) {
-        return YearMonth.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)).lengthOfMonth();
+        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 }

@@ -1,3 +1,5 @@
+package reminder;
+
 import java.util.SortedSet;
 
 public interface NoteSerializer {

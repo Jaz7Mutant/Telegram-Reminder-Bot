@@ -1,3 +1,5 @@
+package reminder;
+
 public enum AddingStates {
     IDLE,
     SET_TEXT,
