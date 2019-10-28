@@ -45,7 +45,7 @@ public class Reminder {
 
         userStates.get(chatId).currentState = UserStates.REMOVING;
         NotePrinter.showUsersNotes("2", chatId, this, UserStates.REMOVING);
-        userIO.showMessage("Which note do you want to delete?", chatId);
+        userIO.showMessage("Which note do you want to delete?", chatId); //TODO: не выводить если нет заметок
     }
 
     public void showUserNotes(String command, String chatId) {
