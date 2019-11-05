@@ -21,11 +21,13 @@ public class NoteKeeper {
     private String newNoteText = null;
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
+    private NoteSerializer noteSerializer = null;
 
-    public NoteKeeper(String chatId, UserIO userIO, Reminder reminder) {
+    public NoteKeeper(String chatId, UserIO userIO, Reminder reminder, NoteSerializer noteSerializer) {
         this.reminder = reminder;
         this.chatId = chatId;
         this.userIO = userIO;
+        this.noteSerializer = noteSerializer;
     }
 
     public void doNextStep(String userMessage) {
@@ -151,6 +153,7 @@ public class NoteKeeper {
         }
         userIO.showMessage("You have a new note \""
                 + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+        noteSerializer.serializeNotes(reminder.notes);
     }
 
     private void removeNote(String userMessage){
@@ -163,10 +166,11 @@ public class NoteKeeper {
             }
         } catch (NumberFormatException e) {
             userIO.showMessage("Wrong format", chatId);
+            currentState = UserStates.IDLE;
             return;
         }
         reminder.notes.remove(userNotes.get(respond - 1));
         currentState = UserStates.IDLE;
-        userIO.showMessage("reminder.Note has been removed", chatId);
+        userIO.showMessage("Note has been removed", chatId);
     }
 }

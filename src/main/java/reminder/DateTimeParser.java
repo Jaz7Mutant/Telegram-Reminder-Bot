@@ -117,17 +117,18 @@ public class DateTimeParser {
                 rawDate.toInstant(),
                 rawDate.getTimeZone().toZoneId()).isBefore(LocalDateTime.now())) {
             userIO.showMessage("Wrong date", chatId);
-            int daysInMonth = getDaysInMonth(rawDate);
-            days = new String[daysInMonth];
-            for (int i = 1; i <= daysInMonth; i++) {
-                days[i - 1] = Integer.toString(i);
-            }
-            userIO.showOnClickButton("Choose day", days, chatId);
+            userIO.showOnClickButton("Choose month", months, chatId);
+//            int daysInMonth = getDaysInMonth(rawDate);
+//            days = new String[daysInMonth];
+//            for (int i = 1; i <= daysInMonth; i++) {
+//                days[i - 1] = Integer.toString(i);
+//            }
+//            userIO.showOnClickButton("Choose day", days, chatId);
             if (addingState == AddingStates.SET_TIME){
-                return AddingStates.SET_DAY;
+                return AddingStates.SET_MONTH;
             }
             else {
-                return AddingStates.SET_REMIND_DAY;
+                return AddingStates.SET_REMIND_MONTH;
             }
         }
         if (addingState == AddingStates.SET_TIME) {

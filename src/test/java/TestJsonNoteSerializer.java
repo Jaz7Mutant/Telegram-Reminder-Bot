@@ -17,7 +17,7 @@ public class TestJsonNoteSerializer {
     public void testJsonSerialize(){
         SortedSet<Note> notes = new TreeSet<Note>(Comparator.comparing(Note::getRemindDate));
         Note note1 = new Note("nkfjfrje4","note1",
-                LocalDateTime.of(2019,10,30,22,50), //todo chatid
+                LocalDateTime.of(2019,10,30,22,50),
                 LocalDateTime.of(2019,9,29,0,0));
         notes.add(note1);
         JsonNoteSerializer jsonNoteSerializer = new JsonNoteSerializer();
@@ -42,10 +42,10 @@ public class TestJsonNoteSerializer {
     public void testJsonDeserialize(){
         SortedSet<Note> notes = new TreeSet<Note>(Comparator.comparing(Note::getRemindDate));
         Note note1 = new Note("kjfhk1jw3","note1",
-                LocalDateTime.of(2019,10,30,22,50), //todo chatid
+                LocalDateTime.of(2019,10,30,22,50),
                 LocalDateTime.of(2019,9,29,0,0));
         Note note2 = new Note("dflj1ewr","note2",
-                LocalDateTime.of(2019,11,30,22,50), // todo chatid
+                LocalDateTime.of(2019,11,30,22,50),
                 LocalDateTime.of(2019,10,10,10,10));
         notes.add(note2);
         notes.add(note1);

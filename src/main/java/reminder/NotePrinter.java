@@ -13,10 +13,10 @@ public class NotePrinter extends TimerTask {
     public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     private static UserIO userIO;
-    private static JsonNoteSerializer noteSerializer;
+    private static NoteSerializer noteSerializer;
     private SortedSet<Note> notes;
 
-    public NotePrinter(UserIO userIO, SortedSet<Note> notes, JsonNoteSerializer noteSerializer) {
+    public NotePrinter(UserIO userIO, SortedSet<Note> notes, NoteSerializer noteSerializer) {
         this.userIO = userIO;
         this.notes = notes;
         this.noteSerializer = noteSerializer;
@@ -31,7 +31,12 @@ public class NotePrinter extends TimerTask {
         LocalDateTime currentTime = LocalDateTime.now();
         Note firstNote = notes.first();
         if (firstNote.getRemindDate().isBefore(currentTime)) {
-            printNote(firstNote);
+            try {
+                printNote(firstNote);
+            } catch (Exception e) {
+                System.out.println(firstNote.getChatId() + "Wrong chat id");
+            }
+
             firstNote.deleteBeforehandRemind();
             if (firstNote.getEventDate().isBefore(currentTime)) {
                 notes.remove(firstNote);
@@ -81,7 +86,7 @@ public class NotePrinter extends TimerTask {
     }
 
     private void printNote(Note note) {
-        userIO.showMessage(note.getText(),note.getChatId());
+        userIO.showMessage("Don't forget about: " + note.getText(),note.getChatId());
         //todo:
     }
 

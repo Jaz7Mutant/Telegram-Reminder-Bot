@@ -19,7 +19,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
     private static final String botUserName = "SimpleAutoReminderBot";
     private static final String botToken = "932793430:AAEe098f_fG7JYPrBupkqaxKRqcarQvUNKo";
 
-    public TelegramIO(DefaultBotOptions botOptions) { // TODO ?
+    public TelegramIO(DefaultBotOptions botOptions) {
         super(botOptions);
     }
 
@@ -87,9 +87,13 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             sb.append(elements[i]);
             sb.append("\r\n");
         }
+        String text = sb.toString();
+        if (elements.length <= 0){
+            text = "No elements";
+        }
         try {
             execute(new SendMessage().setText(prompt).setChatId(chatId));
-            execute(new SendMessage().setText(sb.toString()).setChatId(chatId));
+            execute(new SendMessage().setText(text).setChatId(chatId));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -97,17 +101,20 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
     @Override
     public void onUpdateReceived(Update update) {
-        //todo
         // reminder.Note maker -> note Handler
         // В нем прокидываем сообщение пользователя или кнопке в doNextStep
         // если команда, то в noteHandler, если нет, то в State holder
-        if(update.hasCallbackQuery()){
-            Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
-                    .doNextStep(update.getCallbackQuery().getData());
+        try {
+            if (update.hasCallbackQuery()) {
+                Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
+                        .doNextStep(update.getCallbackQuery().getData());
+            } else if (update.hasMessage()) {
+                BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        else if (update.hasMessage()){
-            BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
-        }
+
     }
 
     @Override

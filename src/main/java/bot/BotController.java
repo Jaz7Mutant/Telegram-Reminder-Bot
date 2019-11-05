@@ -8,9 +8,7 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import reminder.NoteKeeper;
-import reminder.Reminder;
-import reminder.UserStates;
+import reminder.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,11 +36,12 @@ public class BotController {
     private static String PROXY_HOST = "127.0.0.1" /* proxy host */;
     private static Integer PROXY_PORT = 9150 /* proxy port */;
     private static int notePrinterPeriodInSeconds = 60;
+    private static NoteSerializer noteSerializer = new JsonNoteSerializer();
 
     public static void main(String[] args) {
         //userIO.showMessage(welcomeText, ); // TODO В натройках телеги выстаить
-        setUserIO(BotTypes.CONSOLE_BOT);
-        //setUserIO(BotTypes.TELEGRAM_BOT);
+        //setUserIO(BotTypes.CONSOLE_BOT);
+        setUserIO(BotTypes.TELEGRAM_BOT);
 
         commands.put("/new", reminder::addNote);
         commands.put("/remove", reminder::removeNote);
@@ -58,7 +57,7 @@ public class BotController {
 
     public static void parseCommand(String command, String chatId) {
         if (!Reminder.userStates.containsKey(chatId)) {
-            Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder));
+            Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder, noteSerializer));
         }
         if (commands.containsKey(command.split(" ")[0])
                 && Reminder.userStates.get(chatId).currentState == UserStates.IDLE) {
@@ -94,9 +93,9 @@ public class BotController {
         switch (botType) {
             case CONSOLE_BOT:
                 userIO = new ConsoleIO();
-                reminder = new Reminder(userIO, notePrinterPeriodInSeconds);
+                reminder = new Reminder(userIO, notePrinterPeriodInSeconds, noteSerializer);
                 userIO.showMessage(welcomeText, null);
-                Reminder.userStates.put(null,new NoteKeeper(null, userIO, reminder));
+                Reminder.userStates.put(null,new NoteKeeper(null, userIO, reminder, noteSerializer));
                 return;
             case TELEGRAM_BOT:
                 ApiContextInitializer.init();
@@ -108,7 +107,7 @@ public class BotController {
                 botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
                 TelegramIO myBot = new TelegramIO(botOptions);
                 userIO = myBot;
-                reminder = new Reminder(myBot, notePrinterPeriodInSeconds);
+                reminder = new Reminder(myBot, notePrinterPeriodInSeconds, noteSerializer);
                 try {
                     telegramBotsApi.registerBot(myBot);
                     System.out.println("Bot registered");

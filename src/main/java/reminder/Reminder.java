@@ -13,12 +13,12 @@ public class Reminder {
     public NotePrinter notePrinter;
     public DateTimeParser dateTimeParser;
     public static Map<String, NoteKeeper> userStates;
-    private JsonNoteSerializer noteSerializer;
+    private NoteSerializer noteSerializer;
 
-    public Reminder(UserIO userIO, int notePrinterPeriodInSeconds) {
+    public Reminder(UserIO userIO, int notePrinterPeriodInSeconds, NoteSerializer noteSerializer) {
         userStates = new HashMap<String, NoteKeeper>();
         this.userIO = userIO;
-        noteSerializer = new JsonNoteSerializer();
+        this.noteSerializer = noteSerializer;
         notes = noteSerializer.deserializeNotes();
         //notes = new TreeSet<>(Comparator.comparing(reminder.Note::getRemindDate));
         notePrinter = new NotePrinter(userIO, notes, noteSerializer);
@@ -45,7 +45,12 @@ public class Reminder {
 
         userStates.get(chatId).currentState = UserStates.REMOVING;
         NotePrinter.showUsersNotes("2", chatId, this, UserStates.REMOVING);
-        userIO.showMessage("Which note do you want to delete?", chatId); //TODO: не выводить если нет заметок
+        if (NotePrinter.getUserNotes(this, chatId).size() <= 0) {
+            userStates.get(chatId).currentState = UserStates.IDLE;
+        }
+        else{
+            userIO.showMessage("Which note do you want to delete?", chatId);
+        }
     }
 
     public void showUserNotes(String command, String chatId) {
