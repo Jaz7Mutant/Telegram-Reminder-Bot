@@ -7,11 +7,11 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import static reminder.AddingStates.*;
+import static reminder.AddingState.*;
 
 public class NoteKeeper {
-    public UserStates currentState = UserStates.IDLE;
-    public AddingStates addingState;
+    public UserState currentState = UserState.IDLE;
+    public AddingState addingState;
     private UserIO userIO;
     private String chatId;
     private Reminder reminder;
@@ -21,7 +21,7 @@ public class NoteKeeper {
     private String newNoteText = null;
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
-    private NoteSerializer noteSerializer = null;
+    private NoteSerializer noteSerializer;
 
     public NoteKeeper(String chatId, UserIO userIO, Reminder reminder, NoteSerializer noteSerializer) {
         this.reminder = reminder;
@@ -87,7 +87,7 @@ public class NoteKeeper {
                             "A day before",
                             "A week before",
                             "Set date..."}, chatId);
-                }else if (addingState == AddingStates.IDLE){
+                }else if (addingState == AddingState.IDLE){
                     finishAddNote();
                 }
                 return;
@@ -138,25 +138,29 @@ public class NoteKeeper {
         finishAddNote();
     }
 
+    //todo lock
     private void finishAddNote(){
-        reminder.notes.add(new Note(
-                chatId,
-                newNoteText,
-                newNoteDate,
-                newNoteRemindDate));
-        reminder.notePrinter.run();
-        addingState = AddingStates.IDLE;
-        currentState = UserStates.IDLE;
-        int stringLimit = 20;
-        if (newNoteText.length() < 20) {
-            stringLimit = newNoteText.length();
+        synchronized (reminder.notes) {
+            reminder.notes.add(new Note(
+                    chatId,
+                    newNoteText,
+                    newNoteDate,
+                    newNoteRemindDate));
+            reminder.notePrinter.run();
+            addingState = AddingState.IDLE;
+            currentState = UserState.IDLE;
+            int stringLimit = 20;
+            if (newNoteText.length() < 20) {
+                stringLimit = newNoteText.length();
+            }
+            userIO.showMessage("You have a new note \""
+                    + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+            noteSerializer.serializeNotes(reminder.notes);
         }
-        userIO.showMessage("You have a new note \""
-                + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
-        noteSerializer.serializeNotes(reminder.notes);
     }
 
-    private void removeNote(String userMessage){
+    //todo lock
+    private synchronized void removeNote(String userMessage){
         int respond;
         List<Note> userNotes = NotePrinter.getUserNotes(reminder, chatId);
         try {
@@ -166,11 +170,13 @@ public class NoteKeeper {
             }
         } catch (NumberFormatException e) {
             userIO.showMessage("Wrong format", chatId);
-            currentState = UserStates.IDLE;
+            currentState = UserState.IDLE;
             return;
         }
-        reminder.notes.remove(userNotes.get(respond - 1));
-        currentState = UserStates.IDLE;
-        userIO.showMessage("Note has been removed", chatId);
+        synchronized (reminder.notes) {
+            reminder.notes.remove(userNotes.get(respond - 1));
+            currentState = UserState.IDLE;
+            userIO.showMessage("Note has been removed", chatId);
+        }
     }
 }

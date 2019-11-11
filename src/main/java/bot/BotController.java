@@ -35,13 +35,13 @@ public class BotController {
 
     private static String PROXY_HOST = "127.0.0.1" /* proxy host */;
     private static Integer PROXY_PORT = 9150 /* proxy port */;
-    private static int notePrinterPeriodInSeconds = 60;
+    private static int notePrinterPeriodInSeconds = 10;
     private static NoteSerializer noteSerializer = new JsonNoteSerializer();
 
     public static void main(String[] args) {
         //userIO.showMessage(welcomeText, ); // TODO В натройках телеги выстаить
         //setUserIO(BotTypes.CONSOLE_BOT);
-        setUserIO(BotTypes.TELEGRAM_BOT);
+        setUserIO(BotType.TELEGRAM_BOT);
 
         commands.put("/new", reminder::addNote);
         commands.put("/remove", reminder::removeNote);
@@ -60,7 +60,7 @@ public class BotController {
             Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder, noteSerializer));
         }
         if (commands.containsKey(command.split(" ")[0])
-                && Reminder.userStates.get(chatId).currentState == UserStates.IDLE) {
+                && Reminder.userStates.get(chatId).currentState == UserState.IDLE) {
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {
             Reminder.userStates.get(chatId).doNextStep(command);
@@ -89,7 +89,7 @@ public class BotController {
         }
     }
 
-    private static void setUserIO(BotTypes botType) {
+    private static void setUserIO(BotType botType) {
         switch (botType) {
             case CONSOLE_BOT:
                 userIO = new ConsoleIO();

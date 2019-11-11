@@ -16,8 +16,8 @@ public class TestReminder {
         reminder.userStates = new HashMap<String, NoteKeeper>();
         reminder.userStates.put(chatId, noteKeeper);
         reminder.addNote("", chatId);
-        Assert.assertEquals(UserStates.ADDING, Reminder.userStates.get(chatId).currentState);
-        Assert.assertEquals(AddingStates.SET_TEXT, Reminder.userStates.get(chatId).addingState);
+        Assert.assertEquals(UserState.ADDING, Reminder.userStates.get(chatId).currentState);
+        Assert.assertEquals(AddingState.SET_TEXT, Reminder.userStates.get(chatId).addingState);
     }
 
     @Test
@@ -29,7 +29,7 @@ public class TestReminder {
         reminder.userStates = new HashMap<String, NoteKeeper>();
         reminder.userStates.put(chatId, noteKeeper);
         reminder.removeNote("", chatId);
-        Assert.assertEquals(UserStates.IDLE, reminder.userStates.get(chatId).currentState);
+        Assert.assertEquals(UserState.IDLE, reminder.userStates.get(chatId).currentState);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class TestReminder {
         reminder.userStates = new HashMap<String, NoteKeeper>();
         reminder.userStates.put(chatId, noteKeeper);
         reminder.showUserNotes("", chatId);
-        Assert.assertEquals(UserStates.SHOWING, reminder.userStates.get(chatId).currentState);
+        Assert.assertEquals(UserState.SHOWING, reminder.userStates.get(chatId).currentState);
     }
 
 }

@@ -29,7 +29,7 @@ public class DateTimeParser {
         }
     }
 
-    public static AddingStates setYear(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+    public static AddingState setYear(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
@@ -49,14 +49,14 @@ public class DateTimeParser {
         }
         rawDate.set(Calendar.YEAR, respond);
         userIO.showOnClickButton("Choose month", months, chatId);
-        if (addingState == AddingStates.SET_YEAR) {
-            return AddingStates.SET_MONTH;
+        if (addingState == AddingState.SET_YEAR) {
+            return AddingState.SET_MONTH;
         } else {
-            return AddingStates.SET_REMIND_MONTH;
+            return AddingState.SET_REMIND_MONTH;
         }
     }
 
-    public static AddingStates setMonth(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+    public static AddingState setMonth(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
@@ -75,14 +75,14 @@ public class DateTimeParser {
             days[i - 1] = Integer.toString(i);
         }
         userIO.showOnClickButton("Choose day", days, chatId);
-        if (addingState == AddingStates.SET_MONTH) {
-            return AddingStates.SET_DAY;
+        if (addingState == AddingState.SET_MONTH) {
+            return AddingState.SET_DAY;
         } else {
-            return AddingStates.SET_REMIND_DAY;
+            return AddingState.SET_REMIND_DAY;
         }
     }
 
-    public static AddingStates setDay(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+    public static AddingState setDay(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
@@ -96,14 +96,14 @@ public class DateTimeParser {
         rawDate.set(Calendar.DAY_OF_MONTH, respond + 1);
 
         userIO.showMessage("Set time (hh:mm)", chatId);
-        if (addingState == AddingStates.SET_DAY) {
-            return AddingStates.SET_TIME;
+        if (addingState == AddingState.SET_DAY) {
+            return AddingState.SET_TIME;
         } else {
-            return AddingStates.SET_REMIND_TIME;
+            return AddingState.SET_REMIND_TIME;
         }
     }
 
-    public static AddingStates setTime(Calendar rawDate, String userMessage, String chatId, AddingStates addingState) {
+    public static AddingState setTime(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
         LocalTime time;
         try {
             time = LocalTime.parse(userMessage);
@@ -118,23 +118,17 @@ public class DateTimeParser {
                 rawDate.getTimeZone().toZoneId()).isBefore(LocalDateTime.now())) {
             userIO.showMessage("Wrong date", chatId);
             userIO.showOnClickButton("Choose month", months, chatId);
-//            int daysInMonth = getDaysInMonth(rawDate);
-//            days = new String[daysInMonth];
-//            for (int i = 1; i <= daysInMonth; i++) {
-//                days[i - 1] = Integer.toString(i);
-//            }
-//            userIO.showOnClickButton("Choose day", days, chatId);
-            if (addingState == AddingStates.SET_TIME){
-                return AddingStates.SET_MONTH;
+            if (addingState == AddingState.SET_TIME){
+                return AddingState.SET_MONTH;
             }
             else {
-                return AddingStates.SET_REMIND_MONTH;
+                return AddingState.SET_REMIND_MONTH;
             }
         }
-        if (addingState == AddingStates.SET_TIME) {
-            return AddingStates.SET_REMIND;
+        if (addingState == AddingState.SET_TIME) {
+            return AddingState.SET_REMIND;
         } else {
-            return AddingStates.IDLE;
+            return AddingState.IDLE;
         }
     }
 

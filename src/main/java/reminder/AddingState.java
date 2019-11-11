@@ -1,6 +1,6 @@
 package reminder;
 
-public enum AddingStates {
+public enum AddingState {
     IDLE,
     SET_TEXT,
     SET_YEAR,

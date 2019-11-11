@@ -14,12 +14,12 @@ public class NotePrinter extends TimerTask {
     private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     private static UserIO userIO;
     private static NoteSerializer noteSerializer;
-    private SortedSet<Note> notes;
+    private final SortedSet<Note> notes;
 
     public NotePrinter(UserIO userIO, SortedSet<Note> notes, NoteSerializer noteSerializer) {
-        this.userIO = userIO;
+        NotePrinter.userIO = userIO;
         this.notes = notes;
-        this.noteSerializer = noteSerializer;
+        NotePrinter.noteSerializer = noteSerializer;
     }
 
     @Override
@@ -28,39 +28,45 @@ public class NotePrinter extends TimerTask {
         if (notes.isEmpty()) {
             return;
         }
+        // todo lock
+        //  выводить список, а не одну заметку
         LocalDateTime currentTime = LocalDateTime.now();
-        Note firstNote = notes.first();
-        if (firstNote.getRemindDate().isBefore(currentTime)) {
-            try {
-                printNote(firstNote);
-            } catch (Exception e) {
-                System.out.println(firstNote.getChatId() + "Wrong chat id");
-            }
+        synchronized (notes) {
+            Note firstNote = notes.first();
+            if (firstNote.getRemindDate().isBefore(currentTime)) {
+                try {
+                    printNote(firstNote);
+                } catch (Exception e) {
+                    System.out.println(firstNote.getChatId() + "Wrong chat id");
+                }
 
-            firstNote.deleteBeforehandRemind();
-            if (firstNote.getEventDate().isBefore(currentTime)) {
-                notes.remove(firstNote);
+                firstNote.deleteBeforehandRemind();
+                if (firstNote.getEventDate().isBefore(currentTime)) {
+                    notes.remove(firstNote);
+                }
+                noteSerializer.serializeNotes(notes);
             }
-            noteSerializer.serializeNotes(notes);
         }
     }
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {
         List<Note> userNotes = new ArrayList<>();
-        for (Note note : reminder.notes) {
-            if (note.getChatId().equals(chatId)) {
-                userNotes.add(note);
+        synchronized (reminder.notes) {
+            for (Note note : reminder.notes) {
+                if (note.getChatId().equals(chatId)) {
+                    userNotes.add(note);
+                }
             }
+            return userNotes;
         }
-        return userNotes;
     }
 
-    public static UserStates showUsersNotes(String command, String chatId, Reminder reminder, UserStates currentState){
+    public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState){
         int respond;
         List<Note> userNotes = getUserNotes(reminder, chatId);
         if (userNotes.size() == 0){
             userIO.showMessage("You have no notes", chatId);
-            return UserStates.IDLE;
+            return UserState.IDLE;
         }
         try {
             respond = Integer.parseInt(command);
@@ -82,7 +88,7 @@ public class NotePrinter extends TimerTask {
             default:
                 throw new IllegalStateException("Unexpected value: " + respond);
         }
-        return UserStates.IDLE;
+        return UserState.IDLE;
     }
 
     private void printNote(Note note) {

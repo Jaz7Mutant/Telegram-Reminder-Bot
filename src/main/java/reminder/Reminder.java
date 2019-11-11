@@ -2,10 +2,7 @@ package reminder;
 
 import inputOutput.UserIO;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.Timer;
+import java.util.*;
 
 public class Reminder {
     public final SortedSet<Note> notes; //Все заметки
@@ -13,14 +10,11 @@ public class Reminder {
     public NotePrinter notePrinter;
     public DateTimeParser dateTimeParser;
     public static Map<String, NoteKeeper> userStates;
-    private NoteSerializer noteSerializer;
 
     public Reminder(UserIO userIO, int notePrinterPeriodInSeconds, NoteSerializer noteSerializer) {
         userStates = new HashMap<String, NoteKeeper>();
         this.userIO = userIO;
-        this.noteSerializer = noteSerializer;
-        notes = noteSerializer.deserializeNotes();
-        //notes = new TreeSet<>(Comparator.comparing(reminder.Note::getRemindDate));
+        notes = Collections.synchronizedSortedSet(noteSerializer.deserializeNotes());
         notePrinter = new NotePrinter(userIO, notes, noteSerializer);
         dateTimeParser = new DateTimeParser(userIO);
         Timer timer = new Timer();
@@ -33,9 +27,9 @@ public class Reminder {
         // Вызывает checkNotesToPrint.
         // Показывает результат операции (напр. "Заметка установлена на *дата*")
 
-        userStates.get(chatId).currentState = UserStates.ADDING;
+        userStates.get(chatId).currentState = UserState.ADDING;
         DateTimeParser.updateCurrentDate();
-        userStates.get(chatId).addingState = AddingStates.SET_TEXT;
+        userStates.get(chatId).addingState = AddingState.SET_TEXT;
         userIO.showMessage("Write your note", chatId);
     }
 
@@ -43,10 +37,10 @@ public class Reminder {
         // Удаляет заметку. Показывает пользователю список всех напоминаний предлагает выбрать
         // номер заметки в списке и удалить ее.
 
-        userStates.get(chatId).currentState = UserStates.REMOVING;
-        NotePrinter.showUsersNotes("2", chatId, this, UserStates.REMOVING);
+        userStates.get(chatId).currentState = UserState.REMOVING;
+        NotePrinter.showUsersNotes("2", chatId, this, UserState.REMOVING);
         if (NotePrinter.getUserNotes(this, chatId).size() <= 0) {
-            userStates.get(chatId).currentState = UserStates.IDLE;
+            userStates.get(chatId).currentState = UserState.IDLE;
         }
         else{
             userIO.showMessage("Which note do you want to delete?", chatId);
@@ -56,7 +50,7 @@ public class Reminder {
     public void showUserNotes(String command, String chatId) {
         // Позволяет вывесли ближайшие 10 событий, все события, события на сегодня. Всю инфу спрашивает у пользователя.
 
-        userStates.get(chatId).currentState = UserStates.SHOWING;
+        userStates.get(chatId).currentState = UserState.SHOWING;
         userIO.showOnClickButton("Chose the period", new String[]{"for today", "10 upcoming", "all"}, chatId);
     }
 }

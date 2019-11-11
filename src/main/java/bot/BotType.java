@@ -1,6 +1,6 @@
 package bot;
 
-public enum BotTypes {
+public enum BotType {
     CONSOLE_BOT,
     TELEGRAM_BOT
 }

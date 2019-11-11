@@ -1,6 +1,6 @@
 package reminder;
 
-public enum UserStates {
+public enum UserState {
     IDLE,
     ADDING,
     REMOVING,
