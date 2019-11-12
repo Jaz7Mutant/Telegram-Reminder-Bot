@@ -1,24 +1,28 @@
-package reminder;
+package com.jaz7.reminder;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
-import java.io.*;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JsonNoteSerializer implements NoteSerializer {
-
-
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final Logger LOGGER = Logger.getLogger(JsonNoteSerializer.class.getSimpleName());
 
     @Override
     public void serializeNotes(SortedSet<Note> notes) {
         try{
+            LOGGER.info("Serializing notes...");
             JsonWriter writer = new JsonWriter(new FileWriter("Notes.json"));
             writer.beginArray();
             for (Note note: notes) {
@@ -35,14 +39,16 @@ public class JsonNoteSerializer implements NoteSerializer {
             }
             writer.endArray();
             writer.close();
+            LOGGER.info("Notes has been serialized");
         }
         catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Notes serializing error:", e);
         }
     }
 
     @Override
     public SortedSet<Note> deserializeNotes() {
+        LOGGER.info("Deserializing notes...");
         SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate));
         String fieldName;
         try {
@@ -77,8 +83,9 @@ public class JsonNoteSerializer implements NoteSerializer {
             reader.endArray();
         }
         catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, "Notes deserializing error:", e);
         }
+        LOGGER.info("Notes has been deserialized");
         return notes;
     }
 }

@@ -1,6 +1,6 @@
-package reminder;
+package com.jaz7.reminder;
 
-import inputOutput.UserIO;
+import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NotePrinter extends TimerTask {
     public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -15,21 +17,26 @@ public class NotePrinter extends TimerTask {
     private static UserIO userIO;
     private static NoteSerializer noteSerializer;
     private final SortedSet<Note> notes;
+    private static final Logger LOGGER = Logger.getLogger(NotePrinter.class.getSimpleName());
 
     public NotePrinter(UserIO userIO, SortedSet<Note> notes, NoteSerializer noteSerializer) {
         NotePrinter.userIO = userIO;
         this.notes = notes;
         NotePrinter.noteSerializer = noteSerializer;
+        LOGGER.info("NotePrinter has been created");
     }
 
     @Override
     public void run() {
+        LOGGER.info("Find notes to print...");
         // Смотрит на ближайшее событие и если нужно, выводит напоминание о нем, после чего удаляет
         if (notes.isEmpty()) {
+            LOGGER.info("No notes to print");
             return;
         }
         // todo lock
         //  выводить список, а не одну заметку
+        LOGGER.info("Printing notes...");
         LocalDateTime currentTime = LocalDateTime.now();
         synchronized (notes) {
             Note firstNote = notes.first();
@@ -37,16 +44,19 @@ public class NotePrinter extends TimerTask {
                 try {
                     printNote(firstNote);
                 } catch (Exception e) {
-                    System.out.println(firstNote.getChatId() + "Wrong chat id");
+                    LOGGER.log(Level.WARNING, "Error sending message", e); // todo
+//                    System.out.println(firstNote.getChatId() + "Wrong chat id");
                 }
-
+                LOGGER.info("Deleting remind...");
                 firstNote.deleteBeforehandRemind();
                 if (firstNote.getEventDate().isBefore(currentTime)) {
+                    LOGGER.info("Deleting note...");
                     notes.remove(firstNote);
                 }
                 noteSerializer.serializeNotes(notes);
             }
         }
+        LOGGER.info("Printing notes has been done");
     }
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {

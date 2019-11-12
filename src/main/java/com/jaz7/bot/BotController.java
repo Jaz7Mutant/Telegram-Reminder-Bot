@@ -1,23 +1,27 @@
-package bot;
+package com.jaz7.bot;
 
-import inputOutput.ConsoleIO;
-import inputOutput.TelegramIO;
-import inputOutput.UserIO;
+import com.jaz7.inputOutput.ConsoleIO;
+import com.jaz7.inputOutput.TelegramIO;
+import com.jaz7.inputOutput.UserIO;
+import com.jaz7.reminder.*;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import reminder.*;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
 
 public class BotController {
-    private static String botHelp = "This is a bot-reminder." +
+    private static String botHelp = "This is a com.jaz7.bot-com.jaz7.reminder." +
             "\r\nFunctions:\r\n\t/help -- show help" +
             "\r\n\t/echo <args> -- print <args>" +
             "\r\n\t/authors -- print authors" +
@@ -25,8 +29,8 @@ public class BotController {
             "\r\n\t/new -- create new note" +
             "\r\n\t/remove -- remove note" +
             "\r\n\t/all -- show all your notes" +
-            "\r\n\t/stop -- exit chat bot";
-    private static String welcomeText = "Welcome. This is bot-reminder v0.4 alpha \r\n(If you want to write digits as letters use quotes)";
+            "\r\n\t/stop -- exit chat com.jaz7.bot";
+    private static String welcomeText = "Welcome. This is com.jaz7.bot-com.jaz7.reminder v0.4 alpha \r\n(If you want to write digits as letters use quotes)";
     private static String authors = "Tolstoukhov Daniil, Gorbunova Sofia, 2019"; //TODO вынести весь текст в json или отдельный класс
 
     private static UserIO userIO;
@@ -38,12 +42,24 @@ public class BotController {
     private static int notePrinterPeriodInSeconds = 10;
     private static NoteSerializer noteSerializer = new JsonNoteSerializer();
 
+
+    private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
+
     public static void main(String[] args) {
+        try {
+            LogManager.getLogManager().readConfiguration(
+                    BotController.class.getResourceAsStream("logging.properties"));
+        } catch (IOException e) {
+            System.err.println("Could not setup logger configuration: " + e.toString());
+        }
+
         //userIO.showMessage(welcomeText, ); // TODO В натройках телеги выстаить
         //setUserIO(BotTypes.CONSOLE_BOT);
         setUserIO(BotType.TELEGRAM_BOT);
-
+        LOGGER.info("Bot has been created");
         commands.put("/new", reminder::addNote);
+//        commands.put("/meeting", reminder::addMeeting);
+//        commands.put("/join", reminder::joinMeeting);
         commands.put("/remove", reminder::removeNote);
         commands.put("/all", reminder::showUserNotes);
         commands.put("/stop", BotController::exit);
@@ -55,14 +71,18 @@ public class BotController {
         userIO.listenCommands(commands);
     }
 
+    //todo Очередь не нарушать
     public static void parseCommand(String command, String chatId) {
         if (!Reminder.userStates.containsKey(chatId)) {
+            LOGGER.info(chatId +": Add new user");
             Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder, noteSerializer));
         }
         if (commands.containsKey(command.split(" ")[0])
                 && Reminder.userStates.get(chatId).currentState == UserState.IDLE) {
+            LOGGER.info(chatId + ": New command from user" + " - " + command);
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {
+            LOGGER.info(chatId + ": Input command - " + command);
             Reminder.userStates.get(chatId).doNextStep(command);
         }
     }

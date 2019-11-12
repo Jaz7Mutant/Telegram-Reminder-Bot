@@ -1,4 +1,4 @@
-package inputOutput;
+package com.jaz7.inputOutput;
 
 import java.util.Map;
 import java.util.function.BiConsumer;

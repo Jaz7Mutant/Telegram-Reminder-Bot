@@ -1,4 +1,4 @@
-package reminder;
+package com.jaz7.reminder;
 
 import java.util.SortedSet;
 

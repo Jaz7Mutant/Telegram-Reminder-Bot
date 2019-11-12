@@ -1,7 +1,7 @@
-import inputOutput.ConsoleIO;
+import com.jaz7.inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Test;
-import reminder.*;
+import com.jaz7.reminder.*;
 
 import java.util.HashMap;
 

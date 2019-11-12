@@ -1,13 +1,14 @@
-package reminder;
+package com.jaz7.reminder;
 
-import inputOutput.UserIO;
+import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.logging.Logger;
 
-import static reminder.AddingState.*;
+import static com.jaz7.reminder.AddingState.*;
 
 public class NoteKeeper {
     public UserState currentState = UserState.IDLE;
@@ -22,12 +23,14 @@ public class NoteKeeper {
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
     private NoteSerializer noteSerializer;
+    private static final Logger LOGGER = Logger.getLogger(NoteKeeper.class.getSimpleName());
 
     public NoteKeeper(String chatId, UserIO userIO, Reminder reminder, NoteSerializer noteSerializer) {
         this.reminder = reminder;
         this.chatId = chatId;
         this.userIO = userIO;
         this.noteSerializer = noteSerializer;
+        LOGGER.info(chatId + ": NoteKeeper has been created");
     }
 
     public void doNextStep(String userMessage) {
@@ -38,9 +41,11 @@ public class NoteKeeper {
                 doNextAddingStep(userMessage);
                 return;
             case SHOWING:
+                LOGGER.info(chatId + ": Showing notes");
                 currentState = NotePrinter.showUsersNotes(userMessage, chatId, reminder, currentState);
                 return;
             case REMOVING:
+                LOGGER.info(chatId + ": Removing note");
                 removeNote(userMessage);
         }
     }
@@ -48,37 +53,47 @@ public class NoteKeeper {
     private void doNextAddingStep(String userMessage) {
         switch (addingState) {
             case SET_TEXT:
+                LOGGER.info(chatId + ": Setting text");
                 if (userMessage == null) {
                     userIO.showMessage("Wrong format", chatId);
                     userIO.showMessage("Write your note", chatId);
                     return;
                 } else {
                     newNoteText = userMessage;
+                    LOGGER.info(chatId + ": Text has been set");
                     userIO.showMessage("When will it happen?", chatId);
                     userIO.showOnClickButton("Choose year", DateTimeParser.years, chatId);
                     addingState = SET_YEAR;
                     return;
                 }
             case SET_YEAR:
+                LOGGER.info(chatId + ": Setting year");
                 addingState = DateTimeParser.setYear(newRawDate, userMessage, chatId, addingState);
                 return;
             case SET_REMIND_YEAR:
+                LOGGER.info(chatId + ": Setting remind year");
                 addingState = DateTimeParser.setYear(newRawRemindDate, userMessage, chatId, addingState);
                 return;
             case SET_MONTH:
+                LOGGER.info(chatId + ": Setting month");
                 addingState = DateTimeParser.setMonth(newRawDate, userMessage, chatId, addingState);
                 return;
             case SET_REMIND_MONTH:
+                LOGGER.info(chatId + ": Setting remind month");
                 addingState = DateTimeParser.setMonth(newRawRemindDate, userMessage, chatId, addingState);
                 return;
             case SET_DAY:
+                LOGGER.info(chatId + ": Setting day");
                 addingState = DateTimeParser.setDay(newRawDate,userMessage, chatId, addingState);
                 return;
             case SET_REMIND_DAY:
+                LOGGER.info(chatId + ": Setting remind day");
                 addingState = DateTimeParser.setDay(newRawRemindDate,userMessage, chatId, addingState);
                 return;
             case SET_TIME:
+                LOGGER.info(chatId + ": Setting time");
                 addingState = DateTimeParser.setTime(newRawDate,userMessage,chatId,addingState);
+                LOGGER.info(chatId + ": Setting remind type");
                 if (addingState == SET_REMIND){
                     newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
                     userIO.showOnClickButton("Set the date of remind", new String[]{
@@ -92,12 +107,14 @@ public class NoteKeeper {
                 }
                 return;
             case SET_REMIND_TIME:
+                LOGGER.info(chatId + ": Setting remind time");
                 addingState = DateTimeParser.setTime(newRawRemindDate,userMessage,chatId,addingState);
                 if (addingState == IDLE) {
                     finishAddNote();
                 }
                 return;
             case SET_REMIND:
+                LOGGER.info(chatId + ": Setting remind by offset");
                 setRemind(userMessage);
         }
     }
@@ -140,6 +157,7 @@ public class NoteKeeper {
 
     //todo lock
     private void finishAddNote(){
+        LOGGER.info(chatId + ": Adding new note...");
         synchronized (reminder.notes) {
             reminder.notes.add(new Note(
                     chatId,
@@ -157,10 +175,12 @@ public class NoteKeeper {
                     + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
             noteSerializer.serializeNotes(reminder.notes);
         }
+        LOGGER.info(chatId + ": New note has been added");
     }
 
     //todo lock
     private synchronized void removeNote(String userMessage){
+        LOGGER.info(chatId + ": Removing note...");
         int respond;
         List<Note> userNotes = NotePrinter.getUserNotes(reminder, chatId);
         try {
@@ -178,5 +198,6 @@ public class NoteKeeper {
             currentState = UserState.IDLE;
             userIO.showMessage("Note has been removed", chatId);
         }
+        LOGGER.info(chatId + ": Note has been removed");
     }
 }
