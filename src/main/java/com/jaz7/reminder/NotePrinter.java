@@ -30,13 +30,11 @@ public class NotePrinter extends TimerTask {
     @Override
     public void run() {
         LOGGER.info("Find notes to print...");
-        // Смотрит на ближайшее событие и если нужно, выводит напоминание о нем, после чего удаляет
+        // Смотрит на ближайшие события и если нужно, выводит напоминание о них, после чего удаляет
         if (notes.isEmpty()) {
             LOGGER.info("No notes to print");
             return;
         }
-        // todo lock
-        //  выводить список, а не одну заметку
         LOGGER.info("Printing notes...");
         LocalDateTime currentTime = LocalDateTime.now();
         synchronized (notes) {
@@ -46,7 +44,7 @@ public class NotePrinter extends TimerTask {
                     try {
                         printNote(currentNote);
                     } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e); // todo
+                        LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e);
                     }
                     LOGGER.info("Deleting remind...");
                     currentNote.deleteBeforehandRemind();
@@ -109,7 +107,6 @@ public class NotePrinter extends TimerTask {
 
     private void printNote(Note note) {
         userIO.showMessage(BotOptions.botAnswers.get("Remind") + note.getText(),note.getChatId());
-        //todo:
     }
 
     private static void printTodayNotes(List<Note> userNotes, String chatId) {
@@ -119,10 +116,12 @@ public class NotePrinter extends TimerTask {
             if (note.getEventDate().getDayOfYear() == currentDate.getDayOfYear()
                     && note.getEventDate().getYear() == currentDate.getYear()) {
                 if (note.getText().length() >=10) {
-                    todayNotes.add(note.getEventDate().format(timeFormatter) + " " + note.getText().substring(0, 10));
+                    todayNotes.add(note.getEventDate().format(timeFormatter)
+                            + " " + note.getText().substring(0, 10) + " every " + note.getRemindPeriod() + " day(s)");
                 }
                 else{
-                    todayNotes.add(note.getEventDate().format(timeFormatter) + " " + note.getText());
+                    todayNotes.add(note.getEventDate().format(timeFormatter)
+                            + " " + note.getText() + " every " + note.getRemindPeriod() + " day(s)");
                 }
             }
         }
@@ -132,17 +131,8 @@ public class NotePrinter extends TimerTask {
     private static void printTenUpcomingNotes(List<Note> userNotes, String chatId) {
         if (userNotes.size() > 10) { // Если меньше 10, то выводятся все заметки
             String[] upcomingNotes = new String[10];
-            Note currentNote;
             for (int i = 0; i < 10; i++) {
-                currentNote = userNotes.get(i);
-                if (currentNote.getText().length() >= 10){
-                    upcomingNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                            + currentNote.getText().substring(0, 10);
-                }
-                else{
-                    upcomingNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                            + currentNote.getText();
-                }
+                upcomingNotes[i] = getFormattedNote(userNotes.get(i));
             }
             userIO.showList(BotOptions.botAnswers.get("Show10Upcoming"), upcomingNotes, chatId);
         } else printAllNotes(userNotes, chatId);
@@ -150,18 +140,22 @@ public class NotePrinter extends TimerTask {
 
     private static void printAllNotes(List<Note> userNotes, String chatId) {
         String[] formattedUserNotes = new String[userNotes.size()];
-        Note currentNote;
         for (int i = 0; i < userNotes.size(); i++) {
-            currentNote = userNotes.get(i);
-            if (currentNote.getText().length() >= 10){
-                formattedUserNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                        + currentNote.getText().substring(0, 10);
-            }
-            else{
-                formattedUserNotes[i] = currentNote.getEventDate().format(dateTimeFormatter) + " "
-                        + currentNote.getText();
-            }
+            formattedUserNotes[i] = getFormattedNote(userNotes.get(i));
         }
         userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes, chatId);
+    }
+
+    private static String getFormattedNote(Note note){
+        String period = "";
+        if (note.isRepeatable()){
+            period = " every " + note.getRemindPeriod() + " day(s)";
+        }
+        if (note.getText().length() >= 10){
+            return note.getEventDate().format(dateTimeFormatter) + " " + note.getText().substring(0, 10) + period;
+        }
+        else{
+            return note.getEventDate().format(dateTimeFormatter) + " " + note.getText() + period;
+        }
     }
 }

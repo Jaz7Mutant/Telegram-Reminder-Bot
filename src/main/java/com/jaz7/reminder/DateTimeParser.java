@@ -129,7 +129,7 @@ public class DateTimeParser {
         rawDate.set(Calendar.HOUR_OF_DAY, time.getHour());
         rawDate.set(Calendar.MINUTE, time.getMinute());
 
-
+        // Если время в прошлом, то заново задаем всю дату, начиная с месяца
         if (LocalDateTime.ofInstant(
                 rawDate.toInstant(),
                 rawDate.getTimeZone().toZoneId()).isBefore(LocalDateTime.now())) {

@@ -75,7 +75,7 @@ public class JsonNoteSerializer implements NoteSerializer {
                     }
                     else if ("remindDate".equals(fieldName)) {
                         LocalDateTime remindDate = LocalDateTime.parse(reader.nextString(), formatter);
-                        notes.add(new Note(chatId, noteText, eventDate, remindDate));
+                        //notes.add(new Note(chatId, noteText, eventDate, remindDate));
                         reader.endObject();
                     }
                 }

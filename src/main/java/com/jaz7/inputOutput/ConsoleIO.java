@@ -1,7 +1,6 @@
 package com.jaz7.inputOutput;
 
 import com.jaz7.bot.BotController;
-
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
