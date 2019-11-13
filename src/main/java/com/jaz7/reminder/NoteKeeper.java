@@ -221,12 +221,8 @@ public class NoteKeeper {
             }
           
             if (isMeeting) {
-                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, true , newNoteRemindPeriod);
                 LOGGER.info(chatId + ": Setting meeting token");
                 newNote.setToken();
-            }
-            else {
-                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, false, 0);
             }
             reminder.notes.add(newNote);
             reminder.notePrinter.run();
