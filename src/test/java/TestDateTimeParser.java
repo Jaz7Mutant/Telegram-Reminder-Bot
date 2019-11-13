@@ -1,10 +1,10 @@
 import bot.BotOptions;
-import inputOutput.ConsoleIO;
+import com.jaz7.inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import reminder.AddingState;
-import reminder.DateTimeParser;
+import com.jaz7.reminder.AddingState;
+import com.jaz7.reminder.DateTimeParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class TestDateTimeParser {
     public BotOptions botOptions = new BotOptions();
 
@@ -100,7 +101,7 @@ public class TestDateTimeParser {
         StringBuilder respond = new StringBuilder();
         respond.append("Choose day\r\n");
         for (int i = 0; i < days.length; i++) {
-            respond.append((i + 1) + ". " + days[i] + "\r\n");
+            respond.append(i + 1).append(". ").append(days[i]).append("\r\n");
         }
         Assert.assertEquals(respond.toString(), output.toString());
         AddingState state1 = dateTimeParser.setMonth(calendar, month,

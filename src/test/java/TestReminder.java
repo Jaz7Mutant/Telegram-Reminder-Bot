@@ -1,11 +1,12 @@
 import bot.BotOptions;
-import inputOutput.ConsoleIO;
+import com.jaz7.inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Test;
-import reminder.*;
+import com.jaz7.reminder.*;
 
 import java.util.HashMap;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class TestReminder {
     // тут все тесты проверяют только изменения userStates и addingStates
     public BotOptions botOptions = new BotOptions();

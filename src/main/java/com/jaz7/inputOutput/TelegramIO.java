@@ -1,6 +1,6 @@
-package inputOutput;
+package com.jaz7.inputOutput;
 
-import bot.BotController;
+import com.jaz7.bot.BotController;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -8,19 +8,23 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import reminder.Reminder;
+import com.jaz7.reminder.Reminder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TelegramIO extends TelegramLongPollingBot implements UserIO {
     private static final String botUserName = "SimpleAutoReminderBot";
     private static final String botToken = "932793430:AAEe098f_fG7JYPrBupkqaxKRqcarQvUNKo";
+    private static final Logger LOGGER = Logger.getLogger(TelegramIO.class.getSimpleName());
 
     public TelegramIO(DefaultBotOptions botOptions) {
         super(botOptions);
+        LOGGER.info("Init telegram IO");
     }
 
     @Override
@@ -34,8 +38,9 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             execute(new SendMessage()
                     .setChatId(chatId)
                     .setText(message));
+            LOGGER.info(chatId + ": Message has been send");
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, chatId + ": Error sending message" + e.getMessage(), e);
         }
     }
 
@@ -67,14 +72,14 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         }
         if (buttonsRow.size() != 0){
             rowList.add(buttonsRow);
-            //buttonsRow = new ArrayList<>();
         }
         inlineKeyboardMarkup.setKeyboard(rowList);
 
         try {
             execute(new SendMessage().setText(header).setChatId(chatId).setReplyMarkup(inlineKeyboardMarkup));
+            LOGGER.info(chatId + ": Buttons shown successfully");
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, chatId + ": Error showing buttons" + e.getMessage(), e);
         }
     }
 
@@ -94,26 +99,34 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         try {
             execute(new SendMessage().setText(prompt).setChatId(chatId));
             execute(new SendMessage().setText(text).setChatId(chatId));
+            LOGGER.info(chatId + ": List shown successfully");
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, chatId + ": Error showing list" + e.getMessage(), e);
         }
     }
 
     @Override
     public void onUpdateReceived(Update update) {
-        // reminder.Note maker -> note Handler
+        // Note maker -> note Handler
         // В нем прокидываем сообщение пользователя или кнопке в doNextStep
         // если команда, то в noteHandler, если нет, то в State holder
-        try {
+        //try {
             if (update.hasCallbackQuery()) {
                 Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
                         .doNextStep(update.getCallbackQuery().getData());
+                LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
             } else if (update.hasMessage()) {
-                BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+                try {
+                    BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+                    LOGGER.info(update.getMessage().getChatId() + ": Received message");
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //} catch (Exception e) {
+        //    LOGGER.log(Level.WARNING, "Error update receiving:" + e.toString(), e);
+        //}
 
     }
 

@@ -1,4 +1,4 @@
-package reminder;
+package com.jaz7.reminder;
 
 public enum AddingState {
     IDLE,
@@ -11,5 +11,6 @@ public enum AddingState {
     SET_REMIND_YEAR,
     SET_REMIND_MONTH,
     SET_REMIND_DAY,
-    SET_REMIND_TIME
+    SET_REMIND_TIME,
+    SET_MEETING
 }

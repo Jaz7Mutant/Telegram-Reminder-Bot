@@ -1,7 +1,7 @@
-package reminder;
+package com.jaz7.reminder;
 
 import bot.BotOptions;
-import inputOutput.UserIO;
+import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NotePrinter extends TimerTask {
     public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(BotOptions.botOptions.get("DateTimePattern"));
@@ -17,21 +19,26 @@ public class NotePrinter extends TimerTask {
     private static UserIO userIO;
     private static NoteSerializer noteSerializer;
     private final SortedSet<Note> notes;
+    private static final Logger LOGGER = Logger.getLogger(NotePrinter.class.getSimpleName());
 
     public NotePrinter(UserIO userIO, SortedSet<Note> notes, NoteSerializer noteSerializer) {
         NotePrinter.userIO = userIO;
         this.notes = notes;
         NotePrinter.noteSerializer = noteSerializer;
+        LOGGER.info("NotePrinter has been created");
     }
 
     @Override
     public void run() {
+        LOGGER.info("Find notes to print...");
         // Смотрит на ближайшее событие и если нужно, выводит напоминание о нем, после чего удаляет
         if (notes.isEmpty()) {
+            LOGGER.info("No notes to print");
             return;
         }
         // todo lock
         //  выводить список, а не одну заметку
+        LOGGER.info("Printing notes...");
         LocalDateTime currentTime = LocalDateTime.now();
         synchronized (notes) {
             Note currentNote = notes.first();
@@ -40,10 +47,12 @@ public class NotePrinter extends TimerTask {
                     try {
                         printNote(currentNote);
                     } catch (Exception e) {
-                        System.out.println(currentNote.getChatId() + "Wrong chat id");
+                        LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e); // todo
                     }
+                    LOGGER.info("Deleting remind...");
                     currentNote.deleteBeforehandRemind();
                     if (currentNote.getEventDate().minusSeconds(30).isBefore(currentTime)) {
+                        LOGGER.info("Deleting note...");
                         notes.remove(currentNote);
                     }
                     noteSerializer.serializeNotes(notes);
@@ -54,6 +63,7 @@ public class NotePrinter extends TimerTask {
                 }
             }
         }
+        LOGGER.info("Printing notes has been done");
     }
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {

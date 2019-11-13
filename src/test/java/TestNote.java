@@ -1,9 +1,10 @@
 import org.junit.Assert;
 import org.junit.Test;
-import reminder.Note;
+import com.jaz7.reminder.Note;
 
 import java.time.LocalDateTime;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class TestNote {
     @Test
     public void testNote(){

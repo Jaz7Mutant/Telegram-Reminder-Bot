@@ -1,6 +1,6 @@
-package inputOutput;
+package com.jaz7.inputOutput;
 
-import bot.BotController;
+import com.jaz7.bot.BotController;
 
 import java.util.Map;
 import java.util.Scanner;

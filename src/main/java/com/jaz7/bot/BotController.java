@@ -1,20 +1,25 @@
-package bot;
+package com.jaz7.bot;
 
-import inputOutput.ConsoleIO;
-import inputOutput.TelegramIO;
-import inputOutput.UserIO;
+import bot.BotOptions;
+import com.jaz7.inputOutput.ConsoleIO;
+import com.jaz7.inputOutput.TelegramIO;
+import com.jaz7.inputOutput.UserIO;
+import com.jaz7.reminder.*;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import reminder.*;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
 
 public class BotController {
     private static BotOptions botOptions = new BotOptions();
@@ -31,12 +36,24 @@ public class BotController {
     private static int notePrinterPeriodInSeconds = Integer.parseInt(BotOptions.botOptions.get("NotePrinterPeriod"));
     private static NoteSerializer noteSerializer = new JsonNoteSerializer();
 
+
+    private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
+
     public static void main(String[] args) {
+        try {
+            LogManager.getLogManager().readConfiguration(
+                    BotController.class.getResourceAsStream("logging.properties"));
+        } catch (IOException e) {
+            System.err.println("Could not setup logger configuration: " + e.toString());
+        }
+
         //userIO.showMessage(welcomeText, ); // TODO В натройках телеги выстаить
         //setUserIO(BotTypes.CONSOLE_BOT);
         setUserIO(BotOptions.botOptions.get("BotType"));
 
         commands.put("/new", reminder::addNote);
+        commands.put("/meeting", reminder::addMeeting);
+        commands.put("/join", reminder::joinMeeting);
         commands.put("/remove", reminder::removeNote);
         commands.put("/all", reminder::showUserNotes);
         commands.put("/stop", BotController::exit);
@@ -48,14 +65,22 @@ public class BotController {
         userIO.listenCommands(commands);
     }
 
+    //todo Очередь не нарушать
     public static void parseCommand(String command, String chatId) {
         if (!Reminder.userStates.containsKey(chatId)) {
+            LOGGER.info(chatId +": Added new user");
             Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder, noteSerializer));
         }
         if (commands.containsKey(command.split(" ")[0])
                 && Reminder.userStates.get(chatId).currentState == UserState.IDLE) {
+            LOGGER.info(chatId + ": New command from user" + " - " + command);
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {
+            LOGGER.info(chatId + ": Input command - " + command);
+            if (Reminder.userStates.get(chatId).isWorking){
+                userIO.showMessage("Bot is busy", chatId);
+                return;
+            }
             Reminder.userStates.get(chatId).doNextStep(command);
         }
     }
