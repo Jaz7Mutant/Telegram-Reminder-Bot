@@ -23,6 +23,7 @@ public class NoteKeeper {
     private String newNoteText = null;
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
+    private long newNoteRemindPeriod;
     private NoteSerializer noteSerializer;
     private static final Logger LOGGER = Logger.getLogger(NoteKeeper.class.getSimpleName());
 
@@ -194,10 +195,14 @@ public class NoteKeeper {
     private void finishAddNote(){
         LOGGER.info(chatId + ": Adding new note...");
         synchronized (reminder.notes) {
-            Note newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate);
+            Note newNote;
             if (isMeeting) {
+                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, true , newNoteRemindPeriod);
                 LOGGER.info(chatId + ": Setting meeting token");
                 newNote.setToken();
+            }
+            else {
+                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, false, 0);
             }
             reminder.notes.add(newNote);
             reminder.notePrinter.run();
@@ -209,15 +214,15 @@ public class NoteKeeper {
             }
             if (isMeeting){
                 userIO.showMessage(BotOptions.botAnswers.get("NewNote") //todo NewMeeting
-                        + newNoteText.substring(0, stringLimit) + BotOptions.botAnswers.get("WithRemind") 
+                        + newNoteText.substring(0, stringLimit) + BotOptions.botAnswers.get("WithRemind")
                         + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
                 userIO.showMessage("The token of your meeting: ", chatId);
                 userIO.showMessage(newNote.getToken(), chatId);
                 userIO.showMessage("You can share it with your friends", chatId);
             }
             else {
-                 userIO.showMessage(BotOptions.botAnswers.get("NewNote")
-                        + newNoteText.substring(0, stringLimit) + BotOptions.botAnswers.get("WithRemind") 
+                userIO.showMessage(BotOptions.botAnswers.get("NewNote")
+                        + newNoteText.substring(0, stringLimit) + BotOptions.botAnswers.get("WithRemind")
                         + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
                 noteSerializer.serializeNotes(reminder.notes);
             }

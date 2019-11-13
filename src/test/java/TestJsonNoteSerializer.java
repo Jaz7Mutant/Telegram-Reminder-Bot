@@ -19,7 +19,8 @@ public class TestJsonNoteSerializer {
         SortedSet<Note> notes = new TreeSet<Note>(Comparator.comparing(Note::getRemindDate));
         Note note1 = new Note("nkfjfrje4","note1",
                 LocalDateTime.of(2019,10,30,22,50),
-                LocalDateTime.of(2019,9,29,0,0));
+                LocalDateTime.of(2019,9,29,0,0),
+                false, 0, "egwogkerkm");
         notes.add(note1);
         JsonNoteSerializer jsonNoteSerializer = new JsonNoteSerializer();
         jsonNoteSerializer.serializeNotes(notes);
@@ -35,7 +36,7 @@ public class TestJsonNoteSerializer {
             e.printStackTrace();
         }
         String expectedJsonString = "[{\"chatId\":\"nkfjfrje4\",\"note\":\"note1\",\"eventDate\":\"2019-10-30 22:50\"," +
-                "\"remindDate\":\"2019-09-29 00:00\"}]";
+                "\"remindDate\":\"2019-09-29 00:00\",\"isRepeatable\":false,\"remindPeriod\":0,\"token\":\"egwogkerkm\"}]";
         Assert.assertEquals(expectedJsonString, jsonString.toString());
     }
 
@@ -44,10 +45,12 @@ public class TestJsonNoteSerializer {
         SortedSet<Note> notes = new TreeSet<Note>(Comparator.comparing(Note::getRemindDate));
         Note note1 = new Note("kjfhk1jw3","note1",
                 LocalDateTime.of(2019,10,30,22,50),
-                LocalDateTime.of(2019,9,29,0,0));
+                LocalDateTime.of(2019,9,29,0,0),
+                false, 0, "oeffer");
         Note note2 = new Note("dflj1ewr","note2",
                 LocalDateTime.of(2019,11,30,22,50),
-                LocalDateTime.of(2019,10,10,10,10));
+                LocalDateTime.of(2019,10,10,10,10),
+                false, 0, "null");
         notes.add(note2);
         notes.add(note1);
         JsonNoteSerializer jsonNoteSerializer = new JsonNoteSerializer();
