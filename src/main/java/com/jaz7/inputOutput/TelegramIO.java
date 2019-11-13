@@ -110,18 +110,23 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         // Note maker -> note Handler
         // В нем прокидываем сообщение пользователя или кнопке в doNextStep
         // если команда, то в noteHandler, если нет, то в State holder
-        try {
+        //try {
             if (update.hasCallbackQuery()) {
                 Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
                         .doNextStep(update.getCallbackQuery().getData());
                 LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
             } else if (update.hasMessage()) {
-                BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
-                LOGGER.info(update.getMessage().getChatId() + ": Received message");
+                try {
+                    BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+                    LOGGER.info(update.getMessage().getChatId() + ": Received message");
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
             }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error update receiving:" + e.toString(), e);
-        }
+        //} catch (Exception e) {
+        //    LOGGER.log(Level.WARNING, "Error update receiving:" + e.toString(), e);
+        //}
 
     }
 

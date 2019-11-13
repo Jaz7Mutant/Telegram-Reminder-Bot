@@ -51,8 +51,10 @@ public class NoteKeeper {
                 removeNote(userMessage);
                 return;
             case JOINING:
+                isWorking = true;
                 LOGGER.info(chatId + ": Joining to meeting");
                 currentState = joinMeeting(userMessage);
+                isWorking = false;
         }
     }
 
@@ -67,11 +69,11 @@ public class NoteKeeper {
                     reminder.notes.add(currNote.copy(chatId));
                     reminder.notePrinter.run();
                     int stringLimit = 20;
-                    if (newNoteText.length() < 20) {
-                        stringLimit = newNoteText.length();
+                    if (currNote.getText().length() < 20) {
+                        stringLimit = currNote.getText().length();
                     }
                     userIO.showMessage("You have a new note \""
-                            + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+                            + currNote.getText().substring(0, stringLimit) + "...\" with remind on " + currNote.getRemindDate().format(NotePrinter.dateTimeFormatter), chatId);
                     noteSerializer.serializeNotes(reminder.notes);
                     LOGGER.info(chatId + ": Joined meeting");
                     return UserState.IDLE;
