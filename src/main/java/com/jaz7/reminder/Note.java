@@ -9,17 +9,49 @@ public class Note {
     private LocalDateTime eventDate;
     private LocalDateTime remindDate;
     private String token;
+    private boolean isRepeatable;
+    private long remindPeriod;
+
 
     public Note(
             String chatId,
             String text,
             LocalDateTime eventDate,
-            LocalDateTime remindDate) {
+            LocalDateTime remindDate,
+            boolean isRepeatable,
+            long remindPeriod) {
         this.chatId = chatId;
         this.text = text;
         this.eventDate = eventDate;
         this.remindDate = remindDate;
+        this.isRepeatable = isRepeatable;
+        this.remindPeriod = remindPeriod;
         this.token = null;
+    }
+
+    public Note(
+            String chatId,
+            String text,
+            LocalDateTime eventDate,
+            LocalDateTime remindDate,
+            boolean isRepeatable,
+            long remindPeriod,
+            String token) {
+        this.chatId = chatId;
+        this.text = text;
+        this.eventDate = eventDate;
+        this.remindDate = remindDate;
+        this.isRepeatable = isRepeatable;
+        this.remindPeriod = remindPeriod;
+        this.token = token;
+    }
+
+    public boolean isRepeatable(){
+        return isRepeatable;
+    }
+
+    public long getRemindPeriod(){
+        return remindPeriod;
     }
 
     public String getChatId(){
@@ -47,7 +79,7 @@ public class Note {
     }
 
     public Note copy(String newChatId){
-        return new Note(newChatId, text, eventDate, remindDate);
+        return new Note(newChatId, text, eventDate, remindDate, isRepeatable, remindPeriod);
     }
 
     public void deleteBeforehandRemind(){

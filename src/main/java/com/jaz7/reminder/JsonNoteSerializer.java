@@ -35,6 +35,17 @@ public class JsonNoteSerializer implements NoteSerializer {
                 writer.value(note.getEventDate().format(formatter));
                 writer.name("remindDate");
                 writer.value(note.getRemindDate().format(formatter));
+                writer.name("isRepeatable");
+                writer.value(note.isRepeatable());
+                writer.name("remindPeriod");
+                writer.value(note.getRemindPeriod());
+                writer.name("token");
+                if (note.getToken() == null) {
+                    writer.value("null");
+                }
+                else {
+                    writer.value(note.getToken());
+                }
                 writer.endObject();
             }
             writer.endArray();
@@ -49,7 +60,10 @@ public class JsonNoteSerializer implements NoteSerializer {
     @Override
     public SortedSet<Note> deserializeNotes() {
         LOGGER.info("Deserializing notes...");
-        SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate).thenComparing(Note::getText).thenComparing(Note::getChatId).thenComparing(Note::hashCode));
+        SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate).
+                thenComparing(Note::getText).
+                thenComparing(Note::getChatId).
+                thenComparing(Note::hashCode));
         String fieldName;
         try {
             JsonReader reader = new JsonReader(new FileReader("Notes.json"));
@@ -57,6 +71,9 @@ public class JsonNoteSerializer implements NoteSerializer {
             String noteText = null;
             String chatId = null;
             LocalDateTime eventDate = null;
+            LocalDateTime remindDate = null;
+            boolean isRepeatable = false;
+            long remindPeriod = 0;
             while (reader.hasNext()) {
                 JsonToken nextToken = reader.peek();
                 if (JsonToken.BEGIN_OBJECT.equals(nextToken)) {
@@ -74,8 +91,21 @@ public class JsonNoteSerializer implements NoteSerializer {
                         eventDate = LocalDateTime.parse(reader.nextString(), formatter);
                     }
                     else if ("remindDate".equals(fieldName)) {
-                        LocalDateTime remindDate = LocalDateTime.parse(reader.nextString(), formatter);
-                        notes.add(new Note(chatId, noteText, eventDate, remindDate));
+                        remindDate = LocalDateTime.parse(reader.nextString(), formatter);
+                    }
+                    else if ("isRepeatable".equals(fieldName)) {
+                        isRepeatable = reader.nextBoolean();
+                    }
+                    else if ("remindPeriod".equals(fieldName)) {
+                        remindPeriod = reader.nextLong();
+                    }
+                    else if ("token".equals(fieldName)){
+                        String token = reader.nextString();
+                        if (token == "null"){
+                            token = null;
+                        }
+                        notes.add(new Note(chatId, noteText, eventDate, remindDate,
+                                isRepeatable, remindPeriod, token));
                         reader.endObject();
                     }
                 }

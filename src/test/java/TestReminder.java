@@ -47,4 +47,29 @@ public class TestReminder {
         Assert.assertEquals(UserState.SHOWING, reminder.userStates.get(chatId).currentState);
     }
 
+    @Test
+    public void testAddMeeting(){
+        ConsoleIO consoleIO = new ConsoleIO();
+        Reminder reminder = new Reminder(consoleIO,  60, new JsonNoteSerializer() );
+        String chatId = "sfjwo3";
+        NoteKeeper noteKeeper = new NoteKeeper(chatId, consoleIO, reminder, new JsonNoteSerializer());
+        reminder.userStates = new HashMap<String, NoteKeeper>();
+        reminder.userStates.put(chatId, noteKeeper);
+        reminder.addMeeting("",chatId);
+        Assert.assertEquals(UserState.ADDING, reminder.userStates.get(chatId).currentState);
+        Assert.assertEquals(AddingState.SET_MEETING, reminder.userStates.get(chatId).addingState);
+    }
+
+    @Test
+    public void testJoinMeeting(){
+        ConsoleIO consoleIO = new ConsoleIO();
+        Reminder reminder = new Reminder(consoleIO,  60, new JsonNoteSerializer() );
+        String chatId = "sfjwo3";
+        NoteKeeper noteKeeper = new NoteKeeper(chatId, consoleIO, reminder, new JsonNoteSerializer());
+        reminder.userStates = new HashMap<String, NoteKeeper>();
+        reminder.userStates.put(chatId, noteKeeper);
+        reminder.joinMeeting("",chatId);
+        Assert.assertEquals(UserState.JOINING, reminder.userStates.get(chatId).currentState);
+    }
+
 }
