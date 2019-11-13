@@ -1,5 +1,6 @@
 package com.jaz7.bot;
 
+import bot.BotOptions;
 import com.jaz7.inputOutput.ConsoleIO;
 import com.jaz7.inputOutput.TelegramIO;
 import com.jaz7.inputOutput.UserIO;
@@ -21,25 +22,18 @@ import java.util.logging.Logger;
 
 
 public class BotController {
-    private static String botHelp = "This is a com.jaz7.bot-com.jaz7.reminder." +
-            "\r\nFunctions:\r\n\t/help -- show help" +
-            "\r\n\t/echo <args> -- print <args>" +
-            "\r\n\t/authors -- print authors" +
-            "\r\n\t/date -- print current date and time" +
-            "\r\n\t/new -- create new note" +
-            "\r\n\t/remove -- remove note" +
-            "\r\n\t/all -- show all your notes" +
-            "\r\n\t/stop -- exit chat com.jaz7.bot";
-    private static String welcomeText = "Welcome. This is com.jaz7.bot-com.jaz7.reminder v0.4 alpha \r\n(If you want to write digits as letters use quotes)";
-    private static String authors = "Tolstoukhov Daniil, Gorbunova Sofia, 2019"; //TODO вынести весь текст в json или отдельный класс
+    private static BotOptions botOptions = new BotOptions();
+    private static String botHelp = BotOptions.botAnswers.get("BotHelp");
+    private static String welcomeText = BotOptions.botAnswers.get("WelcomeText");
+    private static String authors = BotOptions.botAnswers.get("Authors");
 
     private static UserIO userIO;
     private static Map<String, BiConsumer<String,String>> commands = new HashMap<>();
     private static Reminder reminder;
 
-    private static String PROXY_HOST = "127.0.0.1" /* proxy host */;
-    private static Integer PROXY_PORT = 9150 /* proxy port */;
-    private static int notePrinterPeriodInSeconds = 10;
+    private static String PROXY_HOST = BotOptions.botOptions.get("ProxyHost") /* proxy host */;
+    private static Integer PROXY_PORT = Integer.parseInt(BotOptions.botOptions.get("ProxyPort")) /* proxy port */;
+    private static int notePrinterPeriodInSeconds = Integer.parseInt(BotOptions.botOptions.get("NotePrinterPeriod"));
     private static NoteSerializer noteSerializer = new JsonNoteSerializer();
 
 
@@ -55,8 +49,8 @@ public class BotController {
 
         //userIO.showMessage(welcomeText, ); // TODO В натройках телеги выстаить
         //setUserIO(BotTypes.CONSOLE_BOT);
-        setUserIO(BotType.TELEGRAM_BOT);
-        LOGGER.info("Bot has been created");
+        setUserIO(BotOptions.botOptions.get("BotType"));
+
         commands.put("/new", reminder::addNote);
         commands.put("/meeting", reminder::addMeeting);
         commands.put("/join", reminder::joinMeeting);
@@ -104,7 +98,8 @@ public class BotController {
     }
 
     private static void date(String command, String chatId) {
-        userIO.showMessage(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), chatId);
+        userIO.showMessage(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                BotOptions.botOptions.get("DateTimePattern"))), chatId);
     }
 
     private static void echo(String command, String chatId) {
@@ -113,15 +108,15 @@ public class BotController {
         }
     }
 
-    private static void setUserIO(BotType botType) {
+    private static void setUserIO(String botType) {
         switch (botType) {
-            case CONSOLE_BOT:
+            case "Console":
                 userIO = new ConsoleIO();
                 reminder = new Reminder(userIO, notePrinterPeriodInSeconds, noteSerializer);
                 userIO.showMessage(welcomeText, null);
                 Reminder.userStates.put(null,new NoteKeeper(null, userIO, reminder, noteSerializer));
                 return;
-            case TELEGRAM_BOT:
+            case "Telegram":
                 ApiContextInitializer.init();
                 TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
                 DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);

@@ -1,3 +1,4 @@
+import bot.BotOptions;
 import com.jaz7.inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 @SuppressWarnings("SpellCheckingInspection")
 public class TestReminder {
     // тут все тесты проверяют только изменения userStates и addingStates
+    public BotOptions botOptions = new BotOptions();
     @Test
     public void testAddNote(){
         ConsoleIO consoleIO = new ConsoleIO();

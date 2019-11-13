@@ -1,5 +1,6 @@
 package com.jaz7.reminder;
 
+import bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
 import java.util.*;
@@ -49,7 +50,7 @@ public class Reminder {
         userStates.get(chatId).currentState = UserState.ADDING;
         DateTimeParser.updateCurrentDate();
         userStates.get(chatId).addingState = AddingState.SET_TEXT;
-        userIO.showMessage("Write your note", chatId);
+        userIO.showMessage(BotOptions.botAnswers.get("WriteNote"), chatId);
     }
 
     public void removeNote(String command, String chatId) {
@@ -63,7 +64,7 @@ public class Reminder {
             userStates.get(chatId).currentState = UserState.IDLE;
         }
         else{
-            userIO.showMessage("Which note do you want to delete?", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("Delete"), chatId);
         }
     }
 
@@ -72,6 +73,11 @@ public class Reminder {
 
         LOGGER.info(chatId + ": Switch to showing notes state");
         userStates.get(chatId).currentState = UserState.SHOWING;
-        userIO.showOnClickButton("Chose the period", new String[]{"for today", "10 upcoming", "all"}, chatId);
+        userIO.showOnClickButton(BotOptions.botAnswers.get("ChoosePeriod"),
+                new String[]{
+                        BotOptions.botAnswers.get("ForToday"),
+                        BotOptions.botAnswers.get("10Upcoming"),
+                        BotOptions.botAnswers.get("All")
+                }, chatId);
     }
 }

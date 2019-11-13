@@ -1,9 +1,11 @@
 package com.jaz7.reminder;
 
+import bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -12,8 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NotePrinter extends TimerTask {
-    public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(BotOptions.botOptions.get("DateTimePattern"));
+    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(BotOptions.botOptions.get("TimePattern"));
     private static UserIO userIO;
     private static NoteSerializer noteSerializer;
     private final SortedSet<Note> notes;
@@ -39,21 +41,26 @@ public class NotePrinter extends TimerTask {
         LOGGER.info("Printing notes...");
         LocalDateTime currentTime = LocalDateTime.now();
         synchronized (notes) {
-            Note firstNote = notes.first();
-            if (firstNote.getRemindDate().isBefore(currentTime)) {
-                try {
-                    printNote(firstNote);
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e); // todo
-//                    System.out.println(firstNote.getChatId() + "Wrong chat id");
+            Note currentNote = notes.first();
+            while (currentNote.getRemindDate().minusSeconds(30).isBefore(currentTime)) {
+                {
+                    try {
+                        printNote(currentNote);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e); // todo
+                    }
+                    LOGGER.info("Deleting remind...");
+                    currentNote.deleteBeforehandRemind();
+                    if (currentNote.getEventDate().minusSeconds(30).isBefore(currentTime)) {
+                        LOGGER.info("Deleting note...");
+                        notes.remove(currentNote);
+                    }
+                    noteSerializer.serializeNotes(notes);
+                    if (notes.isEmpty()) {
+                        return;
+                    }
+                    currentNote = notes.first();
                 }
-                LOGGER.info("Deleting remind...");
-                firstNote.deleteBeforehandRemind();
-                if (firstNote.getEventDate().isBefore(currentTime)) {
-                    LOGGER.info("Deleting note...");
-                    notes.remove(firstNote);
-                }
-                noteSerializer.serializeNotes(notes);
             }
         }
         LOGGER.info("Printing notes has been done");
@@ -75,13 +82,13 @@ public class NotePrinter extends TimerTask {
         int respond;
         List<Note> userNotes = getUserNotes(reminder, chatId);
         if (userNotes.size() == 0){
-            userIO.showMessage("You have no notes", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("NoNotes"), chatId);
             return UserState.IDLE;
         }
         try {
             respond = Integer.parseInt(command);
         } catch (NumberFormatException e) {
-            userIO.showMessage("Wrong format", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return currentState;
         }
 
@@ -102,7 +109,7 @@ public class NotePrinter extends TimerTask {
     }
 
     private void printNote(Note note) {
-        userIO.showMessage("Don't forget about: " + note.getText(),note.getChatId());
+        userIO.showMessage(BotOptions.botAnswers.get("Remind") + note.getText(),note.getChatId());
         //todo:
     }
 
@@ -120,7 +127,7 @@ public class NotePrinter extends TimerTask {
                 }
             }
         }
-        userIO.showList("Today's notes:", todayNotes.toArray(new String[0]), chatId);
+        userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
     }
 
     private static void printTenUpcomingNotes(List<Note> userNotes, String chatId) {
@@ -138,7 +145,7 @@ public class NotePrinter extends TimerTask {
                             + currentNote.getText();
                 }
             }
-            userIO.showList("10 upcoming notes:", upcomingNotes, chatId);
+            userIO.showList(BotOptions.botAnswers.get("Show10Upcoming"), upcomingNotes, chatId);
         } else printAllNotes(userNotes, chatId);
     }
 
@@ -156,6 +163,6 @@ public class NotePrinter extends TimerTask {
                         + currentNote.getText();
             }
         }
-        userIO.showList("Your notes:", formattedUserNotes, chatId);
+        userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes, chatId);
     }
 }

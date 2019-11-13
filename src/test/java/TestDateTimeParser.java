@@ -1,3 +1,4 @@
+import bot.BotOptions;
 import com.jaz7.inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,6 +17,8 @@ import java.util.GregorianCalendar;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class TestDateTimeParser {
+    public BotOptions botOptions = new BotOptions();
+
     @Test
     public void testUpdateCurrentDate() {
         DateTimeParser dateTimeParser = new DateTimeParser(new ConsoleIO());
