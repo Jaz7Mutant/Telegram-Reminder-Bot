@@ -1,6 +1,6 @@
 package com.jaz7.reminder;
 
-import bot.BotOptions;
+import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
