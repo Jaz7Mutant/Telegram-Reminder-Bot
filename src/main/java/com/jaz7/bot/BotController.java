@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.ApiContext;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,35 +20,28 @@ import java.util.function.BiConsumer;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-
 public class BotController {
-    private static BotOptions botOptions = new BotOptions();
+    private static BotOptions botOptions = new BotOptions(); // Инициализация всех параметров
     private static String botHelp = BotOptions.botAnswers.get("BotHelp");
     private static String welcomeText = BotOptions.botAnswers.get("WelcomeText");
     private static String authors = BotOptions.botAnswers.get("Authors");
+    private static int notePrinterPeriodInSeconds = Integer.parseInt(BotOptions.botOptions.get("NotePrinterPeriod"));
+    private static String PROXY_HOST = BotOptions.botOptions.get("ProxyHost");
+    private static Integer PROXY_PORT = Integer.parseInt(BotOptions.botOptions.get("ProxyPort"));
 
     private static UserIO userIO;
-    private static Map<String, BiConsumer<String,String>> commands = new HashMap<>();
+    private static Map<String, BiConsumer<String, String>> commands = new HashMap<>();
     private static Reminder reminder;
-
-    private static String PROXY_HOST = BotOptions.botOptions.get("ProxyHost") /* proxy host */;
-    private static Integer PROXY_PORT = Integer.parseInt(BotOptions.botOptions.get("ProxyPort")) /* proxy port */;
-    private static int notePrinterPeriodInSeconds = Integer.parseInt(BotOptions.botOptions.get("NotePrinterPeriod"));
     private static NoteSerializer noteSerializer = new JsonNoteSerializer();
-
-
     private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
 
     public static void main(String[] args) {
+        // Парсинг настроек логгера
         try {
-            LogManager.getLogManager().readConfiguration(
-                    BotController.class.getResourceAsStream("logging.properties"));
+            LogManager.getLogManager().readConfiguration(new FileInputStream("src/main/resources/logging.properties"));
         } catch (IOException e) {
             System.err.println("Could not setup logger configuration: " + e.toString());
         }
-
-        //userIO.showMessage(welcomeText, ); // TODO В натройках телеги выстаить
-        //setUserIO(BotTypes.CONSOLE_BOT);
         setUserIO(BotOptions.botOptions.get("BotType"));
 
         commands.put("/new", reminder::addNote);
@@ -64,46 +58,25 @@ public class BotController {
         userIO.listenCommands(commands);
     }
 
-    //todo Очередь не нарушать
     public static void parseCommand(String command, String chatId) {
+        // Добавление нового пользователя
         if (!Reminder.userStates.containsKey(chatId)) {
-            LOGGER.info(chatId +": Added new user");
+            LOGGER.info(chatId + ": Added new user");
             Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder, noteSerializer));
         }
+        // Исполнение команды
         if (commands.containsKey(command.split(" ")[0])
                 && Reminder.userStates.get(chatId).currentState == UserState.IDLE) {
             LOGGER.info(chatId + ": New command from user" + " - " + command);
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {
+            // Передача аргумента
             LOGGER.info(chatId + ": Input command - " + command);
-            if (Reminder.userStates.get(chatId).isWorking){
+            if (Reminder.userStates.get(chatId).isWorking) {
                 userIO.showMessage("Bot is busy", chatId);
                 return;
             }
             Reminder.userStates.get(chatId).doNextStep(command);
-        }
-    }
-
-    private static void exit(String command,String chatId) {
-        System.exit(0);
-    }
-
-    private static void help(String command, String chatId) {
-        userIO.showMessage(botHelp, chatId);
-    }
-
-    private static void authors(String command, String chatId) {
-        userIO.showMessage(authors, chatId);
-    }
-
-    private static void date(String command, String chatId) {
-        userIO.showMessage(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
-                BotOptions.botOptions.get("DateTimePattern"))), chatId);
-    }
-
-    private static void echo(String command, String chatId) {
-        if (command.length() > 6) {
-            userIO.showMessage(command.substring(6), chatId);
         }
     }
 
@@ -113,7 +86,7 @@ public class BotController {
                 userIO = new ConsoleIO();
                 reminder = new Reminder(userIO, notePrinterPeriodInSeconds, noteSerializer);
                 userIO.showMessage(welcomeText, null);
-                Reminder.userStates.put(null,new NoteKeeper(null, userIO, reminder, noteSerializer));
+                Reminder.userStates.put(null, new NoteKeeper(null, userIO, reminder, noteSerializer));
                 return;
             case "Telegram":
                 ApiContextInitializer.init();
@@ -134,6 +107,29 @@ public class BotController {
                     System.out.println("Error is here");
                     e.printStackTrace();
                 }
+        }
+    }
+
+    private static void exit(String command, String chatId) {
+        System.exit(0);
+    }
+
+    private static void help(String command, String chatId) {
+        userIO.showMessage(botHelp, chatId);
+    }
+
+    private static void authors(String command, String chatId) {
+        userIO.showMessage(authors, chatId);
+    }
+
+    private static void date(String command, String chatId) {
+        userIO.showMessage(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                BotOptions.botOptions.get("DateTimePattern"))), chatId);
+    }
+
+    private static void echo(String command, String chatId) {
+        if (command.length() > 6) {
+            userIO.showMessage(command.substring(6), chatId);
         }
     }
 }

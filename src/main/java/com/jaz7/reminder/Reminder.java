@@ -1,5 +1,4 @@
 package com.jaz7.reminder;
-
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
@@ -8,10 +7,10 @@ import java.util.logging.Logger;
 
 public class Reminder {
     public final SortedSet<Note> notes; //Все заметки
-    private UserIO userIO;
     public NotePrinter notePrinter;
     public DateTimeParser dateTimeParser;
     public static Map<String, NoteKeeper> userStates;
+    private UserIO userIO;
     private static final Logger LOGGER = Logger.getLogger(Reminder.class.getSimpleName());
 
     public Reminder(UserIO userIO, int notePrinterPeriodInSeconds, NoteSerializer noteSerializer) {
@@ -31,13 +30,13 @@ public class Reminder {
         userStates.get(chatId).currentState = UserState.ADDING;
         DateTimeParser.updateCurrentDate();
         userStates.get(chatId).addingState = AddingState.SET_MEETING;
-        userIO.showMessage("Write your note", chatId);
+        userIO.showMessage(BotOptions.botAnswers.get("NewNote"), chatId);
     }
 
     public void joinMeeting(String command, String chatId){
         LOGGER.info(chatId + ": Switch to joining to meeting");
         userStates.get(chatId).currentState = UserState.JOINING;
-        userIO.showMessage("Send the invite token", chatId);
+        userIO.showMessage(BotOptions.botAnswers.get("SendToken"), chatId);
     }
 
     public void addNote(String command, String chatId) {

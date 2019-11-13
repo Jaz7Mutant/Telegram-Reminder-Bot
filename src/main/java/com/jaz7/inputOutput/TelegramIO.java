@@ -29,7 +29,6 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
     @Override
     public void listenCommands(Map<String, BiConsumer<String, String>> commands){
-        return;
     }
 
     @Override
@@ -107,27 +106,22 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
     @Override
     public void onUpdateReceived(Update update) {
-        // Note maker -> note Handler
-        // В нем прокидываем сообщение пользователя или кнопке в doNextStep
-        // если команда, то в noteHandler, если нет, то в State holder
-        //try {
-            if (update.hasCallbackQuery()) {
-                Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
-                        .doNextStep(update.getCallbackQuery().getData());
-                LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
-            } else if (update.hasMessage()) {
-                try {
-                    BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
-                    LOGGER.info(update.getMessage().getChatId() + ": Received message");
-                }
-                catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-        //} catch (Exception e) {
-        //    LOGGER.log(Level.WARNING, "Error update receiving:" + e.toString(), e);
-        //}
+        // Получение очередного сообщения от пользователя
 
+        // Передача аргумента из кнопки
+        if (update.hasCallbackQuery()) {
+            Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
+                    .doNextStep(update.getCallbackQuery().getData());
+            LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
+        // Парсинг сообщения
+        } else if (update.hasMessage()) {
+            try {
+                BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+                LOGGER.info(update.getMessage().getChatId() + ": Received message");
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error in message parsing:" + e.getMessage());
+            }
+        }
     }
 
     @Override

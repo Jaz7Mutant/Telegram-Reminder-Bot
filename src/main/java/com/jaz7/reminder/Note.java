@@ -12,7 +12,6 @@ public class Note {
     private boolean isRepeatable;
     private long remindPeriod;
 
-
     public Note(
             String chatId,
             String text,
@@ -46,14 +45,6 @@ public class Note {
         this.token = token;
     }
 
-    public boolean isRepeatable(){
-        return isRepeatable;
-    }
-
-    public long getRemindPeriod(){
-        return remindPeriod;
-    }
-
     public String getChatId(){
         return chatId;
     }
@@ -78,11 +69,30 @@ public class Note {
         token = "MEET" + (chatId + remindDate.toString() + text.hashCode() + new Random().ints()).hashCode();
     }
 
+    public boolean isRepeatable(){
+        return isRepeatable;
+    }
+
+    public long getRemindPeriod(){
+        return remindPeriod;
+    }
+
     public Note copy(String newChatId){
         return new Note(newChatId, text, eventDate, remindDate, isRepeatable, remindPeriod);
     }
 
     public void deleteBeforehandRemind(){
-        remindDate = eventDate;
+        if (!isRepeatable) {
+            remindDate = eventDate;
+        }
+        else {
+            if (remindPeriod == 30){
+                eventDate = eventDate.plusMonths(1);
+            }
+            else {
+                eventDate = eventDate.plusDays(remindPeriod);
+            }
+            remindDate = eventDate;
+        }
     }
 }

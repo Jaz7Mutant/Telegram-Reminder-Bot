@@ -16,6 +16,8 @@ public class NoteKeeper {
     private UserIO userIO;
     private String chatId;
     private Reminder reminder;
+    private NoteSerializer noteSerializer;
+    private static final Logger LOGGER = Logger.getLogger(NoteKeeper.class.getSimpleName());
 
     private Calendar newRawDate = new GregorianCalendar();
     private Calendar newRawRemindDate = new GregorianCalendar();
@@ -24,8 +26,6 @@ public class NoteKeeper {
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
     private long newNoteRemindPeriod;
-    private NoteSerializer noteSerializer;
-    private static final Logger LOGGER = Logger.getLogger(NoteKeeper.class.getSimpleName());
 
     public NoteKeeper(String chatId, UserIO userIO, Reminder reminder, NoteSerializer noteSerializer) {
         this.reminder = reminder;
@@ -40,7 +40,9 @@ public class NoteKeeper {
             case IDLE:
                 return;
             case ADDING:
+                isWorking = true; // todo ?
                 doNextAddingStep(userMessage);
+                isWorking = false; //todo ?
                 return;
             case SHOWING:
                 LOGGER.info(chatId + ": Showing notes");
@@ -60,7 +62,6 @@ public class NoteKeeper {
 
     private synchronized UserState joinMeeting(String userMessage){
         synchronized (reminder.notes) {
-            Note meeting;
             for (Note currNote : reminder.notes){
                 if (currNote.getToken() == null){
                     continue;
@@ -72,8 +73,10 @@ public class NoteKeeper {
                     if (currNote.getText().length() < 20) {
                         stringLimit = currNote.getText().length();
                     }
-                    userIO.showMessage("You have a new note \""
-                            + currNote.getText().substring(0, stringLimit) + "...\" with remind on " + currNote.getRemindDate().format(NotePrinter.dateTimeFormatter), chatId);
+                    userIO.showMessage(BotOptions.botAnswers.get("NewNote")
+                            + currNote.getText().substring(0, stringLimit)
+                            + BotOptions.botAnswers.get("WithRemind")
+                            + currNote.getRemindDate().format(NotePrinter.dateTimeFormatter), chatId);
                     noteSerializer.serializeNotes(reminder.notes);
                     LOGGER.info(chatId + ": Joined meeting");
                     return UserState.IDLE;
@@ -137,7 +140,10 @@ public class NoteKeeper {
                             BotOptions.botAnswers.get("HourBefore"),
                             BotOptions.botAnswers.get("DayBefore"),
                             BotOptions.botAnswers.get("WeekBefore"),
-                            BotOptions.botAnswers.get("SetDate")}, chatId);
+                            BotOptions.botAnswers.get("SetDate"),
+                            BotOptions.botAnswers.get("Every day"),
+                            BotOptions.botAnswers.get("Every week"),
+                            BotOptions.botAnswers.get("Every month"),}, chatId);
                 }else if (addingState == AddingState.IDLE){
                     finishAddNote();
                 }
@@ -159,7 +165,7 @@ public class NoteKeeper {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > 4){
+            if (respond > 7){
                 throw new NumberFormatException();
             }
         }
@@ -185,17 +191,35 @@ public class NoteKeeper {
                 userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseYear"), DateTimeParser.years, chatId);
                 addingState = AddingState.SET_REMIND_YEAR;
                 return;
+            case 5:
+                newNoteRemindPeriod = 1;
+                newNoteRemindDate = newNoteDate;
+                break;
+            case 6:
+                newNoteRemindPeriod = 7;
+                newNoteRemindDate = newNoteDate;
+                break;
+            case 7:
+                newNoteRemindPeriod = 30;
+                newNoteRemindDate = newNoteDate;
+                break;
             default:
                 throw new IllegalArgumentException();
         }
         finishAddNote();
     }
 
-    //todo lock
     private void finishAddNote(){
         LOGGER.info(chatId + ": Adding new note...");
         synchronized (reminder.notes) {
             Note newNote;
+            if (newNoteRemindPeriod != 0){
+                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, true , newNoteRemindPeriod);
+            }
+            else {
+                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, false, 0);
+            }
+          
             if (isMeeting) {
                 newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, true , newNoteRemindPeriod);
                 LOGGER.info(chatId + ": Setting meeting token");
@@ -213,25 +237,30 @@ public class NoteKeeper {
                 stringLimit = newNoteText.length();
             }
             if (isMeeting){
-                userIO.showMessage(BotOptions.botAnswers.get("NewNote") //todo NewMeeting
-                        + newNoteText.substring(0, stringLimit) + BotOptions.botAnswers.get("WithRemind")
+                userIO.showMessage(BotOptions.botAnswers.get("NewMeeting")
+                        + newNoteText.substring(0, stringLimit)
+                        + BotOptions.botAnswers.get("WithRemind")
                         + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
-                userIO.showMessage("The token of your meeting: ", chatId);
+                userIO.showMessage(BotOptions.botAnswers.get("YourToken"), chatId);
                 userIO.showMessage(newNote.getToken(), chatId);
-                userIO.showMessage("You can share it with your friends", chatId);
+                userIO.showMessage(BotOptions.botAnswers.get("ShareToken"), chatId);
             }
             else {
-                userIO.showMessage(BotOptions.botAnswers.get("NewNote")
-                        + newNoteText.substring(0, stringLimit) + BotOptions.botAnswers.get("WithRemind")
+                 userIO.showMessage(BotOptions.botAnswers.get("NewNote")
+                        + newNoteText.substring(0, stringLimit)
+                        + BotOptions.botAnswers.get("WithRemind")
                         + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
                 noteSerializer.serializeNotes(reminder.notes);
+            }
+            if (newNoteRemindPeriod != 0) {
+                userIO.showMessage(BotOptions.botAnswers.get("RemindPeriodInDays") + newNoteRemindPeriod, chatId);
             }
         }
         LOGGER.info(chatId + ": New note has been added");
         isMeeting = false;
+        newNoteRemindPeriod = 0;
     }
 
-    //todo lock
     private synchronized void removeNote(String userMessage){
         LOGGER.info(chatId + ": Removing note...");
         int respond;
@@ -243,6 +272,7 @@ public class NoteKeeper {
             }
         } catch (NumberFormatException e) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
+            LOGGER.info(chatId + ": Wrong format in removing notes");
             currentState = UserState.IDLE;
             return;
         }
