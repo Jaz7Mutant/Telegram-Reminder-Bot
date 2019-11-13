@@ -1,3 +1,4 @@
+import bot.BotOptions;
 import inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Test;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 
 public class TestReminder {
     // тут все тесты проверяют только изменения userStates и addingStates
+    public BotOptions botOptions = new BotOptions();
     @Test
     public void testAddNote(){
         ConsoleIO consoleIO = new ConsoleIO();

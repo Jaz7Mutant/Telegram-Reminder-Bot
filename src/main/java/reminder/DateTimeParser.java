@@ -1,5 +1,6 @@
 package reminder;
 
+import bot.BotOptions;
 import inputOutput.UserIO;
 
 import java.time.LocalDateTime;
@@ -34,21 +35,21 @@ public class DateTimeParser {
         try {
             respond = Integer.parseInt(userMessage);
         } catch (NumberFormatException e) {
-            userIO.showMessage("Wrong format", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return addingState;
         }
         if (respond == years.length - 1) {
-            userIO.showMessage("Set year (yyyy)", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("SetYear"), chatId);
             return addingState;
         }
         if (respond < years.length) {
             respond = Integer.parseInt(years[respond]);
         } else if (respond < currentDate.getYear() || respond > 2035) {
-            userIO.showMessage("Illegal year", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("IllegalYear"), chatId);
             return addingState;
         }
         rawDate.set(Calendar.YEAR, respond);
-        userIO.showOnClickButton("Choose month", months, chatId);
+        userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseMonth"), months, chatId);
         if (addingState == AddingState.SET_YEAR) {
             return AddingState.SET_MONTH;
         } else {
@@ -64,7 +65,7 @@ public class DateTimeParser {
                 throw new NumberFormatException();
             }
         } catch (NumberFormatException e) {
-            userIO.showMessage("Wrong format", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return addingState;
         }
         rawDate.set(Calendar.MONTH, currentDate.plusMonths(respond - 1).getMonthValue());
@@ -74,7 +75,7 @@ public class DateTimeParser {
         for (int i = 1; i <= daysInMonth; i++) {
             days[i - 1] = Integer.toString(i);
         }
-        userIO.showOnClickButton("Choose day", days, chatId);
+        userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseDay"), days, chatId);
         if (addingState == AddingState.SET_MONTH) {
             return AddingState.SET_DAY;
         } else {
@@ -90,12 +91,12 @@ public class DateTimeParser {
                 throw new NumberFormatException();
             }
         } catch (NumberFormatException e) {
-            userIO.showMessage("Wrong format", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return addingState;
         }
         rawDate.set(Calendar.DAY_OF_MONTH, respond + 1);
 
-        userIO.showMessage("Set time (hh:mm)", chatId);
+        userIO.showMessage(BotOptions.botAnswers.get("SetTime"), chatId);
         if (addingState == AddingState.SET_DAY) {
             return AddingState.SET_TIME;
         } else {
@@ -108,7 +109,7 @@ public class DateTimeParser {
         try {
             time = LocalTime.parse(userMessage);
         } catch (Exception e) {
-            userIO.showMessage("Wrong format", chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return addingState;
         }
         rawDate.set(Calendar.HOUR_OF_DAY, time.getHour());
@@ -116,8 +117,8 @@ public class DateTimeParser {
         if (LocalDateTime.ofInstant(
                 rawDate.toInstant(),
                 rawDate.getTimeZone().toZoneId()).isBefore(LocalDateTime.now())) {
-            userIO.showMessage("Wrong date", chatId);
-            userIO.showOnClickButton("Choose month", months, chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("WrongDate"), chatId);
+            userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseMonth"), months, chatId);
             if (addingState == AddingState.SET_TIME){
                 return AddingState.SET_MONTH;
             }
