@@ -1,6 +1,6 @@
 [
   {
-    "BotType" : "Console",
+    "BotType" : "Telegram",
     "NotePrinterPeriod": "10",
     "ProxyPort": "9150",
     "ProxyHost": "127.0.0.1",
