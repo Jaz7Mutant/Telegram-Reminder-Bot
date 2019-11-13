@@ -1,3 +1,4 @@
+import bot.BotOptions;
 import inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,6 +16,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class TestDateTimeParser {
+    public BotOptions botOptions = new BotOptions();
+
     @Test
     public void testUpdateCurrentDate() {
         DateTimeParser dateTimeParser = new DateTimeParser(new ConsoleIO());
