@@ -58,8 +58,8 @@ public class BotController {
         setUserIO(BotType.TELEGRAM_BOT);
         LOGGER.info("Bot has been created");
         commands.put("/new", reminder::addNote);
-//        commands.put("/meeting", reminder::addMeeting);
-//        commands.put("/join", reminder::joinMeeting);
+        commands.put("/meeting", reminder::addMeeting);
+        commands.put("/join", reminder::joinMeeting);
         commands.put("/remove", reminder::removeNote);
         commands.put("/all", reminder::showUserNotes);
         commands.put("/stop", BotController::exit);
@@ -74,7 +74,7 @@ public class BotController {
     //todo Очередь не нарушать
     public static void parseCommand(String command, String chatId) {
         if (!Reminder.userStates.containsKey(chatId)) {
-            LOGGER.info(chatId +": Add new user");
+            LOGGER.info(chatId +": Added new user");
             Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder, noteSerializer));
         }
         if (commands.containsKey(command.split(" ")[0])
@@ -83,6 +83,10 @@ public class BotController {
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {
             LOGGER.info(chatId + ": Input command - " + command);
+            if (Reminder.userStates.get(chatId).isWorking){
+                userIO.showMessage("Bot is busy", chatId);
+                return;
+            }
             Reminder.userStates.get(chatId).doNextStep(command);
         }
     }

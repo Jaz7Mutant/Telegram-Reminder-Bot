@@ -44,7 +44,7 @@ public class NotePrinter extends TimerTask {
                 try {
                     printNote(firstNote);
                 } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Error sending message", e); // todo
+                    LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e); // todo
 //                    System.out.println(firstNote.getChatId() + "Wrong chat id");
                 }
                 LOGGER.info("Deleting remind...");

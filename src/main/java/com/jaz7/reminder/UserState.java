@@ -4,5 +4,6 @@ public enum UserState {
     IDLE,
     ADDING,
     REMOVING,
-    SHOWING
+    SHOWING,
+    JOINING
 }

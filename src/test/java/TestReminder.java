@@ -5,6 +5,7 @@ import com.jaz7.reminder.*;
 
 import java.util.HashMap;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class TestReminder {
     // тут все тесты проверяют только изменения userStates и addingStates
     @Test

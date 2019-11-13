@@ -13,12 +13,14 @@ import static com.jaz7.reminder.AddingState.*;
 public class NoteKeeper {
     public UserState currentState = UserState.IDLE;
     public AddingState addingState;
+    public boolean isWorking = false;
     private UserIO userIO;
     private String chatId;
     private Reminder reminder;
 
     private Calendar newRawDate = new GregorianCalendar();
     private Calendar newRawRemindDate = new GregorianCalendar();
+    private boolean isMeeting = false;
     private String newNoteText = null;
     private LocalDateTime newNoteDate = null;
     private LocalDateTime newNoteRemindDate = null;
@@ -47,11 +49,43 @@ public class NoteKeeper {
             case REMOVING:
                 LOGGER.info(chatId + ": Removing note");
                 removeNote(userMessage);
+                return;
+            case JOINING:
+                LOGGER.info(chatId + ": Joining to meeting");
+                currentState = joinMeeting(userMessage);
+        }
+    }
+
+    private synchronized UserState joinMeeting(String userMessage){
+        synchronized (reminder.notes) {
+            Note meeting;
+            for (Note currNote : reminder.notes){
+                if (currNote.getToken() == null){
+                    continue;
+                }
+                if (currNote.getToken().equals(userMessage)){
+                    reminder.notes.add(currNote.copy(chatId));
+                    reminder.notePrinter.run();
+                    int stringLimit = 20;
+                    if (newNoteText.length() < 20) {
+                        stringLimit = newNoteText.length();
+                    }
+                    userIO.showMessage("You have a new note \""
+                            + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+                    noteSerializer.serializeNotes(reminder.notes);
+                    LOGGER.info(chatId + ": Joined meeting");
+                    return UserState.IDLE;
+                }
+            }
+            userIO.showMessage("Wrong token", chatId);
+            return UserState.IDLE;
         }
     }
 
     private void doNextAddingStep(String userMessage) {
         switch (addingState) {
+            case SET_MEETING:
+                isMeeting = true; // Продолжить добавление заметки, поэтому нет break
             case SET_TEXT:
                 LOGGER.info(chatId + ": Setting text");
                 if (userMessage == null) {
@@ -159,11 +193,12 @@ public class NoteKeeper {
     private void finishAddNote(){
         LOGGER.info(chatId + ": Adding new note...");
         synchronized (reminder.notes) {
-            reminder.notes.add(new Note(
-                    chatId,
-                    newNoteText,
-                    newNoteDate,
-                    newNoteRemindDate));
+            Note newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate);
+            if (isMeeting) {
+                LOGGER.info(chatId + ": Setting meeting token");
+                newNote.setToken();
+            }
+            reminder.notes.add(newNote);
             reminder.notePrinter.run();
             addingState = AddingState.IDLE;
             currentState = UserState.IDLE;
@@ -171,11 +206,21 @@ public class NoteKeeper {
             if (newNoteText.length() < 20) {
                 stringLimit = newNoteText.length();
             }
-            userIO.showMessage("You have a new note \""
-                    + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
-            noteSerializer.serializeNotes(reminder.notes);
+            if (isMeeting){
+                userIO.showMessage("You have a new meeting \""
+                        + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+                userIO.showMessage("The token of your meeting: ", chatId);
+                userIO.showMessage(newNote.getToken(), chatId);
+                userIO.showMessage("You can share it with your friends", chatId);
+            }
+            else {
+                userIO.showMessage("You have a new note \""
+                        + newNoteText.substring(0, stringLimit) + "...\" with remind on " + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+                noteSerializer.serializeNotes(reminder.notes);
+            }
         }
         LOGGER.info(chatId + ": New note has been added");
+        isMeeting = false;
     }
 
     //todo lock

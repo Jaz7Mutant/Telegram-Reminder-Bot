@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class TestDateTimeParser {
     @Test
     public void testUpdateCurrentDate() {
@@ -97,7 +98,7 @@ public class TestDateTimeParser {
         StringBuilder respond = new StringBuilder();
         respond.append("Choose day\r\n");
         for (int i = 0; i < days.length; i++) {
-            respond.append((i + 1) + ". " + days[i] + "\r\n");
+            respond.append(i + 1).append(". ").append(days[i]).append("\r\n");
         }
         Assert.assertEquals(respond.toString(), output.toString());
         AddingState state1 = dateTimeParser.setMonth(calendar, month,

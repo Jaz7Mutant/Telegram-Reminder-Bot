@@ -42,14 +42,14 @@ public class JsonNoteSerializer implements NoteSerializer {
             LOGGER.info("Notes has been serialized");
         }
         catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Notes serializing error:", e);
+            LOGGER.log(Level.WARNING, "Notes serializing error:" + e.getMessage(), e);
         }
     }
 
     @Override
     public SortedSet<Note> deserializeNotes() {
         LOGGER.info("Deserializing notes...");
-        SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate));
+        SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate).thenComparing(Note::getText).thenComparing(Note::getChatId).thenComparing(Note::hashCode));
         String fieldName;
         try {
             JsonReader reader = new JsonReader(new FileReader("Notes.json"));
@@ -83,7 +83,7 @@ public class JsonNoteSerializer implements NoteSerializer {
             reader.endArray();
         }
         catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Notes deserializing error:", e);
+            LOGGER.log(Level.WARNING, "Notes deserializing error:" + e.getMessage(), e);
         }
         LOGGER.info("Notes has been deserialized");
         return notes;

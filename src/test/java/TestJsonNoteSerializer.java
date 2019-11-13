@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class TestJsonNoteSerializer {
 
     @Test
@@ -22,7 +23,7 @@ public class TestJsonNoteSerializer {
         notes.add(note1);
         JsonNoteSerializer jsonNoteSerializer = new JsonNoteSerializer();
         jsonNoteSerializer.serializeNotes(notes);
-        String line = null;
+        String line;
         StringBuilder jsonString = new StringBuilder();
         try{
             BufferedReader in = new BufferedReader(new FileReader("Notes.json"));

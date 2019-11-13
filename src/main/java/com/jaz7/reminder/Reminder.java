@@ -25,6 +25,20 @@ public class Reminder {
         LOGGER.info("NotePrinter has been started");
     }
 
+    public void addMeeting(String command, String chatId){
+        LOGGER.info(chatId + ": Switch to adding meeting state");
+        userStates.get(chatId).currentState = UserState.ADDING;
+        DateTimeParser.updateCurrentDate();
+        userStates.get(chatId).addingState = AddingState.SET_MEETING;
+        userIO.showMessage("Write your note", chatId);
+    }
+
+    public void joinMeeting(String command, String chatId){
+        LOGGER.info(chatId + ": Switch to joining to meeting");
+        userStates.get(chatId).currentState = UserState.JOINING;
+        userIO.showMessage("Send the invite token", chatId);
+    }
+
     public void addNote(String command, String chatId) {
         // Спрашивает у пользователя String noteText, LocalDateTime remindDate, LocalDateTime eventDate
         // Добавляет новую заметку в лист заметок.

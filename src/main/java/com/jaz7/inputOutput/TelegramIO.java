@@ -40,7 +40,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
                     .setText(message));
             LOGGER.info(chatId + ": Message has been send");
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error sending message", e);
+            LOGGER.log(Level.WARNING, chatId + ": Error sending message" + e.getMessage(), e);
         }
     }
 
@@ -79,7 +79,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             execute(new SendMessage().setText(header).setChatId(chatId).setReplyMarkup(inlineKeyboardMarkup));
             LOGGER.info(chatId + ": Buttons shown successfully");
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing buttons", e);
+            LOGGER.log(Level.WARNING, chatId + ": Error showing buttons" + e.getMessage(), e);
         }
     }
 
@@ -101,7 +101,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             execute(new SendMessage().setText(text).setChatId(chatId));
             LOGGER.info(chatId + ": List shown successfully");
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing list", e);
+            LOGGER.log(Level.WARNING, chatId + ": Error showing list" + e.getMessage(), e);
         }
     }
 
@@ -120,7 +120,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
                 LOGGER.info(update.getMessage().getChatId() + ": Received message");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error update receiving:", e);
+            LOGGER.log(Level.WARNING, "Error update receiving:" + e.toString(), e);
         }
 
     }
