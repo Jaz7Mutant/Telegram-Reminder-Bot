@@ -1,4 +1,4 @@
-package bot;
+package com.jaz7.bot;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;

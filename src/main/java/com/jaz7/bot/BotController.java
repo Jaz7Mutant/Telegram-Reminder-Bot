@@ -1,6 +1,5 @@
 package com.jaz7.bot;
 
-import bot.BotOptions;
 import com.jaz7.inputOutput.ConsoleIO;
 import com.jaz7.inputOutput.TelegramIO;
 import com.jaz7.inputOutput.UserIO;

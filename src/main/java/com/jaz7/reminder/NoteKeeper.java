@@ -1,6 +1,6 @@
 package com.jaz7.reminder;
 
-import bot.BotOptions;
+import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
@@ -8,10 +8,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Logger;
-
-import com.jaz7.reminder.Reminder;
-import com.jaz7.reminder.NotePrinter;
-import com.jaz7.reminder.AddingState;
 
 public class NoteKeeper {
     public UserState currentState = UserState.IDLE;

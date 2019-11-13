@@ -1,4 +1,4 @@
-import bot.BotOptions;
+import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.ConsoleIO;
 import org.junit.Assert;
 import org.junit.Before;
