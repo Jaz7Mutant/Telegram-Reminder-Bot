@@ -1,8 +1,11 @@
+import com.jaz7.reminder.Note;
 import org.junit.Assert;
 import org.junit.Test;
-import com.jaz7.reminder.Note;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class TestNote {
@@ -18,7 +21,9 @@ public class TestNote {
                 note.getEventDate());
         Assert.assertEquals(LocalDateTime.of(2019,9,29,0,0),
                 note.getRemindDate());
-        note.deleteBeforehandRemind();
+        SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate));
+        notes.add(note);
+        note.deleteBeforehandRemind(notes);
         Assert.assertEquals(note.getEventDate(), note.getRemindDate());
     }
 

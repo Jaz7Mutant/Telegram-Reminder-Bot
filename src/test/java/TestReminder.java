@@ -20,7 +20,7 @@ public class TestReminder {
         reminder.userStates.put(chatId, noteKeeper);
         reminder.addNote("", chatId);
         Assert.assertEquals(UserState.ADDING, Reminder.userStates.get(chatId).currentState);
-        Assert.assertEquals(AddingState.SET_TEXT, Reminder.userStates.get(chatId).addingState);
+        Assert.assertEquals(AddingState.SET_TEXT, Reminder.userStates.get(chatId).noteAdder.addingState);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class TestReminder {
         reminder.userStates.put(chatId, noteKeeper);
         reminder.addMeeting("",chatId);
         Assert.assertEquals(UserState.ADDING, reminder.userStates.get(chatId).currentState);
-        Assert.assertEquals(AddingState.SET_MEETING, reminder.userStates.get(chatId).addingState);
+        Assert.assertEquals(AddingState.SET_MEETING, reminder.userStates.get(chatId).noteAdder.addingState);
     }
 
     @Test

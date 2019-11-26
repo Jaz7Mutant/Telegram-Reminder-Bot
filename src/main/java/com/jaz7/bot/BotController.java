@@ -43,13 +43,14 @@ public class BotController {
             System.err.println("Could not setup logger configuration: " + e.toString());
         }
         setUserIO(BotOptions.botOptions.get("BotType"));
+        new RespondParser(userIO);
 
         commands.put("/new", reminder::addNote);
         commands.put("/meeting", reminder::addMeeting);
         commands.put("/join", reminder::joinMeeting);
         commands.put("/remove", reminder::removeNote);
         commands.put("/all", reminder::showUserNotes);
-        commands.put("/stop", BotController::exit);
+        //commands.put("/stop", BotController::exit);
         commands.put("/help", BotController::help);
         commands.put("/authors", BotController::authors);
         commands.put("/echo", BotController::echo);

@@ -3,35 +3,26 @@ package com.jaz7.reminder;
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class NoteKeeper {
     public UserState currentState = UserState.IDLE;
-    public AddingState addingState;
     public boolean isWorking = false;
+    public List<Note> userNotes;
+    public NoteAdder noteAdder;
     private UserIO userIO;
     private String chatId;
     private Reminder reminder;
     private NoteSerializer noteSerializer;
     private static final Logger LOGGER = Logger.getLogger(NoteKeeper.class.getSimpleName());
 
-    private Calendar newRawDate = new GregorianCalendar();
-    private Calendar newRawRemindDate = new GregorianCalendar();
-    private boolean isMeeting = false;
-    private String newNoteText = null;
-    private LocalDateTime newNoteDate = null;
-    private LocalDateTime newNoteRemindDate = null;
-    private long newNoteRemindPeriod;
-
     public NoteKeeper(String chatId, UserIO userIO, Reminder reminder, NoteSerializer noteSerializer) {
         this.reminder = reminder;
         this.chatId = chatId;
         this.userIO = userIO;
         this.noteSerializer = noteSerializer;
+        this.noteAdder = new NoteAdder(userIO, noteSerializer, reminder, chatId, this);
         LOGGER.info(chatId + ": NoteKeeper has been created");
     }
 
@@ -41,7 +32,7 @@ public class NoteKeeper {
                 return;
             case ADDING:
                 isWorking = true; // todo ?
-                doNextAddingStep(userMessage);
+                noteAdder.doNextAddingStep(userMessage);
                 isWorking = false; //todo ?
                 return;
             case SHOWING:
@@ -60,7 +51,7 @@ public class NoteKeeper {
         }
     }
 
-    private synchronized UserState joinMeeting(String userMessage){
+    private UserState joinMeeting(String userMessage){
         synchronized (reminder.notes) {
             for (Note currNote : reminder.notes){
                 if (currNote.getToken() == null){
@@ -87,195 +78,23 @@ public class NoteKeeper {
         }
     }
 
-    private void doNextAddingStep(String userMessage) {
-        switch (addingState) {
-            case SET_MEETING:
-                isMeeting = true; // Продолжить добавление заметки, поэтому нет break
-            case SET_TEXT:
-                LOGGER.info(chatId + ": Setting text");
-                if (userMessage == null) {
-                    userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-                    userIO.showMessage(BotOptions.botAnswers.get("WriteNote"), chatId);
-                    return;
-                } else {
-                    newNoteText = userMessage;
-                    LOGGER.info(chatId + ": Text has been set");
-                    userIO.showMessage(BotOptions.botAnswers.get("When"), chatId);
-                    userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseYear"), DateTimeParser.years, chatId);
-                    addingState = AddingState.SET_YEAR;
-                    return;
-                }
-            case SET_YEAR:
-                LOGGER.info(chatId + ": Setting year");
-                addingState = DateTimeParser.setYear(newRawDate, userMessage, chatId, addingState);
-                return;
-            case SET_REMIND_YEAR:
-                LOGGER.info(chatId + ": Setting remind year");
-                addingState = DateTimeParser.setYear(newRawRemindDate, userMessage, chatId, addingState);
-                return;
-            case SET_MONTH:
-                LOGGER.info(chatId + ": Setting month");
-                addingState = DateTimeParser.setMonth(newRawDate, userMessage, chatId, addingState);
-                return;
-            case SET_REMIND_MONTH:
-                LOGGER.info(chatId + ": Setting remind month");
-                addingState = DateTimeParser.setMonth(newRawRemindDate, userMessage, chatId, addingState);
-                return;
-            case SET_DAY:
-                LOGGER.info(chatId + ": Setting day");
-                addingState = DateTimeParser.setDay(newRawDate,userMessage, chatId, addingState);
-                return;
-            case SET_REMIND_DAY:
-                LOGGER.info(chatId + ": Setting remind day");
-                addingState = DateTimeParser.setDay(newRawRemindDate,userMessage, chatId, addingState);
-                return;
-            case SET_TIME:
-                LOGGER.info(chatId + ": Setting time");
-                addingState = DateTimeParser.setTime(newRawDate,userMessage,chatId,addingState);
-                LOGGER.info(chatId + ": Setting remind type");
-                if (addingState == AddingState.SET_REMIND){
-                    newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
-                    userIO.showOnClickButton(BotOptions.botAnswers.get("SetRemind"), new String[]{
-                            BotOptions.botAnswers.get("NoRemind"),
-                            BotOptions.botAnswers.get("HourBefore"),
-                            BotOptions.botAnswers.get("DayBefore"),
-                            BotOptions.botAnswers.get("WeekBefore"),
-                            BotOptions.botAnswers.get("SetDate"),
-                            BotOptions.botAnswers.get("Every day"),
-                            BotOptions.botAnswers.get("Every week"),
-                            BotOptions.botAnswers.get("Every month"),}, chatId);
-                }else if (addingState == AddingState.IDLE){
-                    finishAddNote();
-                }
-                return;
-            case SET_REMIND_TIME:
-                LOGGER.info(chatId + ": Setting remind time");
-                addingState = DateTimeParser.setTime(newRawRemindDate,userMessage,chatId,addingState);
-                if (addingState == AddingState.IDLE) {
-                    finishAddNote();
-                }
-                return;
-            case SET_REMIND:
-                LOGGER.info(chatId + ": Setting remind by offset");
-                setRemind(userMessage);
-        }
-    }
-
-    private void setRemind(String userMessage){
-        int respond;
-        try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > 7){
-                throw new NumberFormatException();
-            }
-        }
-        catch (NumberFormatException e){
-            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-            return;
-        }
-        newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
-        switch (respond) {
-            case 0:
-                newNoteRemindDate = newNoteDate;
-                break;
-            case 1:
-                newNoteRemindDate = newNoteDate.minusHours(1);
-                break;
-            case 2:
-                newNoteRemindDate = newNoteDate.minusDays(1);
-                break;
-            case 3:
-                newNoteRemindDate = newNoteDate.minusWeeks(1);
-                break;
-            case 4:
-                userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseYear"), DateTimeParser.years, chatId);
-                addingState = AddingState.SET_REMIND_YEAR;
-                return;
-            case 5:
-                newNoteRemindPeriod = 1;
-                newNoteRemindDate = newNoteDate;
-                break;
-            case 6:
-                newNoteRemindPeriod = 7;
-                newNoteRemindDate = newNoteDate;
-                break;
-            case 7:
-                newNoteRemindPeriod = 30;
-                newNoteRemindDate = newNoteDate;
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
-        finishAddNote();
-    }
-
-    private void finishAddNote(){
-        LOGGER.info(chatId + ": Adding new note...");
-        synchronized (reminder.notes) {
-            Note newNote;
-            if (newNoteRemindPeriod != 0){
-                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, true , newNoteRemindPeriod);
-            }
-            else {
-                newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, false, 0);
-            }
-          
-            if (isMeeting) {
-                LOGGER.info(chatId + ": Setting meeting token");
-                newNote.setToken();
-            }
-            reminder.notes.add(newNote);
-            reminder.notePrinter.run();
-            addingState = AddingState.IDLE;
-            currentState = UserState.IDLE;
-            int stringLimit = 20;
-            if (newNoteText.length() < 20) {
-                stringLimit = newNoteText.length();
-            }
-            if (isMeeting){
-                userIO.showMessage(BotOptions.botAnswers.get("NewMeeting")
-                        + newNoteText.substring(0, stringLimit)
-                        + BotOptions.botAnswers.get("WithRemind")
-                        + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
-                userIO.showMessage(BotOptions.botAnswers.get("YourToken"), chatId);
-                userIO.showMessage(newNote.getToken(), chatId);
-                userIO.showMessage(BotOptions.botAnswers.get("ShareToken"), chatId);
-            }
-            else {
-                 userIO.showMessage(BotOptions.botAnswers.get("NewNote")
-                        + newNoteText.substring(0, stringLimit)
-                        + BotOptions.botAnswers.get("WithRemind")
-                        + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
-                noteSerializer.serializeNotes(reminder.notes);
-            }
-            if (newNoteRemindPeriod != 0) {
-                userIO.showMessage(BotOptions.botAnswers.get("RemindPeriodInDays") + newNoteRemindPeriod, chatId);
-            }
-        }
-        LOGGER.info(chatId + ": New note has been added");
-        isMeeting = false;
-        newNoteRemindPeriod = 0;
-    }
-
-    private synchronized void removeNote(String userMessage){
+    private synchronized void removeNote(String userMessage){ // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
         LOGGER.info(chatId + ": Removing note...");
+        userNotes = NotePrinter.getUserNotes(reminder, chatId);
         int respond;
-        List<Note> userNotes = NotePrinter.getUserNotes(reminder, chatId);
         try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > userNotes.size() || respond <= 0){
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException e) {
-            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-            LOGGER.info(chatId + ": Wrong format in removing notes");
+            respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
+        }
+        catch (IllegalArgumentException e){
             currentState = UserState.IDLE;
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
         synchronized (reminder.notes) {
             reminder.notes.remove(userNotes.get(respond - 1));
             currentState = UserState.IDLE;
             userIO.showMessage(BotOptions.botAnswers.get("Removed"), chatId);
+            noteSerializer.serializeNotes(reminder.notes); // TODO Можно убрать
         }
         LOGGER.info(chatId + ": Note has been removed");
     }

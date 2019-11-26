@@ -37,6 +37,7 @@ public class NotePrinter extends TimerTask {
         }
         LOGGER.info("Printing notes...");
         LocalDateTime currentTime = LocalDateTime.now();
+        boolean isRemovedNotes = false;
         synchronized (notes) {
             Note currentNote = notes.first();
             while (currentNote.getRemindDate().minusSeconds(30).isBefore(currentTime)) {
@@ -47,10 +48,11 @@ public class NotePrinter extends TimerTask {
                         LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e);
                     }
                     LOGGER.info("Deleting remind...");
-                    currentNote.deleteBeforehandRemind();
+                    currentNote.deleteBeforehandRemind(notes);
                     if (currentNote.getEventDate().minusSeconds(30).isBefore(currentTime)) {
                         LOGGER.info("Deleting note...");
                         notes.remove(currentNote);
+                        isRemovedNotes = true;
                     }
                     noteSerializer.serializeNotes(notes);
                     if (notes.isEmpty()) {
@@ -61,6 +63,9 @@ public class NotePrinter extends TimerTask {
             }
         }
         LOGGER.info("Printing notes has been done");
+        if (isRemovedNotes) {
+            noteSerializer.serializeNotes(notes); // TODO Можно убрать
+        }
     }
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {
@@ -126,7 +131,7 @@ public class NotePrinter extends TimerTask {
             }
         }
         userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
-    }
+    } //todo Через дефолтный форматтер
 
     private static void printTenUpcomingNotes(List<Note> userNotes, String chatId) {
         if (userNotes.size() > 10) { // Если меньше 10, то выводятся все заметки
@@ -149,7 +154,7 @@ public class NotePrinter extends TimerTask {
     private static String getFormattedNote(Note note){
         String period = "";
         if (note.isRepeatable()){
-            period = " every " + note.getRemindPeriod() + " day(s)";
+            period = "... every " + note.getRemindPeriod() + " day(s)";
         }
         if (note.getText().length() >= 10){
             return note.getEventDate().format(dateTimeFormatter) + " " + note.getText().substring(0, 10) + period;
