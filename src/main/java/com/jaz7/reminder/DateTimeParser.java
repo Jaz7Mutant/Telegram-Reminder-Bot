@@ -1,5 +1,4 @@
 package com.jaz7.reminder;
-
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
@@ -10,7 +9,7 @@ import java.util.logging.Logger;
 
 public class DateTimeParser {
     public static String[] years;
-    private static LocalDateTime currentDate;
+    public static LocalDateTime currentDate;
     private static String[] months;
     private static String[] days;
     private static UserIO userIO;
@@ -34,28 +33,8 @@ public class DateTimeParser {
         LOGGER.info("Current date has been updated");
     }
 
-    public static AddingState setYear(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
-        int respond;
-        try {
-            respond = Integer.parseInt(userMessage);
-        } catch (NumberFormatException e) {
-            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-            LOGGER.info(chatId + ": Wrong year format");
-            return addingState;
-        }
-        if (respond == years.length - 1) {
-            userIO.showMessage(BotOptions.botAnswers.get("SetYear"), chatId);
-            LOGGER.info(chatId + ": Setting year manually");
-            return addingState;
-        }
-        if (respond < years.length) {
-            respond = Integer.parseInt(years[respond]);
-        } else if (respond < currentDate.getYear() || respond > 2035) {
-            userIO.showMessage(BotOptions.botAnswers.get("IllegalYear"), chatId);
-            LOGGER.info(chatId + ": Illegal year");
-            return addingState;
-        }
-        rawDate.set(Calendar.YEAR, respond);
+    public static AddingState setYear(Calendar rawDate, int year, String chatId, AddingState addingState) {
+        rawDate.set(Calendar.YEAR, year);
         LOGGER.info(chatId + ": Year has been set");
         
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseMonth"), months, chatId);
@@ -66,19 +45,8 @@ public class DateTimeParser {
         }
     }
 
-    public static AddingState setMonth(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
-        int respond;
-        try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > 11 || respond < 0) {
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException e) {
-            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-            LOGGER.info(chatId + ": Wrong month format");
-            return addingState;
-        }
-        rawDate.set(Calendar.MONTH, currentDate.plusMonths(respond - 1).getMonthValue());
+    public static AddingState setMonth(Calendar rawDate, int month, String chatId, AddingState addingState) {
+        rawDate.set(Calendar.MONTH, currentDate.plusMonths(month).getMonthValue());
         LOGGER.info(chatId + ": Month has been set");
 
         int daysInMonth = getDaysInMonth(rawDate);
@@ -86,6 +54,7 @@ public class DateTimeParser {
         for (int i = 1; i <= daysInMonth; i++) {
             days[i - 1] = Integer.toString(i);
         }
+        Reminder.userStates.get(chatId).noteAdder.daysInCurrentMonth = days;
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseDay"), days, chatId);
         if (addingState == AddingState.SET_MONTH) {
             return AddingState.SET_DAY;
@@ -94,21 +63,9 @@ public class DateTimeParser {
         }
     }
 
-    public static AddingState setDay(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
-        int respond;
-        try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > days.length || respond < 0) {
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException e) {
-            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-            LOGGER.info(chatId + ": Wrong day format");
-            return addingState;
-        }
-        rawDate.set(Calendar.DAY_OF_MONTH, respond + 1);
+    public static AddingState setDay(Calendar rawDate, int day, String chatId, AddingState addingState) {
+        rawDate.set(Calendar.DAY_OF_MONTH, day);
         LOGGER.info(chatId + ": Day has been set");
-
         userIO.showMessage(BotOptions.botAnswers.get("SetTime"), chatId);
         if (addingState == AddingState.SET_DAY) {
             return AddingState.SET_TIME;
@@ -117,20 +74,12 @@ public class DateTimeParser {
         }
     }
 
-    public static AddingState setTime(Calendar rawDate, String userMessage, String chatId, AddingState addingState) {
-        LocalTime time;
-        try {
-            time = LocalTime.parse(userMessage);
-        } catch (Exception e) {
-            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-            LOGGER.info(chatId + ": Wrong time format");
-            return addingState;
-        }
+    public static AddingState setTime(Calendar rawDate, LocalTime time, String chatId, AddingState addingState) {
         rawDate.set(Calendar.HOUR_OF_DAY, time.getHour());
         rawDate.set(Calendar.MINUTE, time.getMinute());
 
         // Если время в прошлом, то заново задаем всю дату, начиная с месяца
-        if (LocalDateTime.ofInstant(
+        if (LocalDateTime.ofInstant( // TODO Исправить - Сделать так, чтобы новая дата задавалась с шага, на котором была сделана ошибка. Т.е. Добавить на каждом шаге проверку
                 rawDate.toInstant(),
                 rawDate.getTimeZone().toZoneId()).isBefore(LocalDateTime.now())) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongDate"), chatId);

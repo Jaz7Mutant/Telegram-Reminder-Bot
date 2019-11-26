@@ -2,6 +2,7 @@ package com.jaz7.reminder;
 
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.SortedSet;
 
 public class Note {
     private String chatId;
@@ -11,22 +12,6 @@ public class Note {
     private String token;
     private boolean isRepeatable;
     private long remindPeriod;
-
-    public Note(
-            String chatId,
-            String text,
-            LocalDateTime eventDate,
-            LocalDateTime remindDate,
-            boolean isRepeatable,
-            long remindPeriod) {
-        this.chatId = chatId;
-        this.text = text;
-        this.eventDate = eventDate;
-        this.remindDate = remindDate;
-        this.isRepeatable = isRepeatable;
-        this.remindPeriod = remindPeriod;
-        this.token = null;
-    }
 
     public Note(
             String chatId,
@@ -66,7 +51,7 @@ public class Note {
     }
 
     public void setToken() {
-        token = "MEET" + (chatId + remindDate.toString() + text.hashCode() + new Random().ints()).hashCode();
+        token = "MEET" + (chatId + remindDate.toString() + text.hashCode() + new Random().ints()).hashCode(); // todo uuid
     }
 
     public boolean isRepeatable(){
@@ -78,21 +63,24 @@ public class Note {
     }
 
     public Note copy(String newChatId){
-        return new Note(newChatId, text, eventDate, remindDate, isRepeatable, remindPeriod);
+        return new Note(newChatId, new String(text), eventDate.plusMinutes(0), remindDate.plusMinutes(0), isRepeatable, remindPeriod, token);
     }
 
-    public void deleteBeforehandRemind(){
+    public void deleteBeforehandRemind(SortedSet<Note> notes){
         if (!isRepeatable) {
             remindDate = eventDate;
         }
         else {
+            notes.remove(this);
             if (remindPeriod == 30){
                 eventDate = eventDate.plusMonths(1);
             }
             else {
-                eventDate = eventDate.plusDays(remindPeriod);
+         //       eventDate = eventDate.plusMinutes(5);
+                eventDate = eventDate.plusDays(remindPeriod); //todo
             }
             remindDate = eventDate;
+            notes.add(this);
         }
     }
 }

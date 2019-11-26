@@ -29,8 +29,8 @@ public class Reminder {
         LOGGER.info(chatId + ": Switch to adding meeting state");
         userStates.get(chatId).currentState = UserState.ADDING;
         DateTimeParser.updateCurrentDate();
-        userStates.get(chatId).addingState = AddingState.SET_MEETING;
-        userIO.showMessage(BotOptions.botAnswers.get("NewNote"), chatId);
+        userStates.get(chatId).noteAdder.addingState = AddingState.SET_MEETING;
+        userIO.showMessage(BotOptions.botAnswers.get("WriteNote"), chatId);
     }
 
     public void joinMeeting(String command, String chatId){
@@ -48,7 +48,7 @@ public class Reminder {
         LOGGER.info(chatId + ": Switch to adding note state");
         userStates.get(chatId).currentState = UserState.ADDING;
         DateTimeParser.updateCurrentDate();
-        userStates.get(chatId).addingState = AddingState.SET_TEXT;
+        userStates.get(chatId).noteAdder.addingState = AddingState.SET_TEXT;
         userIO.showMessage(BotOptions.botAnswers.get("WriteNote"), chatId);
     }
 

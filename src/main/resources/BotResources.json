@@ -9,7 +9,7 @@
   },
   {
     "BotHelp": "This is a bot-reminder.\nFunctions:\n\t/help -- show help\n\t/echo <args> -- print <args>\n\t/authors -- print authors\n\t/date -- print current date and time\n\t/new -- create new note\n\t/remove -- remove note\n\t/all -- show all your notes\n\t/stop -- exit chat bot",
-    "WelcomeText": "Welcome. This is bot-reminder v0.4 alpha \n(If you want to write digits as letters use quotes)",
+    "WelcomeText": "Welcome. This is bot-reminder v0.7 alpha \n(If you want to write digits as letters use quotes)",
     "Authors": "Tolstoukhov Daniil, Gorbunova Sofia, 2019",
     "WriteNote": "Write your note",
     "NewNote": "You have a new note \"",
