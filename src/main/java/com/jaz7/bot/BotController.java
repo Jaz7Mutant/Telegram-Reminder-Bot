@@ -50,11 +50,14 @@ public class BotController {
         commands.put("/join", reminder::joinMeeting);
         commands.put("/remove", reminder::removeNote);
         commands.put("/all", reminder::showUserNotes);
-        //commands.put("/stop", BotController::exit);
+        //commands.put("/stop", BotController::stop);
         commands.put("/help", BotController::help);
         commands.put("/authors", BotController::authors);
         commands.put("/echo", BotController::echo);
         commands.put("/date", BotController::date);
+        commands.put("/chat", reminder::startChatting);
+        commands.put("/leave", reminder::stopChatting);
+        commands.put("/next", reminder::switchCompanion);
 
         userIO.listenCommands(commands);
     }
@@ -111,7 +114,7 @@ public class BotController {
         }
     }
 
-    private static void exit(String command, String chatId) {
+    private static void stop(String command, String chatId) {
         System.exit(0);
     }
 

@@ -16,7 +16,7 @@ public class TestMeeting {
         Note meet = new Note("1223","test",
                 LocalDateTime.of(2019, 12, 13, 23,22),
                 LocalDateTime.of(2019, 12, 13, 23,22),
-                false, 0,"token");
+                 0,"token");
         ConsoleIO consoleIO = new ConsoleIO();
         JsonNoteSerializer noteSerializer = new JsonNoteSerializer();
         SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate).
@@ -44,11 +44,11 @@ public class TestMeeting {
         Note note1 = new Note("1223", "first",
                 LocalDateTime.of(2019, 12, 13, 23, 22),
                 LocalDateTime.of(2019, 12, 13, 23, 22),
-                false, 0, "dkfl");
+                 0, "dkfl");
         Note note2 = new Note("1223", "second",
                 LocalDateTime.of(2019, 12, 13, 23, 22),
                 LocalDateTime.of(2019, 12, 13, 23, 22),
-                false, 0, "dkfl");
+                 0, "dkfl");
         ConsoleIO consoleIO = new ConsoleIO();
         JsonNoteSerializer noteSerializer = new JsonNoteSerializer();
         SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate).

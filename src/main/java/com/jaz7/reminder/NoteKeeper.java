@@ -8,6 +8,9 @@ import java.util.logging.Logger;
 
 public class NoteKeeper {
     public UserState currentState = UserState.IDLE;
+    public String companionChatId;
+//    public List<String> bannedUsers; TODO
+    public boolean isChatting;
     public boolean isWorking = false;
     public List<Note> userNotes;
     public NoteAdder noteAdder;
@@ -29,6 +32,9 @@ public class NoteKeeper {
     public void doNextStep(String userMessage) {
         switch (currentState) {
             case IDLE:
+                if (companionChatId != null){
+                    userIO.showMessage(userMessage, companionChatId);
+                }
                 return;
             case ADDING:
                 isWorking = true; // todo ?

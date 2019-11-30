@@ -9,18 +9,22 @@ public class Reminder {
     public final SortedSet<Note> notes; //Все заметки
     public NotePrinter notePrinter;
     public DateTimeParser dateTimeParser;
-    public static Map<String, NoteKeeper> userStates;
+    public static final Map<String, NoteKeeper> userStates = new HashMap<String, NoteKeeper>(); //Все пользователи
+    public static final List<String> readyToChatUsers = new ArrayList<>(); //Пользователи, которые ищут собеседника
+    public static List<String> chattingUsers =  new ArrayList<>(); //Пользователи, которые находятся в состоянии общения
+
+    private Random random = new Random();
+    private Timer timer;
     private UserIO userIO;
     private static final Logger LOGGER = Logger.getLogger(Reminder.class.getSimpleName());
 
     public Reminder(UserIO userIO, int notePrinterPeriodInSeconds, NoteSerializer noteSerializer) {
-        userStates = new HashMap<String, NoteKeeper>();
         this.userIO = userIO;
         notes = Collections.synchronizedSortedSet(noteSerializer.deserializeNotes());
         notePrinter = new NotePrinter(userIO, notes, noteSerializer);
         dateTimeParser = new DateTimeParser(userIO);
         LOGGER.info("Reminder has been created");
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(notePrinter, 1000 * notePrinterPeriodInSeconds, 1000 * notePrinterPeriodInSeconds);
         LOGGER.info("NotePrinter has been started");
     }
@@ -78,5 +82,72 @@ public class Reminder {
                         BotOptions.botAnswers.get("10Upcoming"),
                         BotOptions.botAnswers.get("All")
                 }, chatId);
+    }
+
+    public void startChatting(String command, String chatId){
+        synchronized (readyToChatUsers) {
+            LOGGER.info(chatId + ": Switch to chatting state");
+            userIO.showMessage(BotOptions.botAnswers.get("CurrentOnline") + chattingUsers.size(), chatId);
+            chattingUsers.add(chatId);
+            readyToChatUsers.add(chatId);
+            switchCompanion(null, chatId);
+        }
+    }
+
+    public void switchCompanion(String command, String chatId){
+        synchronized (userStates) {
+            synchronized (readyToChatUsers) {
+                if (!readyToChatUsers.contains(chatId)) {
+                    readyToChatUsers.add(chatId);
+                }
+                String currentCompanion = userStates.get(chatId).companionChatId;
+                if (currentCompanion != null) {
+                    userStates.get(currentCompanion).companionChatId = null;
+                    //userIO.showMessage(BotOptions.botAnswers.get("CompanionLeft"), currentCompanion);
+                    readyToChatUsers.add(currentCompanion);
+                    //
+                    // userIO.showMessage(BotOptions.botAnswers.get("LookingForCompanion"), currentCompanion);
+                }
+                userStates.get(chatId).companionChatId = null;
+                userIO.showMessage(BotOptions.botAnswers.get("LookingForCompanion"), chatId);
+                if (readyToChatUsers.size() == 1) {
+                    userIO.showMessage(BotOptions.botAnswers.get("NoOnlineUsers"), chatId);
+                } else {
+                    String companion = getRandomUserToChat(chatId);
+                    userStates.get(chatId).companionChatId = companion;
+                    userStates.get(companion).companionChatId = chatId;
+                    userIO.showMessage(BotOptions.botAnswers.get("ChattingWith") + chatId, companion);
+                    userIO.showMessage(BotOptions.botAnswers.get("ChattingWith") + companion, chatId);
+                    readyToChatUsers.remove(chatId);
+                    readyToChatUsers.remove(companion);
+                }
+            }
+        }
+    }
+
+    public void stopChatting(String command, String chatId){
+        synchronized (readyToChatUsers) {
+            LOGGER.info(chatId + ": Switching off chatting");
+            chattingUsers.remove(chatId);
+            readyToChatUsers.remove(chatId);
+            String currentCompanion = userStates.get(chatId).companionChatId;
+            if (currentCompanion != null && userStates.get(currentCompanion).companionChatId.equals(chatId)) {
+                userStates.get(chatId).companionChatId = null;
+                userIO.showMessage(BotOptions.botAnswers.get("CompanionLeft"), currentCompanion);
+                //userIO.showMessage(BotOptions.botAnswers.get("LookingForCompanion"), currentCompanion);
+                userStates.get(currentCompanion).companionChatId = null;
+                readyToChatUsers.add(currentCompanion);
+                switchCompanion(null, currentCompanion);
+            }
+            userIO.showMessage(BotOptions.botAnswers.get("LeftTheChat"), chatId);
+        }
+    }
+
+    private String getRandomUserToChat(String finderChatId){
+       String user = readyToChatUsers.get(random.nextInt(readyToChatUsers.size()));
+       while (user.equals(finderChatId)){
+           user = readyToChatUsers.get(random.nextInt(readyToChatUsers.size()));
+       }
+       return user;
     }
 }

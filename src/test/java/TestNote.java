@@ -14,7 +14,7 @@ public class TestNote {
         Note note = new Note("wlfn", "note",
                 LocalDateTime.of(2019,10,30,22,5),
                 LocalDateTime.of(2019,9,29,0,0),
-                true, 0, "dfmv");
+                 0, "dfmv");
         Assert.assertEquals("wlfn", note.getChatId());
         Assert.assertEquals("note", note.getText());
         Assert.assertEquals(LocalDateTime.of(2019,10,30,22,5),
