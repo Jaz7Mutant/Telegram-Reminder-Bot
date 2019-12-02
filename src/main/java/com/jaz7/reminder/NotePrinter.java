@@ -64,7 +64,7 @@ public class NotePrinter extends TimerTask {
         }
         LOGGER.info("Printing notes has been done");
         if (isRemovedNotes) {
-            noteSerializer.serializeNotes(notes); // TODO Можно убрать
+            noteSerializer.serializeNotes(notes); // TODO Можно убрать для ускорения работы
         }
     }
 

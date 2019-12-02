@@ -78,7 +78,7 @@ public class Note {
             }
             else {
          //       eventDate = eventDate.plusMinutes(5);
-                eventDate = eventDate.plusDays(remindPeriod); //todo
+                eventDate = eventDate.plusDays(remindPeriod); //todo Для тестов периодических напоминаний
             }
             remindDate = eventDate;
             notes.add(this);

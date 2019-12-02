@@ -2,6 +2,7 @@ package com.jaz7.reminder;
 
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
+import com.jaz7.user.User;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -11,13 +12,13 @@ import java.util.logging.Logger;
 public class NoteAdder {
     public AddingState addingState;
     public String[] daysInCurrentMonth;
+    private User user;
     private boolean isMeeting;
     private static String[] remindTypes;
     private UserIO userIO;
     private NoteSerializer noteSerializer;
     private Reminder reminder;
     private String chatId;
-    private NoteKeeper noteKeeper;
     private String newNoteText;
     private Calendar newRawDate;
     private Calendar newRawRemindDate;
@@ -27,12 +28,12 @@ public class NoteAdder {
 
     private static final Logger LOGGER = Logger.getLogger(NoteAdder.class.getSimpleName());
 
-    public NoteAdder(UserIO userIO, NoteSerializer noteSerializer, Reminder reminder, String chatId, NoteKeeper noteKeeper){
+    public NoteAdder(UserIO userIO, NoteSerializer noteSerializer, Reminder reminder, String chatId, User user){
         this.userIO = userIO;
         this.noteSerializer = noteSerializer;
         this.chatId = chatId;
         this.reminder = reminder;
-        this.noteKeeper = noteKeeper;
+        this.user = user;
         newRawDate = Calendar.getInstance();
         newRawRemindDate = Calendar.getInstance();
         remindTypes = new String[]{
@@ -250,7 +251,7 @@ public class NoteAdder {
         }
         LOGGER.info(chatId + ": New note has been added");
         addingState = AddingState.IDLE;
-        noteKeeper.currentState = UserState.IDLE;
+        user.currentState = UserState.IDLE;
         isMeeting = false;
         newNoteRemindPeriod = 0;
         reminder.notePrinter.run();

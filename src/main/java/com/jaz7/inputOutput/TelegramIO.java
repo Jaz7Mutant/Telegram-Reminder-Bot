@@ -1,6 +1,7 @@
 package com.jaz7.inputOutput;
 
 import com.jaz7.bot.BotController;
+import com.jaz7.reminder.Reminder;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -8,7 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import com.jaz7.reminder.Reminder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +110,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
         // Передача аргумента из кнопки
         if (update.hasCallbackQuery()) {
-            Reminder.userStates.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
+            Reminder.users.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
                     .doNextStep(update.getCallbackQuery().getData());
             LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
         // Парсинг сообщения
