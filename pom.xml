@@ -6,7 +6,7 @@
 
     <groupId>Jaz7</groupId>
     <artifactId>chat-botController</artifactId>
-    <version>0.7-pre-alpha</version>
+    <version>0.9-pre-alpha</version>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>

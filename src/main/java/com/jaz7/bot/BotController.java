@@ -1,9 +1,11 @@
 package com.jaz7.bot;
 
+import com.jaz7.chatRoulette.ChatRoulette;
 import com.jaz7.inputOutput.ConsoleIO;
 import com.jaz7.inputOutput.TelegramIO;
 import com.jaz7.inputOutput.UserIO;
 import com.jaz7.reminder.*;
+import com.jaz7.user.User;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.ApiContext;
@@ -32,6 +34,7 @@ public class BotController {
     private static UserIO userIO;
     private static Map<String, BiConsumer<String, String>> commands = new HashMap<>();
     private static Reminder reminder;
+    private static ChatRoulette chatRoulette;
     private static NoteSerializer noteSerializer = new JsonNoteSerializer();
     private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
 
@@ -44,40 +47,45 @@ public class BotController {
         }
         setUserIO(BotOptions.botOptions.get("BotType"));
         new RespondParser(userIO);
+        chatRoulette = new ChatRoulette(userIO);
 
         commands.put("/new", reminder::addNote);
         commands.put("/meeting", reminder::addMeeting);
         commands.put("/join", reminder::joinMeeting);
         commands.put("/remove", reminder::removeNote);
         commands.put("/all", reminder::showUserNotes);
-        //commands.put("/stop", BotController::exit);
+        //commands.put("/stop", BotController::stop);
         commands.put("/help", BotController::help);
         commands.put("/authors", BotController::authors);
         commands.put("/echo", BotController::echo);
         commands.put("/date", BotController::date);
+        commands.put("/chat", chatRoulette::startChatting);
+        commands.put("/leave", chatRoulette::stopChatting);
+        commands.put("/next", chatRoulette::switchCompanion);
 
         userIO.listenCommands(commands);
     }
 
     public static void parseCommand(String command, String chatId) {
         // Добавление нового пользователя
-        if (!Reminder.userStates.containsKey(chatId)) {
+        if (!Reminder.users.containsKey(chatId)) {
             LOGGER.info(chatId + ": Added new user");
-            Reminder.userStates.put(chatId, new NoteKeeper(chatId, userIO, reminder, noteSerializer));
+            Reminder.users.put(chatId, new User(userIO, chatId, reminder, noteSerializer));
         }
         // Исполнение команды
         if (commands.containsKey(command.split(" ")[0])
-                && Reminder.userStates.get(chatId).currentState == UserState.IDLE) {
+        //&& Reminder.userStates.get(chatId).currentState == UserState.IDLE) // Todo Надо тестить. Если не упадет -- можно удалить
+        ){
             LOGGER.info(chatId + ": New command from user" + " - " + command);
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {
             // Передача аргумента
-            LOGGER.info(chatId + ": Input command - " + command);
-            if (Reminder.userStates.get(chatId).isWorking) {
+            LOGGER.info(chatId + ": New message as argument - " + command);
+            if (Reminder.users.get(chatId).isWorking) {
                 userIO.showMessage("Bot is busy", chatId);
                 return;
             }
-            Reminder.userStates.get(chatId).doNextStep(command);
+            Reminder.users.get(chatId).doNextStep(command);
         }
     }
 
@@ -87,7 +95,7 @@ public class BotController {
                 userIO = new ConsoleIO();
                 reminder = new Reminder(userIO, notePrinterPeriodInSeconds, noteSerializer);
                 userIO.showMessage(welcomeText, null);
-                Reminder.userStates.put(null, new NoteKeeper(null, userIO, reminder, noteSerializer));
+                Reminder.users.put(null, new User(userIO, null, reminder, noteSerializer));
                 return;
             case "Telegram":
                 ApiContextInitializer.init();
@@ -111,7 +119,7 @@ public class BotController {
         }
     }
 
-    private static void exit(String command, String chatId) {
+    private static void stop(String command, String chatId) {
         System.exit(0);
     }
 

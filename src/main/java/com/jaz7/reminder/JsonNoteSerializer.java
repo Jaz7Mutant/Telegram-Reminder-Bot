@@ -104,8 +104,7 @@ public class JsonNoteSerializer implements NoteSerializer {
                         if (token == "null"){
                             token = null;
                         }
-                        notes.add(new Note(chatId, noteText, eventDate, remindDate,
-                                isRepeatable, remindPeriod, token));
+                        notes.add(new Note(chatId, noteText, eventDate, remindDate, remindPeriod, token));
                         reader.endObject();
                     }
                 }

@@ -54,7 +54,7 @@ public class DateTimeParser {
         for (int i = 1; i <= daysInMonth; i++) {
             days[i - 1] = Integer.toString(i);
         }
-        Reminder.userStates.get(chatId).noteAdder.daysInCurrentMonth = days;
+        Reminder.users.get(chatId).noteKeeper.noteAdder.daysInCurrentMonth = days;
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseDay"), days, chatId);
         if (addingState == AddingState.SET_MONTH) {
             return AddingState.SET_DAY;
