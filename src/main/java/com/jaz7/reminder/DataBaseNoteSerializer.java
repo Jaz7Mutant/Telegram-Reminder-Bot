@@ -10,7 +10,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
-public class DataBaseNoteSerializer extends AbstractSerializer {
+public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     private static Connection connection;
 
     // этот варик не так уж и плох
@@ -24,7 +24,7 @@ public class DataBaseNoteSerializer extends AbstractSerializer {
                         //можешь удалить отсюда те поля, которые не изменяются
                         //предположил что token и chatId и не меняются
                         String.format(
-                                "UPDATE notes SET Text = '%s', EventDate = '%s', " +
+                                "UPDATE Notes SET Text = '%s', EventDate = '%s', " +
                                         "RemindDate = '%s', RemindPeriod = %d " +
                                         "WHERE Token = '%s' AND ChatId = '%s'",
                                 note.getText(), note.getEventDate().format(formatter),
@@ -32,7 +32,7 @@ public class DataBaseNoteSerializer extends AbstractSerializer {
                                 note.getToken(), note.getChatId()));
                 if (rowsUpdated == 0)
                     connection.createStatement().executeUpdate(
-                            String.format("INSERT notes(Token, ChatId, Text, EventDate, RemindDate, RemindPeriod)" +
+                            String.format("INSERT Notes(Token, ChatId, Text, EventDate, RemindDate, RemindPeriod)" +
                                     "VALUES (%s)", note.toStringValue()));
             }
             LOGGER.info("Notes has been serialized");
@@ -63,7 +63,7 @@ public class DataBaseNoteSerializer extends AbstractSerializer {
     }
 
     public static void connectToDataBase() throws SQLException {
-        String url = "jdbc:mysql://remotemysql.com/N8QPpqMaSc?serverTimezone=Europe/Moscow&useSSL=false";
+        String url = "jdbc:mysql://remotemysql.com/N8QPpqMaSc?serverTimezone=Europe/Moscow&autoReconnect=True";
         String username = "N8QPpqMaSc";
         String password = "KPt1jX9vmH";
         try {
@@ -82,7 +82,7 @@ public class DataBaseNoteSerializer extends AbstractSerializer {
             connection.createStatement().executeUpdate("TRUNCATE TABLE notes");
             for (Note note : notes) {
                 connection.createStatement().executeUpdate(
-                        String.format("INSERT notes(Token, ChatId, Text, EventDate, RemindDate, RemindPeriod)" +
+                        String.format("INSERT Notes(Token, ChatId, Text, EventDate, RemindDate, RemindPeriod)" +
                                 "VALUES (%s)", note.toStringValue()));
             }
             LOGGER.info("Notes has been serialized");
