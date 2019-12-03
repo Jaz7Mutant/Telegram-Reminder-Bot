@@ -50,6 +50,10 @@ public class User {
                 LOGGER.info(chatId + ": Joining to meeting");
                 currentState = noteKeeper.joinMeeting(userMessage);
                 isWorking = false;
+                return;
+            case RESPOND_TO_OFFER:
+                currentState = noteKeeper.respondToOffer(userMessage);
+                return;
         }
     }
 }

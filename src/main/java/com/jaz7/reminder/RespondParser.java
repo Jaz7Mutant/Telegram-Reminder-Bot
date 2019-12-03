@@ -82,7 +82,7 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > 7){
+            if (respond > NoteAdder.remindTypes.length - 1){
                 throw new NumberFormatException();
             }
         }
@@ -91,6 +91,32 @@ public class RespondParser {
             throw new IllegalArgumentException();
         }
         return respond;
+    }
+
+    public static int parseSetRepeatingPeriodRespond(String userMessage, String chatId){
+        int respond;
+        try{
+            respond = Integer.parseInt(userMessage);
+            if (respond > NoteAdder.remindPeriods.length - 1){
+                throw new NumberFormatException();
+            }
+        }
+        catch (NumberFormatException e){
+            LOGGER.info(chatId + ": Wrong format setting repeating period");
+            throw new IllegalArgumentException();
+        }
+        switch (respond){
+            case 0:
+                return 0;
+            case 1:
+                return 1;
+            case 2:
+                return 7;
+            case 3:
+                return 30;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public static int parseRemoveNoteRespond(String userMessage, List<Note> userNotes, String chatId){
@@ -105,5 +131,20 @@ public class RespondParser {
             throw new IllegalArgumentException();
         }
         return respond;
+    }
+
+    public static boolean parseRespondToOfferRespond(String userMessage, String chatId){
+        int respond;
+        try{
+            respond = Integer.parseInt(userMessage);
+            if (respond > 1){
+                throw new NumberFormatException();
+            }
+        }
+        catch (NumberFormatException e){
+            LOGGER.info(chatId + ": Wrong format in responding to offer");
+            throw new IllegalArgumentException();
+        }
+        return respond == 0;
     }
 }

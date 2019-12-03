@@ -97,7 +97,7 @@ public class DateTimeParser {
         if (addingState == AddingState.SET_TIME) {
             return AddingState.SET_REMIND;
         } else {
-            return AddingState.IDLE;
+            return AddingState.SET_REPEATING_PERIOD;
         }
     }
 

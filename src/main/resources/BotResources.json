@@ -30,6 +30,7 @@
     "DayBefore": "A day before",
     "WeekBefore": "A week before",
     "SetDate": "Set date...",
+    "Only once": "Only once",
     "Every day": "Every day",
     "Every week": "Every week",
     "Every month": "Every month",
@@ -54,6 +55,14 @@
     "NoOnlineUsers": "No free users to chat. Please wait...",
     "CompanionLeft": "Your companion has left the chat",
     "ChattingWith": "You are connected to: ",
-    "LeftTheChat": "You have been left the chat"
+    "LeftTheChat": "You have been left the chat",
+    "SetRemindPeriod": "Set remind period",
+    "OfferAccept": "You have been accepted the offer",
+    "OfferDecline": "You have been declined the offer",
+    "CompanionAcceptYourOffer": "User accepted your offer",
+    "CompanionDeclineYourOffer": "User declined your offer",
+    "OfferToJoin": "Would you like to accept the remind?",
+    "Accept": "Accept",
+    "Decline": "Decline"
   }
 ]

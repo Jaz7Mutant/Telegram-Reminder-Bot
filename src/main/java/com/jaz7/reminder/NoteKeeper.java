@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 public class NoteKeeper {
     public List<Note> userNotes;
     public NoteAdder noteAdder;
+    public Note offeredNote;
     private UserIO userIO;
     private String chatId;
     private User user;
@@ -71,6 +72,28 @@ public class NoteKeeper {
             noteSerializer.serializeNotes(reminder.notes); // TODO Можно убрать, если не хватает производительности
         }
         LOGGER.info(chatId + ": Note has been removed");
+        return UserState.IDLE;
+    }
+
+    public UserState respondToOffer(String userMessage) {
+
+        LOGGER.info(chatId + ": Responding to offer");
+        boolean respond;
+        try {
+            respond = RespondParser.parseRespondToOfferRespond(userMessage, chatId);
+        } catch (IllegalArgumentException e) {
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
+            return user.currentState;
+        }
+        if (respond) {
+            reminder.notes.add(offeredNote);
+            userIO.showMessage(BotOptions.botAnswers.get("OfferAccept"), chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("CompanionAcceptYourOffer"), user.companionChatId);
+        } else {
+            offeredNote = null;
+            userIO.showMessage(BotOptions.botAnswers.get("OfferDecline"), chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("CompanionDeclineYourOffer"), user.companionChatId);
+        }
         return UserState.IDLE;
     }
 }
