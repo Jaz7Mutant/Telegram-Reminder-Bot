@@ -12,9 +12,11 @@ import java.util.logging.Logger;
 public class NoteAdder {
     public AddingState addingState;
     public String[] daysInCurrentMonth;
+    public static String[] remindPeriods;
+    public static String[] remindTypes;
+    public static String[] yesNoAnswers;
     private User user;
     private boolean isMeeting;
-    private static String[] remindTypes;
     private UserIO userIO;
     private NoteSerializer noteSerializer;
     private Reminder reminder;
@@ -42,9 +44,20 @@ public class NoteAdder {
                 BotOptions.botAnswers.get("DayBefore"),
                 BotOptions.botAnswers.get("WeekBefore"),
                 BotOptions.botAnswers.get("SetDate"),
+//                BotOptions.botAnswers.get("Every day"),
+//                BotOptions.botAnswers.get("Every week"),
+//                BotOptions.botAnswers.get("Every month"),
+        };
+        remindPeriods = new String[]{
+                BotOptions.botAnswers.get("Only once"),
                 BotOptions.botAnswers.get("Every day"),
                 BotOptions.botAnswers.get("Every week"),
-                BotOptions.botAnswers.get("Every month"),};
+                BotOptions.botAnswers.get("Every month"),
+        };
+        yesNoAnswers = new String[]{
+                BotOptions.botAnswers.get("Accept"),
+                BotOptions.botAnswers.get("Decline"),
+        };
     }
 
     public void doNextAddingStep(String userMessage) {
@@ -104,6 +117,12 @@ public class NoteAdder {
             case SET_REMIND:
                 LOGGER.info(chatId + ": Setting remind by offset");
                 setRemind(userMessage);
+                return;
+
+            case SET_REPEATING_PERIOD:
+                LOGGER.info(chatId + ": Setting repeating period");
+                setRepeatingPeriod(userMessage);
+                return;
         }
     }
 
@@ -162,9 +181,11 @@ public class NoteAdder {
             newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
             userIO.showOnClickButton(BotOptions.botAnswers.get("SetRemind"), remindTypes, chatId);
         }
-        if (addingState == AddingState.IDLE){
+        if (addingState == AddingState.SET_REPEATING_PERIOD){
             newNoteRemindDate = LocalDateTime.ofInstant(newRawRemindDate.toInstant(), newRawRemindDate.getTimeZone().toZoneId());
-            finishAddNote();
+
+            userIO.showOnClickButton(BotOptions.botAnswers.get("SetRemindPeriod"), remindPeriods, chatId);
+            //finishAddNote();
         }
     }
 
@@ -183,7 +204,9 @@ public class NoteAdder {
         switch (respond) {
             case 0:
                 newNoteRemindDate = newNoteDate;
-                break;
+                newNoteRemindPeriod = 0;
+                finishAddNote();
+                return;
             case 1:
                 newNoteRemindDate = newNoteDate.minusHours(1);
                 break;
@@ -197,21 +220,37 @@ public class NoteAdder {
                 userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseYear"), DateTimeParser.years, chatId);
                 addingState = AddingState.SET_REMIND_YEAR;
                 return;
-            case 5:
-                newNoteRemindPeriod = 1;
-                newNoteRemindDate = newNoteDate;
-                break;
-            case 6:
-                newNoteRemindPeriod = 7;
-                newNoteRemindDate = newNoteDate;
-                break;
-            case 7:
-                newNoteRemindPeriod = 30;
-                newNoteRemindDate = newNoteDate;
-                break;
+//            case 5:
+//                newNoteRemindPeriod = 1;
+//                newNoteRemindDate = newNoteDate;
+//                break;
+//            case 6:
+//                newNoteRemindPeriod = 7;
+//                newNoteRemindDate = newNoteDate;
+//                break;
+//            case 7:
+//                newNoteRemindPeriod = 30;
+//                newNoteRemindDate = newNoteDate;
+//                break;
             default:
                 throw new IllegalArgumentException();
         }
+        userIO.showOnClickButton(BotOptions.botAnswers.get("SetRemindPeriod"), remindPeriods, chatId);
+        addingState = AddingState.SET_REPEATING_PERIOD;
+        //finishAddNote();
+    }
+
+    private void setRepeatingPeriod(String userMessage){
+        LOGGER.info(chatId + ": Setting remind period...");
+        int respond;
+        try {
+            respond = RespondParser.parseSetRepeatingPeriodRespond(userMessage, chatId);
+        }
+        catch (IllegalArgumentException e){
+            userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
+            return;
+        }
+        newNoteRemindPeriod = respond;
         finishAddNote();
     }
 
@@ -243,6 +282,15 @@ public class NoteAdder {
                         + newNoteText.substring(0, stringLimit)
                         + BotOptions.botAnswers.get("WithRemind")
                         + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+            }
+
+            if (user.companionChatId != null){
+                userIO.showOnClickButton(BotOptions.botAnswers.get("OfferToJoin")
+                        + "\n" + newNoteText.substring(0, stringLimit)
+                        + BotOptions.botAnswers.get("WithRemind")
+                        + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), yesNoAnswers, user.companionChatId);
+                Reminder.users.get(user.companionChatId).noteKeeper.offeredNote = newNote.copy(user.companionChatId);
+                Reminder.users.get(user.companionChatId).currentState = UserState.RESPOND_TO_OFFER;
             }
             noteSerializer.serializeNotes(reminder.notes);
             if (newNoteRemindPeriod != 0) {

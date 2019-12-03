@@ -75,12 +75,14 @@ public class Note {
             notes.remove(this);
             if (remindPeriod == 30){
                 eventDate = eventDate.plusMonths(1);
+                remindDate = remindDate.plusMonths(1);
             }
             else {
-         //       eventDate = eventDate.plusMinutes(5);
+//                eventDate = eventDate.plusMinutes(1);
+//                remindDate = remindDate.plusMinutes(1);
                 eventDate = eventDate.plusDays(remindPeriod); //todo Для тестов периодических напоминаний
+                remindDate = remindDate.plusDays(remindPeriod);
             }
-            remindDate = eventDate;
             notes.add(this);
         }
     }

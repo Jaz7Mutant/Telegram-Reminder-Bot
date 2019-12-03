@@ -5,5 +5,6 @@ public enum UserState {
     ADDING,
     REMOVING,
     SHOWING,
-    JOINING
+    JOINING,
+    RESPOND_TO_OFFER
 }
