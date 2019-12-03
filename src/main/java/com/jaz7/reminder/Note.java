@@ -86,4 +86,10 @@ public class Note {
             notes.add(this);
         }
     }
+
+    public String toStringValue()
+    {
+        return String.format("'%s', '%s', '%s', '%s', '%s', %d",
+                token, chatId, text, eventDate.toString(), remindDate.toString(), remindPeriod);
+    }
 }

@@ -15,9 +15,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JsonNoteSerializer implements NoteSerializer {
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final Logger LOGGER = Logger.getLogger(JsonNoteSerializer.class.getSimpleName());
+public class JsonNoteSerializer extends AbstractNoteSerializer {
 
     @Override
     public void serializeNotes(SortedSet<Note> notes) {
