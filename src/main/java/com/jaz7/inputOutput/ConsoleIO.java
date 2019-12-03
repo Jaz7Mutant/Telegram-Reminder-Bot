@@ -12,7 +12,7 @@ public class ConsoleIO implements UserIO {
         String currentCommand = "";
         while (!currentCommand.equals("/exit")) {
             currentCommand = getUserText(null, "");
-                BotController.parseCommand(currentCommand, "");
+            BotController.parseCommand(currentCommand, "");
         }
     }
 
