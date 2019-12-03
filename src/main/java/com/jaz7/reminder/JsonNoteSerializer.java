@@ -15,7 +15,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JsonNoteSerializer extends AbstractSerializer {
+public class JsonNoteSerializer extends AbstractNoteSerializer {
 
     @Override
     public void serializeNotes(SortedSet<Note> notes) {
