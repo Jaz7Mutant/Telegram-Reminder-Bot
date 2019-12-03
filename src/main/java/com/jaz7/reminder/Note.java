@@ -10,7 +10,7 @@ public class Note {
     private LocalDateTime eventDate;
     private LocalDateTime remindDate;
     private String token;
-    private boolean isRepeatable;
+    private boolean isRepeatable = false;
     private long remindPeriod;
 
     public Note(
@@ -18,14 +18,15 @@ public class Note {
             String text,
             LocalDateTime eventDate,
             LocalDateTime remindDate,
-            boolean isRepeatable,
             long remindPeriod,
             String token) {
         this.chatId = chatId;
         this.text = text;
         this.eventDate = eventDate;
         this.remindDate = remindDate;
-        this.isRepeatable = isRepeatable;
+        if (remindPeriod != 0){
+            this.isRepeatable = true;
+        }
         this.remindPeriod = remindPeriod;
         this.token = token;
     }
@@ -63,7 +64,7 @@ public class Note {
     }
 
     public Note copy(String newChatId){
-        return new Note(newChatId, new String(text), eventDate.plusMinutes(0), remindDate.plusMinutes(0), isRepeatable, remindPeriod, token);
+        return new Note(newChatId, new String(text), eventDate.plusMinutes(0), remindDate.plusMinutes(0), remindPeriod, token);
     }
 
     public void deleteBeforehandRemind(SortedSet<Note> notes){
@@ -77,10 +78,16 @@ public class Note {
             }
             else {
          //       eventDate = eventDate.plusMinutes(5);
-                eventDate = eventDate.plusDays(remindPeriod); //todo
+                eventDate = eventDate.plusDays(remindPeriod); //todo Для тестов периодических напоминаний
             }
             remindDate = eventDate;
             notes.add(this);
         }
+    }
+
+    public String toStringValue()
+    {
+        return String.format("'%s', '%s', '%s', '%s', '%s', %d",
+                token, chatId, text, eventDate.toString(), remindDate.toString(), remindPeriod);
     }
 }

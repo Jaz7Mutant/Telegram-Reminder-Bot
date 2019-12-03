@@ -2,56 +2,32 @@ package com.jaz7.reminder;
 
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
+import com.jaz7.user.User;
 
 import java.util.List;
 import java.util.logging.Logger;
 
 public class NoteKeeper {
-    public UserState currentState = UserState.IDLE;
-    public boolean isWorking = false;
     public List<Note> userNotes;
     public NoteAdder noteAdder;
     private UserIO userIO;
     private String chatId;
-    private Reminder reminder;
+    private User user;
+    public Reminder reminder;
     private NoteSerializer noteSerializer;
     private static final Logger LOGGER = Logger.getLogger(NoteKeeper.class.getSimpleName());
 
-    public NoteKeeper(String chatId, UserIO userIO, Reminder reminder, NoteSerializer noteSerializer) {
+    public NoteKeeper(String chatId, UserIO userIO, User user, Reminder reminder, NoteSerializer noteSerializer) {
         this.reminder = reminder;
         this.chatId = chatId;
         this.userIO = userIO;
+        this.user = user;
         this.noteSerializer = noteSerializer;
-        this.noteAdder = new NoteAdder(userIO, noteSerializer, reminder, chatId, this);
+        this.noteAdder = new NoteAdder(userIO, noteSerializer, reminder, chatId, user);
         LOGGER.info(chatId + ": NoteKeeper has been created");
     }
 
-    public void doNextStep(String userMessage) {
-        switch (currentState) {
-            case IDLE:
-                return;
-            case ADDING:
-                isWorking = true; // todo ?
-                noteAdder.doNextAddingStep(userMessage);
-                isWorking = false; //todo ?
-                return;
-            case SHOWING:
-                LOGGER.info(chatId + ": Showing notes");
-                currentState = NotePrinter.showUsersNotes(userMessage, chatId, reminder, currentState);
-                return;
-            case REMOVING:
-                LOGGER.info(chatId + ": Removing note");
-                removeNote(userMessage);
-                return;
-            case JOINING:
-                isWorking = true;
-                LOGGER.info(chatId + ": Joining to meeting");
-                currentState = joinMeeting(userMessage);
-                isWorking = false;
-        }
-    }
-
-    private UserState joinMeeting(String userMessage){
+    public UserState joinMeeting(String userMessage){
         synchronized (reminder.notes) {
             for (Note currNote : reminder.notes){
                 if (currNote.getToken() == null){
@@ -78,7 +54,7 @@ public class NoteKeeper {
         }
     }
 
-    private synchronized void removeNote(String userMessage){ // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
+    public synchronized UserState removeNote(String userMessage){ // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
         LOGGER.info(chatId + ": Removing note...");
         userNotes = NotePrinter.getUserNotes(reminder, chatId);
         int respond;
@@ -86,16 +62,15 @@ public class NoteKeeper {
             respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
         }
         catch (IllegalArgumentException e){
-            currentState = UserState.IDLE;
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
-            return;
+            return UserState.IDLE;
         }
         synchronized (reminder.notes) {
             reminder.notes.remove(userNotes.get(respond - 1));
-            currentState = UserState.IDLE;
             userIO.showMessage(BotOptions.botAnswers.get("Removed"), chatId);
-            noteSerializer.serializeNotes(reminder.notes); // TODO Можно убрать
+            noteSerializer.serializeNotes(reminder.notes); // TODO Можно убрать, если не хватает производительности
         }
         LOGGER.info(chatId + ": Note has been removed");
+        return UserState.IDLE;
     }
 }

@@ -6,8 +6,13 @@
 
     <groupId>Jaz7</groupId>
     <artifactId>chat-botController</artifactId>
-    <version>0.7-pre-alpha</version>
+    <version>0.9-pre-alpha</version>
     <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.15</version>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
