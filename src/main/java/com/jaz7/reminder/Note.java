@@ -24,14 +24,14 @@ public class Note {
         this.text = text;
         this.eventDate = eventDate;
         this.remindDate = remindDate;
-        if (remindPeriod != 0){
+        if (remindPeriod != 0) {
             this.isRepeatable = true;
         }
         this.remindPeriod = remindPeriod;
         this.token = token;
     }
 
-    public String getChatId(){
+    public String getChatId() {
         return chatId;
     }
 
@@ -55,29 +55,27 @@ public class Note {
         token = "MEET" + (chatId + remindDate.toString() + text.hashCode() + new Random().ints()).hashCode(); // todo uuid
     }
 
-    public boolean isRepeatable(){
+    public boolean isRepeatable() {
         return isRepeatable;
     }
 
-    public long getRemindPeriod(){
+    public long getRemindPeriod() {
         return remindPeriod;
     }
 
-    public Note copy(String newChatId){
+    public Note copy(String newChatId) {
         return new Note(newChatId, new String(text), eventDate.plusMinutes(0), remindDate.plusMinutes(0), remindPeriod, token);
     }
 
-    public void deleteBeforehandRemind(SortedSet<Note> notes){
+    public void deleteBeforehandRemind(SortedSet<Note> notes) {
         if (!isRepeatable) {
             remindDate = eventDate;
-        }
-        else {
+        } else {
             notes.remove(this);
-            if (remindPeriod == 30){
+            if (remindPeriod == 30) {
                 eventDate = eventDate.plusMonths(1);
                 remindDate = remindDate.plusMonths(1);
-            }
-            else {
+            } else {
 //                eventDate = eventDate.plusMinutes(1);
 //                remindDate = remindDate.plusMinutes(1);
                 eventDate = eventDate.plusDays(remindPeriod); //todo Для тестов периодических напоминаний
@@ -87,9 +85,8 @@ public class Note {
         }
     }
 
-    public String toStringValue()
-    {
+    public String toStringValue() {
         return String.format("'%s', '%s', '%s', '%s', '%s', %d",
-                token, chatId, text, eventDate.toString(), remindDate.toString(), remindPeriod);
+                token, chatId, text, eventDate.format(AbstractNoteSerializer.formatter), remindDate.format(AbstractNoteSerializer.formatter), remindPeriod);
     }
 }

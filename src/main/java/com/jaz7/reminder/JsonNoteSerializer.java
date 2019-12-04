@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -16,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class JsonNoteSerializer extends AbstractNoteSerializer {
+    private static final Logger LOGGER = Logger.getLogger(JsonNoteSerializer.class.getSimpleName());
 
     @Override
     public void serializeNotes(SortedSet<Note> notes) {

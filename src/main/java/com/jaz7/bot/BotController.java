@@ -14,9 +14,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.logging.LogManager;
@@ -35,13 +37,20 @@ public class BotController {
     private static Map<String, BiConsumer<String, String>> commands = new HashMap<>();
     private static Reminder reminder;
     private static ChatRoulette chatRoulette;
-    private static NoteSerializer noteSerializer = new JsonNoteSerializer();
+//    private static NoteSerializer noteSerializer = new JsonNoteSerializer();
+    private static NoteSerializer noteSerializer = new DataBaseNoteSerializer();
     private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
 
     public static void main(String[] args) {
+        try {
+            DataBaseNoteSerializer.connectToDataBase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         // Парсинг настроек логгера
         try {
             LogManager.getLogManager().readConfiguration(new FileInputStream("src/main/resources/logging.properties"));
+            LOGGER.info("Logger settings applied successfully");
         } catch (IOException e) {
             System.err.println("Could not setup logger configuration: " + e.toString());
         }
@@ -54,7 +63,7 @@ public class BotController {
         commands.put("/join", reminder::joinMeeting);
         commands.put("/remove", reminder::removeNote);
         commands.put("/all", reminder::showUserNotes);
-        //commands.put("/stop", BotController::stop);
+        commands.put("/stop", BotController::stop);
         commands.put("/help", BotController::help);
         commands.put("/authors", BotController::authors);
         commands.put("/echo", BotController::echo);
@@ -62,6 +71,7 @@ public class BotController {
         commands.put("/chat", chatRoulette::startChatting);
         commands.put("/leave", chatRoulette::stopChatting);
         commands.put("/next", chatRoulette::switchCompanion);
+        LOGGER.info("Command list has been initialized");
 
         userIO.listenCommands(commands);
     }
@@ -69,8 +79,8 @@ public class BotController {
     public static void parseCommand(String command, String chatId) {
         // Добавление нового пользователя
         if (!Reminder.users.containsKey(chatId)) {
-            LOGGER.info(chatId + ": Added new user");
             Reminder.users.put(chatId, new User(userIO, chatId, reminder, noteSerializer));
+            LOGGER.info(chatId + ": Added new user");
         }
         // Исполнение команды
         if (commands.containsKey(command.split(" ")[0])
@@ -90,6 +100,7 @@ public class BotController {
     }
 
     private static void setUserIO(String botType) {
+        LOGGER.info("Setting bot type...");
         switch (botType) {
             case "Console":
                 userIO = new ConsoleIO();
@@ -117,10 +128,18 @@ public class BotController {
                     e.printStackTrace();
                 }
         }
+        LOGGER.info("Bot type has been set successfully");
     }
 
     private static void stop(String command, String chatId) {
-        System.exit(0);
+        LOGGER.info(chatId + ": Removing user");
+        synchronized (reminder.notes) {
+            List<Note> userNotes = NotePrinter.getUserNotes(reminder, chatId);
+            for (Note note : userNotes){
+                reminder.notes.remove(note);
+            }
+            Reminder.users.remove(chatId);
+        }
     }
 
     private static void help(String command, String chatId) {

@@ -18,6 +18,7 @@ public class ChatRoulette {
     private UserIO userIO;
 
     public ChatRoulette(UserIO userIO){
+        LOGGER.info("Initializing ChatRoulette");
         this.userIO = userIO;
     }
 
@@ -40,10 +41,10 @@ public class ChatRoulette {
                 }
                 String currentCompanion = users.get(chatId).companionChatId;
                 if (currentCompanion != null) {
-                    Queue bannedusers = users.get(chatId).bannedUsers;
-                    bannedusers.add(currentCompanion);
-                    if (bannedusers.size() > 3){
-                        bannedusers.poll();
+                    Queue<String> bannedUsers = users.get(chatId).bannedUsers;
+                    bannedUsers.add(currentCompanion);
+                    if (bannedUsers.size() > 3){
+                        bannedUsers.poll();
                     }
                     if (users.get(currentCompanion).companionChatId != null){
                         userIO.showMessage(BotOptions.botAnswers.get("CompanionLeft"), currentCompanion);
@@ -86,7 +87,6 @@ public class ChatRoulette {
             if (currentCompanion != null && users.get(currentCompanion).companionChatId.equals(chatId)) {
                 users.get(chatId).companionChatId = null;
                 userIO.showMessage(BotOptions.botAnswers.get("CompanionLeft"), currentCompanion);
-                //userIO.showMessage(BotOptions.botAnswers.get("LookingForCompanion"), currentCompanion);
                 users.get(currentCompanion).companionChatId = null;
                 readyToChatUsers.add(currentCompanion);
                 switchCompanion(null, currentCompanion);
@@ -99,7 +99,7 @@ public class ChatRoulette {
         String user = "";
         int i = 0;
         while (user.equals("") || user.equals(finderChatId) || users.get(finderChatId).bannedUsers.contains(user)){
-            //user = readyToChatUsers.get(random.nextInt(readyToChatUsers.size()));
+            LOGGER.info(finderChatId + ": Trying to find companion...");
             if (i >= readyToChatUsers.size()){
                 return "";
             }

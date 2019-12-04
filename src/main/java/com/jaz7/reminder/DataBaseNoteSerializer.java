@@ -10,9 +10,11 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     private static Connection connection;
+    private static final Logger LOGGER = Logger.getLogger("DBSerializer");
 
     @Override
     //более тупой варик, просто удаляю всю таблицу и с 0 заполняю заново

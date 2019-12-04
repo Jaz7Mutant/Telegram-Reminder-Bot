@@ -14,8 +14,7 @@ public class BotOptions {
     public static Map<String, String> botAnswers;
 
     public BotOptions() {
-        Type type = new TypeToken<List<Map<String, String>>>() {
-        }.getType();
+        Type type = new TypeToken<List<Map<String, String>>>() {}.getType();
         try {
             List<Map<String, String>> mapList = new GsonBuilder().create().fromJson(
                     new FileReader("src/main/resources/BotResources.json"), type);
