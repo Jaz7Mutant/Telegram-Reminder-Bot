@@ -98,12 +98,12 @@ public class RespondParser {
         try{
             respond = Integer.parseInt(userMessage);
             if (respond > NoteAdder.remindPeriods.length - 1){
-                throw new NumberFormatException();
+                return -1;
             }
         }
         catch (NumberFormatException e){
             LOGGER.info(chatId + ": Wrong format setting repeating period");
-            throw new IllegalArgumentException();
+            return -1;
         }
         switch (respond){
             case 0:
@@ -124,11 +124,11 @@ public class RespondParser {
         try {
             respond = Integer.parseInt(userMessage);
             if (respond > userNotes.size() || respond <= 0){
-                throw new NumberFormatException();
+                return -1;
             }
         } catch (NumberFormatException e) {
             LOGGER.info(chatId + ": Wrong format in removing notes");
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }

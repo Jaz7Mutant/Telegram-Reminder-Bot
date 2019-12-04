@@ -58,11 +58,8 @@ public class NoteKeeper {
     public synchronized UserState removeNote(String userMessage){ // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
         LOGGER.info(chatId + ": Removing note...");
         userNotes = NotePrinter.getUserNotes(reminder, chatId);
-        int respond;
-        try {
-            respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
-        }
-        catch (IllegalArgumentException e){
+        int respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
+        if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return UserState.IDLE;
         }
@@ -76,7 +73,6 @@ public class NoteKeeper {
     }
 
     public UserState respondToOffer(String userMessage) {
-
         LOGGER.info(chatId + ": Responding to offer");
         boolean respond;
         try {
