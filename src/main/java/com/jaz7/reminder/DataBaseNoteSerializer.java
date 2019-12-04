@@ -18,7 +18,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     public void serializeNotes(SortedSet<Note> notes) {
         try {
             LOGGER.info("Serializing notes...");
-            connection.createStatement().executeUpdate("TRUNCATE TABLE notes");
+            connection.createStatement().executeUpdate("TRUNCATE TABLE Notes");
             for (Note note : notes) {
                 connection.createStatement().executeUpdate(
                         String.format("INSERT Notes(Token, ChatId, Text, EventDate, RemindDate, RemindPeriod)" +
@@ -35,7 +35,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
         LOGGER.info("Deserializing notes...");
         SortedSet<Note> notes = new TreeSet<>();
         try {
-            ResultSet result = connection.createStatement().executeQuery("SELECT * FROM notes");
+            ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Notes");
             while (result.next()) {
                 notes.add(new Note(result.getString("ChatId"),
                         result.getString("Text"),
