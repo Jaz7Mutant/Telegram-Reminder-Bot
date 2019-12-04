@@ -37,11 +37,11 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             execute(new SendMessage()
                     .setChatId(chatId)
                     .setText(message));
-            LOGGER.info(String.format("%s: Message has been send - %s", chatId, message));
+            LOGGER.info(String.format("%s: Message has been send", chatId));
         } catch (TelegramApiException e) {
             LOGGER.log(
                     Level.WARNING,
-                    String.format("%s: Error sending message - %s ; %s", chatId, message, e.getMessage()),
+                    String.format("%s: Error sending message - %s ; %s", chatId, message.replace('\n', ' '), e.getMessage()),
                     e);
         }
     }
@@ -129,9 +129,9 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
                     update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
             LOGGER.info(
                     String.format(
-                        "%s: Received message - %s",
-                        update.getMessage().getChatId(),
-                        update.getMessage().getText()));
+                            "%s: Received message - %s",
+                            update.getMessage().getChatId(),
+                            update.getMessage().getText()));
         }
     }
 

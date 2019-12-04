@@ -138,7 +138,7 @@ public class NoteAdder {
 
     private void settingMonth(String userMessage, Calendar rawDate) {
         int respond = RespondParser.parseSetMonthRespond(userMessage, chatId);
-        if (respond == -1){
+        if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -147,7 +147,7 @@ public class NoteAdder {
 
     private void settingDay(String userMessage, Calendar rawDate) {
         int respond = RespondParser.parseSetDayRespond(userMessage, chatId, daysInCurrentMonth) + 1;
-        if (respond == -1){
+        if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -155,8 +155,8 @@ public class NoteAdder {
     }
 
     private void settingTime(String userMessage, Calendar rawDate) {
-        LocalTime time = RespondParser.parseSetTimeRespond(userMessage,chatId);
-        if (time == null){
+        LocalTime time = RespondParser.parseSetTimeRespond(userMessage, chatId);
+        if (time == null) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -175,7 +175,7 @@ public class NoteAdder {
     private void setRemind(String userMessage) {
         LOGGER.info(String.format("%s: Setting remind..", chatId));
         int respond = RespondParser.parseSetRemindRespond(userMessage, chatId);
-        if (respond == -1){
+        if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -207,10 +207,10 @@ public class NoteAdder {
         addingState = AddingState.SET_REPEATING_PERIOD;
     }
 
-    private void setRepeatingPeriod(String userMessage){
+    private void setRepeatingPeriod(String userMessage) {
         LOGGER.info(String.format("%s: Setting remind period...", chatId));
         int respond = RespondParser.parseSetRepeatingPeriodRespond(userMessage, chatId);
-        if (respond == -1){
+        if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }

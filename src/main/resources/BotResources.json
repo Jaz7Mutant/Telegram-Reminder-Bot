@@ -5,7 +5,8 @@
     "ProxyPort": "9150",
     "ProxyHost": "127.0.0.1",
     "DateTimePattern": "yyyy-MM-dd HH:mm",
-    "TimePattern": "HH:mm"
+    "TimePattern": "HH:mm",
+    "SerializerType": "DataBase"
   },
   {
     "BotHelp": "This is a bot-reminder.\nFunctions:\n\t/help -- show help\n\t/echo <args> -- print <args>\n\t/authors -- print authors\n\t/date -- print current date and time\n\t/new -- create new note\n\t/remove -- remove note\n\t/all -- show all your notes\n\t/stop -- exit chat bot",
