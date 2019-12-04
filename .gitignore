@@ -2,4 +2,4 @@
 /target/
 *.iml
 /Notes.json
-/logs/
+bot_log.log*

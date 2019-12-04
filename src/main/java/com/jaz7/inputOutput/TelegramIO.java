@@ -37,9 +37,9 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             execute(new SendMessage()
                     .setChatId(chatId)
                     .setText(message));
-            LOGGER.info(chatId + ": Message has been send");
+            LOGGER.info(chatId + ": Message has been send - " + message);
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error sending message" + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, chatId + ": Error sending message - " + message + " ; " + e.getMessage(), e);
         }
     }
 
@@ -76,9 +76,9 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
         try {
             execute(new SendMessage().setText(header).setChatId(chatId).setReplyMarkup(inlineKeyboardMarkup));
-            LOGGER.info(chatId + ": Buttons shown successfully");
+            LOGGER.info(chatId + ": Buttons shown successfully - " + header);
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing buttons" + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, chatId + ": Error showing buttons - " + header + " ; " + e.getMessage(), e);
         }
     }
 
@@ -98,9 +98,9 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         try {
             execute(new SendMessage().setText(prompt).setChatId(chatId));
             execute(new SendMessage().setText(text).setChatId(chatId));
-            LOGGER.info(chatId + ": List shown successfully");
+            LOGGER.info(chatId + ": List shown successfully - " + prompt);
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing list" + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, chatId + ": Error showing list - " + prompt + " ; " + e.getMessage(), e);
         }
     }
 
@@ -117,9 +117,9 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         } else if (update.hasMessage()) {
             try {
                 BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
-                LOGGER.info(update.getMessage().getChatId() + ": Received message");
+                LOGGER.info(update.getMessage().getChatId() + ": Received message - " + update.getMessage().getText());
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error in message parsing:" + e.getMessage());
+                LOGGER.log(Level.WARNING, "Error in message parsing: " + update.getMessage().getText() + " ; " + e.getMessage());
             }
         }
     }

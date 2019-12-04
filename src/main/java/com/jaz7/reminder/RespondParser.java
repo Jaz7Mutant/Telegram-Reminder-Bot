@@ -14,6 +14,7 @@ public class RespondParser {
     private static final Logger LOGGER = Logger.getLogger(RespondParser.class.getSimpleName());
 
     public RespondParser(UserIO userIO){
+        LOGGER.info("Initializing RespondParser");
         this.userIO = userIO;
     }
 
