@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>Jaz7</groupId>
   <artifactId>chat-botController</artifactId>
-  <version>0.6-pre-alpha</version>
+  <version>0.9-pre-alpha</version>
   <build>
     <resources>
       <resource>

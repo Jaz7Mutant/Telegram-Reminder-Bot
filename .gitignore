@@ -1,5 +1,5 @@
 /.idea/
 /target/
 *.iml
-/Notes.json
+/src/main/resources/Notes.json
 bot_log.log*

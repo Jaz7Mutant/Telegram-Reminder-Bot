@@ -24,7 +24,7 @@ public class RespondParser {
             respond = Integer.parseInt(userMessage);
         } catch (NumberFormatException e) {
             LOGGER.info(String.format("%s: Wrong year format", chatId));
-            throw new IllegalArgumentException();
+            return -1;
         }
         if (respond == years.length - 1) {
             LOGGER.info(String.format("%s: Setting year manually", chatId));
@@ -34,7 +34,7 @@ public class RespondParser {
             respond = Integer.parseInt(years[respond]);
         } else if (respond < currentDate.getYear() || respond > 2035) {
             LOGGER.info(String.format("%s: Illegal year", chatId));
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
@@ -44,11 +44,11 @@ public class RespondParser {
         try {
             respond = Integer.parseInt(userMessage);
             if (respond > 11 || respond < 0) {
-                throw new NumberFormatException();
+                return -1;
             }
         } catch (NumberFormatException e) {
             LOGGER.info(String.format("%s: Wrong month format", chatId));
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
@@ -58,11 +58,11 @@ public class RespondParser {
         try {
             respond = Integer.parseInt(userMessage);
             if (respond > days.length || respond < 0) {
-                throw new NumberFormatException();
+                return -1;
             }
         } catch (NumberFormatException e) {
             LOGGER.info(String.format("%s: Wrong day format", chatId));
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
@@ -73,7 +73,7 @@ public class RespondParser {
             time = LocalTime.parse(userMessage);
         } catch (Exception e) {
             LOGGER.info(String.format("%s: Wrong time format", chatId));
-            throw new IllegalArgumentException();
+            return null;
         }
         return time;
     }
@@ -82,12 +82,13 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > NoteAdder.remindTypes.length - 1) {
-                throw new NumberFormatException();
+            if (respond > NoteAdder.remindTypes.length - 1){
+                return -1;
             }
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e){
             LOGGER.info(String.format("%s: Wrong format in setting remind", chatId));
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
@@ -96,12 +97,13 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > NoteAdder.remindPeriods.length - 1) {
-                throw new NumberFormatException();
+            if (respond > NoteAdder.remindPeriods.length - 1){
+                return -1;
             }
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e){
             LOGGER.info(String.format("%s: Wrong format setting repeating period", chatId));
-            throw new IllegalArgumentException();
+            return -1;
         }
         switch (respond) {
             case 0:
@@ -121,12 +123,12 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > userNotes.size() || respond <= 0) {
-                throw new NumberFormatException();
+            if (respond > userNotes.size() || respond <= 0){
+                return -1;
             }
         } catch (NumberFormatException e) {
             LOGGER.info(String.format("%s: Wrong format in removing notes", chatId));
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
