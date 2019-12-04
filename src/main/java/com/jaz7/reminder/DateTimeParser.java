@@ -1,4 +1,5 @@
 package com.jaz7.reminder;
+
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 
@@ -35,8 +36,8 @@ public class DateTimeParser {
 
     public static AddingState setYear(Calendar rawDate, int year, String chatId, AddingState addingState) {
         rawDate.set(Calendar.YEAR, year);
-        LOGGER.info(chatId + ": Year has been set");
-        
+        LOGGER.info(String.format("%s: Year has been set", chatId));
+
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseMonth"), months, chatId);
         if (addingState == AddingState.SET_YEAR) {
             return AddingState.SET_MONTH;
@@ -47,7 +48,7 @@ public class DateTimeParser {
 
     public static AddingState setMonth(Calendar rawDate, int month, String chatId, AddingState addingState) {
         rawDate.set(Calendar.MONTH, currentDate.plusMonths(month).getMonthValue());
-        LOGGER.info(chatId + ": Month has been set");
+        LOGGER.info(String.format("%s: Month has been set", chatId));
 
         int daysInMonth = getDaysInMonth(rawDate);
         days = new String[daysInMonth];
@@ -65,7 +66,7 @@ public class DateTimeParser {
 
     public static AddingState setDay(Calendar rawDate, int day, String chatId, AddingState addingState) {
         rawDate.set(Calendar.DAY_OF_MONTH, day);
-        LOGGER.info(chatId + ": Day has been set");
+        LOGGER.info(String.format("%s: Day has been set", chatId));
         userIO.showMessage(BotOptions.botAnswers.get("SetTime"), chatId);
         if (addingState == AddingState.SET_DAY) {
             return AddingState.SET_TIME;
@@ -84,15 +85,14 @@ public class DateTimeParser {
                 rawDate.getTimeZone().toZoneId()).isBefore(LocalDateTime.now())) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongDate"), chatId);
             userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseMonth"), months, chatId);
-            LOGGER.info(chatId + ": Wrong time (in the past)");
-            if (addingState == AddingState.SET_TIME){
+            LOGGER.info(String.format("%s: Wrong time (in the past)", chatId));
+            if (addingState == AddingState.SET_TIME) {
                 return AddingState.SET_MONTH;
-            }
-            else {
+            } else {
                 return AddingState.SET_REMIND_MONTH;
             }
         }
-        LOGGER.info(chatId + ": Time has been set");
+        LOGGER.info(String.format("%s: Time has been set", chatId));
 
         if (addingState == AddingState.SET_TIME) {
             return AddingState.SET_REMIND;

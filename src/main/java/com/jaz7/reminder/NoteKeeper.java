@@ -25,28 +25,32 @@ public class NoteKeeper {
         this.user = user;
         this.noteSerializer = noteSerializer;
         this.noteAdder = new NoteAdder(userIO, noteSerializer, reminder, chatId, user);
-        LOGGER.info(chatId + ": NoteKeeper has been created");
+        LOGGER.info(String.format("%s: NoteKeeper has been created", chatId));
     }
 
-    public UserState joinMeeting(String userMessage){
+    public UserState joinMeeting(String userMessage) {
         synchronized (reminder.notes) {
-            for (Note currNote : reminder.notes){
-                if (currNote.getToken() == null){
+            for (Note currNote : reminder.notes) {
+                if (currNote.getToken() == null) {
                     continue;
                 }
-                if (currNote.getToken().equals(userMessage)){
+                if (currNote.getToken().equals(userMessage)) {
                     reminder.notes.add(currNote.copy(chatId));
                     reminder.notePrinter.run();
                     int stringLimit = 20;
                     if (currNote.getText().length() < 20) {
                         stringLimit = currNote.getText().length();
                     }
-                    userIO.showMessage(BotOptions.botAnswers.get("NewNote")
-                            + currNote.getText().substring(0, stringLimit)
-                            + BotOptions.botAnswers.get("WithRemind")
-                            + currNote.getRemindDate().format(NotePrinter.dateTimeFormatter), chatId);
+                    userIO.showMessage(
+                            String.format(
+                                    "%s%s%s%s",
+                                    BotOptions.botAnswers.get("NewNote"),
+                                    currNote.getText().substring(0, stringLimit),
+                                    BotOptions.botAnswers.get("WithRemind"),
+                                    currNote.getRemindDate().format(NotePrinter.dateTimeFormatter)),
+                            chatId);
                     noteSerializer.serializeNotes(reminder.notes);
-                    LOGGER.info(chatId + ": Joined meeting");
+                    LOGGER.info(String.format("%s: Joined meeting", chatId));
                     return UserState.IDLE;
                 }
             }
@@ -55,14 +59,13 @@ public class NoteKeeper {
         }
     }
 
-    public synchronized UserState removeNote(String userMessage){ // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
-        LOGGER.info(chatId + ": Removing note...");
+    public synchronized UserState removeNote(String userMessage) { // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
+        LOGGER.info(String.format("%s: Removing note...", chatId));
         userNotes = NotePrinter.getUserNotes(reminder, chatId);
         int respond;
         try {
             respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return UserState.IDLE;
         }
@@ -71,13 +74,13 @@ public class NoteKeeper {
             userIO.showMessage(BotOptions.botAnswers.get("Removed"), chatId);
             noteSerializer.serializeNotes(reminder.notes); // TODO Можно убрать, если не хватает производительности
         }
-        LOGGER.info(chatId + ": Note has been removed");
+        LOGGER.info(String.format("%s: Note has been removed", chatId));
         return UserState.IDLE;
     }
 
     public UserState respondToOffer(String userMessage) {
 
-        LOGGER.info(chatId + ": Responding to offer");
+        LOGGER.info(String.format("%s: Responding to offer", chatId));
         boolean respond;
         try {
             respond = RespondParser.parseRespondToOfferRespond(userMessage, chatId);

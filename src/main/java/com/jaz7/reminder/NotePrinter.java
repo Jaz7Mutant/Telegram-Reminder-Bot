@@ -13,8 +13,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NotePrinter extends TimerTask {
-    public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(BotOptions.botOptions.get("DateTimePattern"));
-    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(BotOptions.botOptions.get("TimePattern"));
+    public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
+            BotOptions.botOptions.get("DateTimePattern"));
+    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(
+            BotOptions.botOptions.get("TimePattern"));
     private static UserIO userIO;
     private static NoteSerializer noteSerializer;
     private final SortedSet<Note> notes;
@@ -80,10 +82,10 @@ public class NotePrinter extends TimerTask {
         }
     }
 
-    public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState){
+    public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState) {
         int respond;
         List<Note> userNotes = getUserNotes(reminder, chatId);
-        if (userNotes.size() == 0){
+        if (userNotes.size() == 0) {
             userIO.showMessage(BotOptions.botAnswers.get("NoNotes"), chatId);
             return UserState.IDLE;
         }
@@ -111,7 +113,7 @@ public class NotePrinter extends TimerTask {
     }
 
     private void printNote(Note note) {
-        userIO.showMessage(BotOptions.botAnswers.get("Remind") + note.getText(),note.getChatId());
+        userIO.showMessage(BotOptions.botAnswers.get("Remind") + note.getText(), note.getChatId());
     }
 
     private static void printTodayNotes(List<Note> userNotes, String chatId) {
@@ -120,14 +122,10 @@ public class NotePrinter extends TimerTask {
         for (Note note : userNotes) {
             if (note.getEventDate().getDayOfYear() == currentDate.getDayOfYear()
                     && note.getEventDate().getYear() == currentDate.getYear()) {
-                if (note.getText().length() >=10) {
-                    todayNotes.add(note.getEventDate().format(timeFormatter)
-                            + " " + note.getText().substring(0, 10) + " every " + note.getRemindPeriod() + " day(s)");
-                }
-                else{
-                    todayNotes.add(note.getEventDate().format(timeFormatter)
-                            + " " + note.getText() + " every " + note.getRemindPeriod() + " day(s)");
-                }
+                todayNotes.add(String.format("%s %s every %s day(s)",
+                        note.getEventDate().format(timeFormatter),
+                        note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
+                        note.getRemindPeriod()));
             }
         }
         userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
@@ -151,16 +149,10 @@ public class NotePrinter extends TimerTask {
         userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes, chatId);
     }
 
-    private static String getFormattedNote(Note note){
-        String period = "";
-        if (note.isRepeatable()){
-            period = "... every " + note.getRemindPeriod() + " day(s)";
-        }
-        if (note.getText().length() >= 10){
-            return note.getEventDate().format(dateTimeFormatter) + " " + note.getText().substring(0, 10) + period;
-        }
-        else{
-            return note.getEventDate().format(dateTimeFormatter) + " " + note.getText() + period;
-        }
+    private static String getFormattedNote(Note note) {
+        return String.format("%s %s%s", note.getEventDate().format(dateTimeFormatter),
+                note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
+                note.isRepeatable() ? String.format("... every %s day(s)", note.getRemindPeriod()) : "");
+
     }
 }

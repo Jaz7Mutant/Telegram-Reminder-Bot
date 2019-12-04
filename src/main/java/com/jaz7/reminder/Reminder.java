@@ -26,16 +26,16 @@ public class Reminder {
         LOGGER.info("NotePrinter has been started");
     }
 
-    public void addMeeting(String command, String chatId){
-        LOGGER.info(chatId + ": Switch to adding meeting state");
+    public void addMeeting(String command, String chatId) {
+        LOGGER.info(String.format("%s: Switch to adding meeting state", chatId));
         users.get(chatId).currentState = UserState.ADDING;
         DateTimeParser.updateCurrentDate();
         users.get(chatId).noteKeeper.noteAdder.addingState = AddingState.SET_MEETING;
         userIO.showMessage(BotOptions.botAnswers.get("WriteNote"), chatId);
     }
 
-    public void joinMeeting(String command, String chatId){
-        LOGGER.info(chatId + ": Switch to joining to meeting");
+    public void joinMeeting(String command, String chatId) {
+        LOGGER.info(String.format("%s: Switch to joining to meeting", chatId));
         users.get(chatId).currentState = UserState.JOINING;
         userIO.showMessage(BotOptions.botAnswers.get("SendToken"), chatId);
     }
@@ -46,7 +46,7 @@ public class Reminder {
         // Вызывает checkNotesToPrint.
         // Показывает результат операции (напр. "Заметка установлена на *дата*")
 
-        LOGGER.info(chatId + ": Switch to adding note state");
+        LOGGER.info(String.format("%s: Switch to adding note state", chatId));
         users.get(chatId).currentState = UserState.ADDING;
         DateTimeParser.updateCurrentDate();
         users.get(chatId).noteKeeper.noteAdder.addingState = AddingState.SET_TEXT;
@@ -57,13 +57,12 @@ public class Reminder {
         // Удаляет заметку. Показывает пользователю список всех напоминаний предлагает выбрать
         // номер заметки в списке и удалить ее.
 
-        LOGGER.info(chatId + ": Switch to removing note state");
+        LOGGER.info(String.format("%s: Switch to removing note state", chatId));
         users.get(chatId).currentState = UserState.REMOVING;
         NotePrinter.showUsersNotes("2", chatId, this, UserState.REMOVING);
         if (NotePrinter.getUserNotes(this, chatId).size() <= 0) {
             users.get(chatId).currentState = UserState.IDLE;
-        }
-        else{
+        } else {
             userIO.showMessage(BotOptions.botAnswers.get("Delete"), chatId);
         }
     }
@@ -71,7 +70,7 @@ public class Reminder {
     public void showUserNotes(String command, String chatId) {
         // Позволяет вывесли ближайшие 10 событий, все события, события на сегодня. Всю инфу спрашивает у пользователя.
 
-        LOGGER.info(chatId + ": Switch to showing notes state");
+        LOGGER.info(String.format("%s: Switch to showing notes state", chatId));
         users.get(chatId).currentState = UserState.SHOWING;
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChoosePeriod"),
                 new String[]{

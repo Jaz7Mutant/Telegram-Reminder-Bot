@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class BotController {
     private static Map<String, BiConsumer<String, String>> commands = new HashMap<>();
     private static Reminder reminder;
     private static ChatRoulette chatRoulette;
-//    private static NoteSerializer noteSerializer = new JsonNoteSerializer();
+    //    private static NoteSerializer noteSerializer = new JsonNoteSerializer();
     private static NoteSerializer noteSerializer = new DataBaseNoteSerializer();
     private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
 
@@ -84,8 +85,8 @@ public class BotController {
         }
         // Исполнение команды
         if (commands.containsKey(command.split(" ")[0])
-        //&& Reminder.userStates.get(chatId).currentState == UserState.IDLE) // Todo Надо тестить. Если не упадет -- можно удалить
-        ){
+            //&& Reminder.userStates.get(chatId).currentState == UserState.IDLE) // Todo Надо тестить. Если не упадет -- можно удалить
+        ) {
             LOGGER.info(chatId + ": New command from user" + " - " + command);
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {
@@ -132,10 +133,10 @@ public class BotController {
     }
 
     private static void stop(String command, String chatId) {
-        LOGGER.info(chatId + ": Removing user");
+        LOGGER.info(String.format("%s: Removing user", chatId));
         synchronized (reminder.notes) {
             List<Note> userNotes = NotePrinter.getUserNotes(reminder, chatId);
-            for (Note note : userNotes){
+            for (Note note : userNotes) {
                 reminder.notes.remove(note);
             }
             Reminder.users.remove(chatId);
@@ -156,8 +157,10 @@ public class BotController {
     }
 
     private static void echo(String command, String chatId) {
-        if (command.length() > 6) {
-            userIO.showMessage(command.substring(6), chatId);
-        }
+        String[] words = command.split(" ");
+        if (words.length > 1)
+            userIO.showMessage(String.join(" ", Arrays.copyOfRange(words, 1, words.length)), chatId);
+        else
+            userIO.showMessage("Эй, что за пустота?", chatId);
     }
 }

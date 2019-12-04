@@ -1,6 +1,7 @@
 package com.jaz7.inputOutput;
 
 import com.jaz7.bot.BotController;
+
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
@@ -8,7 +9,7 @@ import java.util.function.BiConsumer;
 public class ConsoleIO implements UserIO {
 
     @Override
-    public void listenCommands(Map<String, BiConsumer<String,String>> commands) {
+    public void listenCommands(Map<String, BiConsumer<String, String>> commands) {
         String currentCommand = "";
         while (!currentCommand.equals("/exit")) {
             currentCommand = getUserText(null, "");
@@ -17,7 +18,7 @@ public class ConsoleIO implements UserIO {
     }
 
     @Override
-    public void showMessage(String message, String chatId){
+    public void showMessage(String message, String chatId) {
         System.out.println(message);
     }
 
@@ -38,7 +39,7 @@ public class ConsoleIO implements UserIO {
     @Override
     public void showOnClickButton(String header, String[] buttons, String chatId) {
         System.out.println(header);
-        for (int i = 0; i < buttons.length; i++){
+        for (int i = 0; i < buttons.length; i++) {
             System.out.println((i + 1) + ". " + buttons[i]);
         }
     }
