@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -33,7 +34,10 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     @Override
     public SortedSet<Note> deserializeNotes() {
         LOGGER.info("Deserializing notes...");
-        SortedSet<Note> notes = new TreeSet<>();
+        SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate).
+                thenComparing(Note::getText).
+                thenComparing(Note::getChatId).
+                thenComparing(Note::hashCode));
         try {
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Notes");
             while (result.next()) {
