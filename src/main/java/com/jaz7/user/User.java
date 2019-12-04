@@ -18,11 +18,11 @@ public class User {
     private UserIO userIO;
     private static final Logger LOGGER = Logger.getLogger(User.class.getSimpleName());
 
-    public User(UserIO userIO, String chatId, Reminder reminder, NoteSerializer noteSerializer){
+    public User(UserIO userIO, String chatId, Reminder reminder, NoteSerializer noteSerializer) {
         this.noteKeeper = new NoteKeeper(chatId, userIO, this, reminder, noteSerializer);
         this.userIO = userIO;
         this.chatId = chatId;
-        LOGGER.info(chatId + ": User has been created");
+        LOGGER.info(String.format("%s: User has been created", chatId));
     }
 
     public void doNextStep(String userMessage) {
@@ -38,16 +38,16 @@ public class User {
                 isWorking = false; //todo ?
                 return;
             case SHOWING:
-                LOGGER.info(chatId + ": Showing notes");
+                LOGGER.info(String.format("%s: Showing notes", chatId));
                 currentState = NotePrinter.showUsersNotes(userMessage, chatId, noteKeeper.reminder, currentState);
                 return;
             case REMOVING:
-                LOGGER.info(chatId + ": Removing note");
+                LOGGER.info(String.format("%s: Removing note", chatId));
                 currentState = noteKeeper.removeNote(userMessage);
                 return;
             case JOINING:
                 isWorking = true;
-                LOGGER.info(chatId + ": Joining to meeting");
+                LOGGER.info(String.format("%s: Joining to meeting", chatId));
                 currentState = noteKeeper.joinMeeting(userMessage);
                 isWorking = false;
                 return;

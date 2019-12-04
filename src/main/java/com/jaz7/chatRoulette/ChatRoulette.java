@@ -12,19 +12,19 @@ import static com.jaz7.reminder.Reminder.users;
 
 public class ChatRoulette {
     public static final List<String> readyToChatUsers = new ArrayList<>(); //Пользователи, которые ищут собеседника
-    public static List<String> chattingUsers =  new ArrayList<>(); //Пользователи, которые находятся в состоянии общения
+    public static List<String> chattingUsers = new ArrayList<>(); //Пользователи, которые находятся в состоянии общения
 
     private static final Logger LOGGER = Logger.getLogger(ChatRoulette.class.getSimpleName());
     private UserIO userIO;
 
-    public ChatRoulette(UserIO userIO){
+    public ChatRoulette(UserIO userIO) {
         LOGGER.info("Initializing ChatRoulette");
         this.userIO = userIO;
     }
 
-    public void startChatting(String command, String chatId){
+    public void startChatting(String command, String chatId) {
         synchronized (readyToChatUsers) {
-            LOGGER.info(chatId + ": Switch to chatting state");
+            LOGGER.info(String.format("%s: Switch to chatting state", chatId));
             userIO.showMessage(BotOptions.botAnswers.get("CurrentOnline") + readyToChatUsers.size(), chatId);
             chattingUsers.add(chatId);
             readyToChatUsers.add(chatId);
@@ -32,8 +32,8 @@ public class ChatRoulette {
         }
     }
 
-    public void switchCompanion(String command, String chatId){
-        LOGGER.info(chatId + ": Finding new companion");
+    public void switchCompanion(String command, String chatId) {
+        LOGGER.info(String.format("%s: Finding new companion", chatId));
         synchronized (users) {
             synchronized (readyToChatUsers) {
                 if (!readyToChatUsers.contains(chatId)) {
@@ -43,10 +43,10 @@ public class ChatRoulette {
                 if (currentCompanion != null) {
                     Queue<String> bannedUsers = users.get(chatId).bannedUsers;
                     bannedUsers.add(currentCompanion);
-                    if (bannedUsers.size() > 3){
+                    if (bannedUsers.size() > 3) {
                         bannedUsers.poll();
                     }
-                    if (users.get(currentCompanion).companionChatId != null){
+                    if (users.get(currentCompanion).companionChatId != null) {
                         userIO.showMessage(BotOptions.botAnswers.get("CompanionLeft"), currentCompanion);
                         userIO.showMessage(BotOptions.botAnswers.get("LookingForCompanion"), currentCompanion);
                     }
@@ -57,12 +57,12 @@ public class ChatRoulette {
                 userIO.showMessage(BotOptions.botAnswers.get("LookingForCompanion"), chatId);
                 if (readyToChatUsers.size() == 1) {
                     userIO.showMessage(BotOptions.botAnswers.get("NoOnlineUsers"), chatId);
-                    LOGGER.info(chatId + ": No free users to chat");
+                    LOGGER.info(String.format("%s: No free users to chat", chatId));
                 } else {
                     String companion = getRandomUserToChat(chatId);
-                    if (companion.equals("")){
+                    if (companion.equals("")) {
                         userIO.showMessage(BotOptions.botAnswers.get("NoOnlineUsers"), chatId);
-                        LOGGER.info(chatId + ": No free users to chat");
+                        LOGGER.info(String.format("%s: No free users to chat", chatId));
                         return;
                     }
                     users.get(chatId).companionChatId = companion;
@@ -71,16 +71,16 @@ public class ChatRoulette {
                     userIO.showMessage(BotOptions.botAnswers.get("ChattingWith") + companion, chatId);
                     readyToChatUsers.remove(chatId);
                     readyToChatUsers.remove(companion);
-                    LOGGER.info(chatId + ": Connection completed with " + companion);
-                    LOGGER.info(companion + ": Connection completed " + chatId);
+                    LOGGER.info(String.format("%s: Connection completed with %s", chatId, companion));
+                    LOGGER.info(String.format("%s: Connection completed %s", companion, chatId));
                 }
             }
         }
     }
 
-    public void stopChatting(String command, String chatId){
+    public void stopChatting(String command, String chatId) {
         synchronized (readyToChatUsers) {
-            LOGGER.info(chatId + ": Switching off chatting");
+            LOGGER.info(String.format("%s: Switching off chatting", chatId));
             chattingUsers.remove(chatId);
             readyToChatUsers.remove(chatId);
             String currentCompanion = users.get(chatId).companionChatId;
@@ -95,12 +95,12 @@ public class ChatRoulette {
         }
     }
 
-    private String getRandomUserToChat(String finderChatId){
+    private String getRandomUserToChat(String finderChatId) {
         String user = "";
         int i = 0;
-        while (user.equals("") || user.equals(finderChatId) || users.get(finderChatId).bannedUsers.contains(user)){
-            LOGGER.info(finderChatId + ": Trying to find companion...");
-            if (i >= readyToChatUsers.size()){
+        while (user.equals("") || user.equals(finderChatId) || users.get(finderChatId).bannedUsers.contains(user)) {
+            LOGGER.info(String.format("%s: Trying to find companion...", finderChatId));
+            if (i >= readyToChatUsers.size()) {
                 return "";
             }
             user = readyToChatUsers.get(i);

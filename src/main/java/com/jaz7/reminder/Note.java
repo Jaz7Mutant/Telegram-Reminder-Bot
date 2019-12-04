@@ -86,7 +86,13 @@ public class Note {
     }
 
     public String toStringValue() {
-        return String.format("'%s', '%s', '%s', '%s', '%s', %d",
-                token, chatId, text, eventDate.format(AbstractNoteSerializer.formatter), remindDate.format(AbstractNoteSerializer.formatter), remindPeriod);
+        return String.format(
+                "'%s', '%s', '%s', '%s', '%s', %d",
+                token,
+                chatId,
+                text,
+                eventDate.format(AbstractNoteSerializer.formatter),
+                remindDate.format(AbstractNoteSerializer.formatter),
+                remindPeriod);
     }
 }

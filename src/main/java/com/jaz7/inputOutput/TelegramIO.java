@@ -28,7 +28,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
     }
 
     @Override
-    public void listenCommands(Map<String, BiConsumer<String, String>> commands){
+    public void listenCommands(Map<String, BiConsumer<String, String>> commands) {
     }
 
     @Override
@@ -37,9 +37,12 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             execute(new SendMessage()
                     .setChatId(chatId)
                     .setText(message));
-            LOGGER.info(chatId + ": Message has been send - " + message);
+            LOGGER.info(String.format("%s: Message has been send - %s", chatId, message));
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error sending message - " + message + " ; " + e.getMessage(), e);
+            LOGGER.log(
+                    Level.WARNING,
+                    String.format("%s: Error sending message - %s ; %s", chatId, message, e.getMessage()),
+                    e);
         }
     }
 
@@ -54,13 +57,13 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
         int buttonsInRow = 3;
-        if (buttons.length == 12){
+        if (buttons.length == 12) {
             buttonsInRow = 3;
         }
-        if (buttons.length > 20){
+        if (buttons.length > 20) {
             buttonsInRow = 7;
         }
-        for (int i = 0; i < buttons.length; i++){
+        for (int i = 0; i < buttons.length; i++) {
             buttonsRow.add(new InlineKeyboardButton()
                     .setText(buttons[i])
                     .setCallbackData(Integer.toString(i)));
@@ -69,38 +72,44 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
                 buttonsRow = new ArrayList<>();
             }
         }
-        if (buttonsRow.size() != 0){
+        if (buttonsRow.size() != 0) {
             rowList.add(buttonsRow);
         }
         inlineKeyboardMarkup.setKeyboard(rowList);
 
         try {
             execute(new SendMessage().setText(header).setChatId(chatId).setReplyMarkup(inlineKeyboardMarkup));
-            LOGGER.info(chatId + ": Buttons shown successfully - " + header);
+            LOGGER.info(String.format("%s: Buttons shown successfully - %s", chatId, header));
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing buttons - " + header + " ; " + e.getMessage(), e);
+            LOGGER.log(
+                    Level.WARNING,
+                    String.format("%s: Error showing buttons - %s ; %s", chatId, header, e.getMessage()),
+                    e);
         }
     }
 
     @Override
     public void showList(String prompt, String[] elements, String chatId) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < elements.length; i++){
-            sb.append(i+1);
+        for (int i = 0; i < elements.length; i++) {
+            sb.append(i + 1);
             sb.append(". ");
             sb.append(elements[i]);
             sb.append("\r\n");
         }
         String text = sb.toString();
-        if (elements.length <= 0){
+        if (elements.length <= 0) {
             text = "No elements";
         }
         try {
             execute(new SendMessage().setText(prompt).setChatId(chatId));
             execute(new SendMessage().setText(text).setChatId(chatId));
-            LOGGER.info(chatId + ": List shown successfully - " + prompt);
+            LOGGER.info(String.format("%s: List shown successfully - %s", chatId, prompt));
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing list - " + prompt + " ; " + e.getMessage(), e);
+            LOGGER.log(
+                    Level.WARNING,
+                    String.format("%s: Error showing list - %s ; %s", chatId, prompt, e.getMessage()),
+                    e);
         }
     }
 
@@ -112,14 +121,23 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         if (update.hasCallbackQuery()) {
             Reminder.users.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
                     .doNextStep(update.getCallbackQuery().getData());
-            LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
-        // Парсинг сообщения
+            LOGGER.info(
+                    String.format("%s: Received callback query", update.getCallbackQuery().getMessage().getChatId()));
+            // Парсинг сообщения
         } else if (update.hasMessage()) {
             try {
-                BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
-                LOGGER.info(update.getMessage().getChatId() + ": Received message - " + update.getMessage().getText());
+                BotController.parseCommand(
+                        update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+                LOGGER.info(
+                        String.format(
+                                "%s: Received message - %s",
+                                update.getMessage().getChatId(),
+                                update.getMessage().getText()));
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error in message parsing: " + update.getMessage().getText() + " ; " + e.getMessage());
+                LOGGER.log(
+                        Level.WARNING,
+                        String.format(
+                                "Error in message parsing: %s ; %s", update.getMessage().getText(), e.getMessage()));
             }
         }
     }
