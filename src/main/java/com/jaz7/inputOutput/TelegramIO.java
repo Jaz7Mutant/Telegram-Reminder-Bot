@@ -37,9 +37,12 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             execute(new SendMessage()
                     .setChatId(chatId)
                     .setText(message));
-            LOGGER.info(chatId + ": Message has been send - " + message);
+            LOGGER.info(String.format("%s: Message has been send - %s", chatId, message));
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error sending message - " + message + " ; " + e.getMessage(), e);
+            LOGGER.log(
+                    Level.WARNING,
+                    String.format("%s: Error sending message - %s ; %s", chatId, message, e.getMessage()),
+                    e);
         }
     }
 
@@ -76,9 +79,12 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
         try {
             execute(new SendMessage().setText(header).setChatId(chatId).setReplyMarkup(inlineKeyboardMarkup));
-            LOGGER.info(chatId + ": Buttons shown successfully - " + header);
+            LOGGER.info(String.format("%s: Buttons shown successfully - %s", chatId, header));
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing buttons - " + header + " ; " + e.getMessage(), e);
+            LOGGER.log(
+                    Level.WARNING,
+                    String.format("%s: Error showing buttons - %s ; %s", chatId, header, e.getMessage()),
+                    e);
         }
     }
 
@@ -98,9 +104,12 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         try {
             execute(new SendMessage().setText(prompt).setChatId(chatId));
             execute(new SendMessage().setText(text).setChatId(chatId));
-            LOGGER.info(chatId + ": List shown successfully - " + prompt);
+            LOGGER.info(String.format("%s: List shown successfully - %s", chatId, prompt));
         } catch (TelegramApiException e) {
-            LOGGER.log(Level.WARNING, chatId + ": Error showing list - " + prompt + " ; " + e.getMessage(), e);
+            LOGGER.log(
+                    Level.WARNING,
+                    String.format("%s: Error showing list - %s ; %s", chatId, prompt, e.getMessage()),
+                    e);
         }
     }
 
@@ -112,11 +121,17 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         if (update.hasCallbackQuery()) {
             Reminder.users.get(Long.toString(update.getCallbackQuery().getMessage().getChatId()))
                     .doNextStep(update.getCallbackQuery().getData());
-            LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
+            LOGGER.info(
+                    String.format("%s: Received callback query", update.getCallbackQuery().getMessage().getChatId()));
             // Парсинг сообщения
         } else if (update.hasMessage()) {
-            BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
-            LOGGER.info(update.getMessage().getChatId() + ": Received message - " + update.getMessage().getText());
+            BotController.parseCommand(
+                    update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
+            LOGGER.info(
+                    String.format(
+                        "%s: Received message - %s",
+                        update.getMessage().getChatId(),
+                        update.getMessage().getText()));
         }
     }
 

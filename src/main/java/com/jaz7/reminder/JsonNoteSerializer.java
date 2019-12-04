@@ -19,11 +19,11 @@ public class JsonNoteSerializer extends AbstractNoteSerializer {
 
     @Override
     public void serializeNotes(SortedSet<Note> notes) {
-        try{
+        try {
             LOGGER.info("Serializing notes...");
             JsonWriter writer = new JsonWriter(new FileWriter("src/main/resources/Notes.json"));
             writer.beginArray();
-            for (Note note: notes) {
+            for (Note note : notes) {
                 writer.beginObject();
                 writer.name("chatId");
                 writer.value(note.getChatId());
@@ -40,8 +40,7 @@ public class JsonNoteSerializer extends AbstractNoteSerializer {
                 writer.name("token");
                 if (note.getToken() == null) {
                     writer.value("null");
-                }
-                else {
+                } else {
                     writer.value(note.getToken());
                 }
                 writer.endObject();
@@ -49,9 +48,8 @@ public class JsonNoteSerializer extends AbstractNoteSerializer {
             writer.endArray();
             writer.close();
             LOGGER.info("Notes has been serialized");
-        }
-        catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Notes serializing error:" + e.getMessage(), e);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Notes serializing error: " + e.getMessage(), e);
         }
     }
 
@@ -76,30 +74,24 @@ public class JsonNoteSerializer extends AbstractNoteSerializer {
                 JsonToken nextToken = reader.peek();
                 if (JsonToken.BEGIN_OBJECT.equals(nextToken)) {
                     reader.beginObject();
-                }
-                else if (JsonToken.NAME.equals(nextToken)) {
+                } else if (JsonToken.NAME.equals(nextToken)) {
                     fieldName = reader.nextName();
                     if ("chatId".equals(fieldName)) {
                         chatId = reader.nextString();
                     }
                     if ("note".equals(fieldName)) {
                         noteText = reader.nextString();
-                    }
-                    else if ("eventDate".equals(fieldName)) {
+                    } else if ("eventDate".equals(fieldName)) {
                         eventDate = LocalDateTime.parse(reader.nextString(), formatter);
-                    }
-                    else if ("remindDate".equals(fieldName)) {
+                    } else if ("remindDate".equals(fieldName)) {
                         remindDate = LocalDateTime.parse(reader.nextString(), formatter);
-                    }
-                    else if ("isRepeatable".equals(fieldName)) {
+                    } else if ("isRepeatable".equals(fieldName)) {
                         isRepeatable = reader.nextBoolean();
-                    }
-                    else if ("remindPeriod".equals(fieldName)) {
+                    } else if ("remindPeriod".equals(fieldName)) {
                         remindPeriod = reader.nextLong();
-                    }
-                    else if ("token".equals(fieldName)){
+                    } else if ("token".equals(fieldName)) {
                         String token = reader.nextString();
-                        if (token.equals("null")){
+                        if (token.equals("null")) {
                             token = null;
                         }
                         notes.add(new Note(chatId, noteText, eventDate, remindDate, remindPeriod, token));
@@ -108,9 +100,8 @@ public class JsonNoteSerializer extends AbstractNoteSerializer {
                 }
             }
             reader.endArray();
-        }
-        catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Notes deserializing error:" + e.getMessage(), e);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Notes deserializing error: " + e.getMessage(), e);
         }
         LOGGER.info("Notes has been deserialized");
         return notes;

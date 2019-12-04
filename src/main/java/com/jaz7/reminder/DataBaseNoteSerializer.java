@@ -29,7 +29,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
             }
             LOGGER.info("Notes has been serialized");
         } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Notes serializing error:" + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, "Notes serializing error: " + e.getMessage(), e);
         }
     }
 

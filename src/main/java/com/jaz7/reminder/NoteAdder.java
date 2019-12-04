@@ -62,13 +62,13 @@ public class NoteAdder {
             case SET_MEETING:
                 isMeeting = true; // Продолжить добавление заметки, поэтому нет break
             case SET_TEXT:
-                LOGGER.info(chatId + ": Setting text");
+                LOGGER.info(String.format("%s: Setting text", chatId));
                 if (userMessage == null || userMessage.equals("")) {
                     userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
                     userIO.showMessage(BotOptions.botAnswers.get("WriteNote"), chatId);
                 } else {
                     newNoteText = userMessage;
-                    LOGGER.info(chatId + ": Text has been set");
+                    LOGGER.info(String.format("%s: Text has been set", chatId));
                     userIO.showMessage(BotOptions.botAnswers.get("When"), chatId);
                     userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseYear"), DateTimeParser.years, chatId);
                     addingState = AddingState.SET_YEAR;
@@ -76,48 +76,48 @@ public class NoteAdder {
                 return;
 
             case SET_YEAR:
-                LOGGER.info(chatId + ": Setting year");
+                LOGGER.info(String.format("%s: Setting year", chatId));
                 settingYear(userMessage, newRawDate);
                 return;
             case SET_REMIND_YEAR:
-                LOGGER.info(chatId + ": Setting remind year");
+                LOGGER.info(String.format("%s: Setting remind year", chatId));
                 settingYear(userMessage, newRawRemindDate);
                 return;
 
             case SET_MONTH:
-                LOGGER.info(chatId + ": Setting month");
+                LOGGER.info(String.format("%s: Setting month", chatId));
                 settingMonth(userMessage, newRawDate);
                 return;
             case SET_REMIND_MONTH:
-                LOGGER.info(chatId + ": Setting remind month");
+                LOGGER.info(String.format("%s: Setting remind month", chatId));
                 settingMonth(userMessage, newRawRemindDate);
                 return;
 
             case SET_DAY:
-                LOGGER.info(chatId + ": Setting day");
+                LOGGER.info(String.format("%s: Setting day", chatId));
                 settingDay(userMessage, newRawDate);
                 return;
             case SET_REMIND_DAY:
-                LOGGER.info(chatId + ": Setting remind day");
+                LOGGER.info(String.format("%s: Setting remind day", chatId));
                 settingDay(userMessage, newRawRemindDate);
                 return;
 
             case SET_TIME:
-                LOGGER.info(chatId + ": Setting time");
+                LOGGER.info(String.format("%s: Setting time", chatId));
                 settingTime(userMessage, newRawDate);
                 return;
             case SET_REMIND_TIME:
-                LOGGER.info(chatId + ": Setting remind time");
+                LOGGER.info(String.format("%s: Setting remind time", chatId));
                 settingTime(userMessage, newRawRemindDate);
                 return;
 
             case SET_REMIND:
-                LOGGER.info(chatId + ": Setting remind by offset");
+                LOGGER.info(String.format("%s: Setting remind by offset", chatId));
                 setRemind(userMessage);
                 return;
 
             case SET_REPEATING_PERIOD:
-                LOGGER.info(chatId + ": Setting repeating period");
+                LOGGER.info(String.format("%s: Setting repeating period", chatId));
                 setRepeatingPeriod(userMessage);
                 return;
         }
@@ -136,7 +136,7 @@ public class NoteAdder {
         addingState = DateTimeParser.setYear(rawDate, respond, chatId, addingState);
     }
 
-    private void settingMonth(String userMessage, Calendar rawDate){
+    private void settingMonth(String userMessage, Calendar rawDate) {
         int respond = RespondParser.parseSetMonthRespond(userMessage, chatId);
         if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
@@ -145,7 +145,7 @@ public class NoteAdder {
         addingState = DateTimeParser.setMonth(rawDate, respond - 1, chatId, addingState);
     }
 
-    private void settingDay(String userMessage, Calendar rawDate){
+    private void settingDay(String userMessage, Calendar rawDate) {
         int respond = RespondParser.parseSetDayRespond(userMessage, chatId, daysInCurrentMonth) + 1;
         if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
@@ -154,26 +154,26 @@ public class NoteAdder {
         addingState = DateTimeParser.setDay(rawDate, respond, chatId, addingState);
     }
 
-    private void settingTime(String userMessage, Calendar rawDate){
+    private void settingTime(String userMessage, Calendar rawDate) {
         LocalTime time = RespondParser.parseSetTimeRespond(userMessage,chatId);
         if (time == null){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
-        addingState = DateTimeParser.setTime(rawDate, time,chatId,addingState);
+        addingState = DateTimeParser.setTime(rawDate, time, chatId, addingState);
         if (addingState == AddingState.SET_REMIND) {
-            LOGGER.info(chatId + ": Setting remind type");
+            LOGGER.info(String.format("%s: Setting remind type", chatId));
             newNoteDate = LocalDateTime.ofInstant(newRawDate.toInstant(), newRawDate.getTimeZone().toZoneId());
             userIO.showOnClickButton(BotOptions.botAnswers.get("SetRemind"), remindTypes, chatId);
         }
-        if (addingState == AddingState.SET_REPEATING_PERIOD){
+        if (addingState == AddingState.SET_REPEATING_PERIOD) {
             newNoteRemindDate = LocalDateTime.ofInstant(newRawRemindDate.toInstant(), newRawRemindDate.getTimeZone().toZoneId());
             userIO.showOnClickButton(BotOptions.botAnswers.get("SetRemindPeriod"), remindPeriods, chatId);
         }
     }
 
-    private void setRemind(String userMessage){
-        LOGGER.info(chatId + ": Setting remind..");
+    private void setRemind(String userMessage) {
+        LOGGER.info(String.format("%s: Setting remind..", chatId));
         int respond = RespondParser.parseSetRemindRespond(userMessage, chatId);
         if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
@@ -208,7 +208,7 @@ public class NoteAdder {
     }
 
     private void setRepeatingPeriod(String userMessage){
-        LOGGER.info(chatId + ": Setting remind period...");
+        LOGGER.info(String.format("%s: Setting remind period...", chatId));
         int respond = RespondParser.parseSetRepeatingPeriodRespond(userMessage, chatId);
         if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
@@ -218,12 +218,12 @@ public class NoteAdder {
         finishAddNote();
     }
 
-    private void finishAddNote(){
-        LOGGER.info(chatId + ": Adding new note...");
+    private void finishAddNote() {
+        LOGGER.info(String.format("%s: Adding new note...", chatId));
         synchronized (reminder.notes) {
             Note newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, newNoteRemindPeriod, null);
             if (isMeeting) {
-                LOGGER.info(chatId + ": Setting meeting token");
+                LOGGER.info(String.format("%s: Setting meeting token", chatId));
                 newNote.setToken();
             }
 
@@ -232,36 +232,49 @@ public class NoteAdder {
             if (newNoteText.length() < 20) {
                 stringLimit = newNoteText.length();
             }
-            if (isMeeting){
-                userIO.showMessage(BotOptions.botAnswers.get("NewMeeting")
-                        + newNoteText.substring(0, stringLimit)
-                        + BotOptions.botAnswers.get("WithRemind")
-                        + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+            if (isMeeting) {
+                userIO.showMessage(
+                        String.format(
+                                "%s%s%s%s",
+                                BotOptions.botAnswers.get("NewMeeting"),
+                                newNoteText.substring(0, stringLimit),
+                                BotOptions.botAnswers.get("WithRemind"),
+                                newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
+                        chatId);
                 userIO.showMessage(BotOptions.botAnswers.get("YourToken"), chatId);
                 userIO.showMessage(newNote.getToken(), chatId);
                 userIO.showMessage(BotOptions.botAnswers.get("ShareToken"), chatId);
-            }
-            else {
-                userIO.showMessage(BotOptions.botAnswers.get("NewNote")
-                        + newNoteText.substring(0, stringLimit)
-                        + BotOptions.botAnswers.get("WithRemind")
-                        + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), chatId);
+            } else {
+                userIO.showMessage(
+                        String.format(
+                                "%s%s%s%s",
+                                BotOptions.botAnswers.get("NewNote"),
+                                newNoteText.substring(0, stringLimit),
+                                BotOptions.botAnswers.get("WithRemind"),
+                                newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
+                        chatId);
             }
 
-            if (user.companionChatId != null){
-                userIO.showOnClickButton(BotOptions.botAnswers.get("OfferToJoin")
-                        + "\n" + newNoteText.substring(0, stringLimit)
-                        + BotOptions.botAnswers.get("WithRemind")
-                        + newNoteRemindDate.format(NotePrinter.dateTimeFormatter), yesNoAnswers, user.companionChatId);
+            if (user.companionChatId != null) {
+                userIO.showOnClickButton(
+                        String.format(
+                                "%s\n%s%s%s",
+                                BotOptions.botAnswers.get("OfferToJoin"),
+                                newNoteText.substring(0, stringLimit),
+                                BotOptions.botAnswers.get("WithRemind"),
+                                newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
+                        yesNoAnswers,
+                        user.companionChatId);
                 Reminder.users.get(user.companionChatId).noteKeeper.offeredNote = newNote.copy(user.companionChatId);
                 Reminder.users.get(user.companionChatId).currentState = UserState.RESPOND_TO_OFFER;
             }
             noteSerializer.serializeNotes(reminder.notes);
             if (newNoteRemindPeriod != 0) {
-                userIO.showMessage(BotOptions.botAnswers.get("RemindPeriodInDays") + newNoteRemindPeriod, chatId);
+                userIO.showMessage(
+                        BotOptions.botAnswers.get("RemindPeriodInDays") + newNoteRemindPeriod, chatId);
             }
         }
-        LOGGER.info(chatId + ": New note has been added");
+        LOGGER.info(String.format("%s: New note has been added", chatId));
         addingState = AddingState.IDLE;
         user.currentState = UserState.IDLE;
         isMeeting = false;
