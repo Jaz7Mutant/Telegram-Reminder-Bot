@@ -24,7 +24,7 @@ public class RespondParser {
             respond = Integer.parseInt(userMessage);
         } catch (NumberFormatException e) {
             LOGGER.info(chatId + ": Wrong year format");
-            throw new IllegalArgumentException();
+            return -1;
         }
         if (respond == years.length - 1) {
             LOGGER.info(chatId + ": Setting year manually");
@@ -33,9 +33,8 @@ public class RespondParser {
         if (respond < years.length) {
             respond = Integer.parseInt(years[respond]);
         } else if (respond < currentDate.getYear() || respond > 2035) {
-
             LOGGER.info(chatId + ": Illegal year");
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
@@ -45,11 +44,11 @@ public class RespondParser {
         try {
             respond = Integer.parseInt(userMessage);
             if (respond > 11 || respond < 0) {
-                throw new NumberFormatException();
+                return -1;
             }
         } catch (NumberFormatException e) {
             LOGGER.info(chatId + ": Wrong month format");
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
@@ -59,22 +58,22 @@ public class RespondParser {
         try {
             respond = Integer.parseInt(userMessage);
             if (respond > days.length || respond < 0) {
-                throw new NumberFormatException();
+                return -1;
             }
         } catch (NumberFormatException e) {
             LOGGER.info(chatId + ": Wrong day format");
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }
 
-    public static LocalTime parseSerTimeRespond(String userMessage, String chatId){
+    public static LocalTime parseSetTimeRespond(String userMessage, String chatId){
         LocalTime time;
         try {
             time = LocalTime.parse(userMessage);
         } catch (Exception e) {
             LOGGER.info(chatId + ": Wrong time format");
-            throw new IllegalArgumentException();
+            return null;
         }
         return time;
     }
@@ -84,12 +83,12 @@ public class RespondParser {
         try {
             respond = Integer.parseInt(userMessage);
             if (respond > NoteAdder.remindTypes.length - 1){
-                throw new NumberFormatException();
+                return -1;
             }
         }
         catch (NumberFormatException e){
             LOGGER.info(chatId + ": Wrong format in setting remind");
-            throw new IllegalArgumentException();
+            return -1;
         }
         return respond;
     }

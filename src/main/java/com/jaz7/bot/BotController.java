@@ -14,7 +14,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -37,16 +36,16 @@ public class BotController {
     private static Map<String, BiConsumer<String, String>> commands = new HashMap<>();
     private static Reminder reminder;
     private static ChatRoulette chatRoulette;
-    //private static NoteSerializer noteSerializer = new JsonNoteSerializer();
-    private static NoteSerializer noteSerializer = new DataBaseNoteSerializer();
+    private static NoteSerializer noteSerializer = new JsonNoteSerializer();
+    //private static NoteSerializer noteSerializer = new DataBaseNoteSerializer();
     private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
 
     public static void main(String[] args) {
-        try {
-            DataBaseNoteSerializer.connectToDataBase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            DataBaseNoteSerializer.connectToDataBase();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
         // Парсинг настроек логгера
         try {
             LogManager.getLogManager().readConfiguration(new FileInputStream("src/main/resources/logging.properties"));

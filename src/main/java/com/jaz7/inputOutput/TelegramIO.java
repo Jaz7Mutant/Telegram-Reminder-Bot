@@ -115,12 +115,12 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             LOGGER.info(update.getCallbackQuery().getMessage().getChatId() + ": Received callback query");
         // Парсинг сообщения
         } else if (update.hasMessage()) {
-            try {
+            //try {
                 BotController.parseCommand(update.getMessage().getText(), Long.toString(update.getMessage().getChatId()));
                 LOGGER.info(update.getMessage().getChatId() + ": Received message - " + update.getMessage().getText());
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error in message parsing: " + update.getMessage().getText() + " ; " + e.getMessage());
-            }
+//            } catch (Exception e) {
+//                LOGGER.log(Level.WARNING, "Error in message parsing: " + update.getMessage().getText() + " ; " + e.getMessage());
+//            }
         }
     }
 

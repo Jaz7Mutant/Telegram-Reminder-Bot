@@ -30,7 +30,7 @@ public class NoteAdder {
 
     private static final Logger LOGGER = Logger.getLogger(NoteAdder.class.getSimpleName());
 
-    public NoteAdder(UserIO userIO, NoteSerializer noteSerializer, Reminder reminder, String chatId, User user){
+    public NoteAdder(UserIO userIO, NoteSerializer noteSerializer, Reminder reminder, String chatId, User user) {
         this.userIO = userIO;
         this.noteSerializer = noteSerializer;
         this.chatId = chatId;
@@ -44,9 +44,6 @@ public class NoteAdder {
                 BotOptions.botAnswers.get("DayBefore"),
                 BotOptions.botAnswers.get("WeekBefore"),
                 BotOptions.botAnswers.get("SetDate"),
-//                BotOptions.botAnswers.get("Every day"),
-//                BotOptions.botAnswers.get("Every week"),
-//                BotOptions.botAnswers.get("Every month"),
         };
         remindPeriods = new String[]{
                 BotOptions.botAnswers.get("Only once"),
@@ -126,16 +123,13 @@ public class NoteAdder {
         }
     }
 
-    private void settingYear(String userMessage, Calendar rawDate){
-        int respond;
-        try{
-            respond = RespondParser.parseSetYearRespond(userMessage, chatId);
-            if (respond == 0){
-                userIO.showMessage(BotOptions.botAnswers.get("SetYear"), chatId);
-                return;
-            }
+    private void settingYear(String userMessage, Calendar rawDate) {
+        int respond = RespondParser.parseSetYearRespond(userMessage, chatId);
+        if (respond == 0) {
+            userIO.showMessage(BotOptions.botAnswers.get("SetYear"), chatId);
+            return;
         }
-        catch (IllegalArgumentException e){
+        if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -143,11 +137,8 @@ public class NoteAdder {
     }
 
     private void settingMonth(String userMessage, Calendar rawDate){
-        int respond;
-        try{
-            respond = RespondParser.parseSetMonthRespond(userMessage, chatId) - 1;
-        }
-        catch (IllegalArgumentException e){
+        int respond = RespondParser.parseSetMonthRespond(userMessage, chatId) - 1;
+        if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -155,11 +146,8 @@ public class NoteAdder {
     }
 
     private void settingDay(String userMessage, Calendar rawDate){
-        int respond;
-        try {
-            respond = RespondParser.parseSetDayRespond(userMessage, chatId, daysInCurrentMonth) + 1;
-        }
-        catch (IllegalArgumentException e){
+        int respond = RespondParser.parseSetDayRespond(userMessage, chatId, daysInCurrentMonth) + 1;
+        if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -167,11 +155,8 @@ public class NoteAdder {
     }
 
     private void settingTime(String userMessage, Calendar rawDate){
-        LocalTime time;
-        try {
-            time = RespondParser.parseSerTimeRespond(userMessage,chatId);
-        }
-        catch (IllegalArgumentException e){
+        LocalTime time = RespondParser.parseSetTimeRespond(userMessage,chatId);
+        if (time == null){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
@@ -183,19 +168,14 @@ public class NoteAdder {
         }
         if (addingState == AddingState.SET_REPEATING_PERIOD){
             newNoteRemindDate = LocalDateTime.ofInstant(newRawRemindDate.toInstant(), newRawRemindDate.getTimeZone().toZoneId());
-
             userIO.showOnClickButton(BotOptions.botAnswers.get("SetRemindPeriod"), remindPeriods, chatId);
-            //finishAddNote();
         }
     }
 
     private void setRemind(String userMessage){
         LOGGER.info(chatId + ": Setting remind..");
-        int respond;
-        try{
-            respond = RespondParser.parseSetRemindRespond(userMessage, chatId);
-        }
-        catch (IllegalArgumentException e){
+        int respond = RespondParser.parseSetRemindRespond(userMessage, chatId);
+        if (respond == -1){
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }

@@ -1,8 +1,8 @@
 package com.jaz7.reminder;
 
 import java.time.LocalDateTime;
-import java.util.Random;
 import java.util.SortedSet;
+import java.util.UUID;
 
 public class Note {
     private String chatId;
@@ -52,7 +52,7 @@ public class Note {
     }
 
     public void setToken() {
-        token = "MEET" + (chatId + remindDate.toString() + text.hashCode() + new Random().ints()).hashCode(); // todo uuid
+        token = UUID.randomUUID().toString().replace("-", "");
     }
 
     public boolean isRepeatable() {
