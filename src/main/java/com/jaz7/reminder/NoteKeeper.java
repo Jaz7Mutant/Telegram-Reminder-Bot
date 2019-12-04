@@ -63,7 +63,7 @@ public class NoteKeeper {
         LOGGER.info(String.format("%s: Removing note...", chatId));
         userNotes = NotePrinter.getUserNotes(reminder, chatId);
         int respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
-        if (respond == -1){
+        if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return UserState.IDLE;
         }

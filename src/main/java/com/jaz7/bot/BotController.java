@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -37,16 +39,10 @@ public class BotController {
     private static Map<String, BiConsumer<String, String>> commands = new HashMap<>();
     private static Reminder reminder;
     private static ChatRoulette chatRoulette;
-    //    private static NoteSerializer noteSerializer = new JsonNoteSerializer();
-    private static NoteSerializer noteSerializer = new DataBaseNoteSerializer();
+    private static NoteSerializer noteSerializer;
     private static final Logger LOGGER = Logger.getLogger(BotController.class.getSimpleName());
 
     public static void main(String[] args) {
-        try {
-            DataBaseNoteSerializer.connectToDataBase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         // Парсинг настроек логгера
         try {
             LogManager.getLogManager().readConfiguration(new FileInputStream("src/main/resources/logging.properties"));
@@ -54,6 +50,7 @@ public class BotController {
         } catch (IOException e) {
             System.err.println("Could not setup logger configuration: " + e.toString());
         }
+        setNoteSerializer(BotOptions.botOptions.get("SerializerType"));
         setUserIO(BotOptions.botOptions.get("BotType"));
         new RespondParser(userIO);
         chatRoulette = new ChatRoulette(userIO);
@@ -112,23 +109,43 @@ public class BotController {
                 ApiContextInitializer.init();
                 TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
                 DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
-//                botOptions.setProxyHost(PROXY_HOST);
-//                botOptions.setProxyPort(PROXY_PORT);
-                // Select proxy type: [HTTP|SOCKS4|SOCKS5] (default: NO_PROXY)
-//                botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
+                botOptions.setProxyHost(PROXY_HOST);
+                botOptions.setProxyPort(PROXY_PORT);
+                botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
                 TelegramIO myBot = new TelegramIO(botOptions);
                 userIO = myBot;
                 reminder = new Reminder(myBot, notePrinterPeriodInSeconds, noteSerializer);
                 try {
                     telegramBotsApi.registerBot(myBot);
-                    System.out.println("Bot registered");
+                    LOGGER.info("Bot has been registered");
 
                 } catch (TelegramApiException e) {
-                    System.out.println("Error is here");
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "Error in bot registration: ", e.getMessage());
                 }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + botType);
         }
         LOGGER.info("Bot type has been set successfully");
+    }
+
+    private static void setNoteSerializer(String serializerType) {
+        LOGGER.info("Setting serializer type...");
+        switch (serializerType) {
+            case "Json":
+                noteSerializer = new JsonNoteSerializer();
+                break;
+            case "DataBase":
+                noteSerializer = new DataBaseNoteSerializer();
+                try {
+                    DataBaseNoteSerializer.connectToDataBase();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.WARNING, "Can't connect to database: ", e.getMessage());
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + serializerType);
+        }
     }
 
     private static void stop(String command, String chatId) {

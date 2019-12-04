@@ -67,7 +67,7 @@ public class RespondParser {
         return respond;
     }
 
-    public static LocalTime parseSerTimeRespond(String userMessage, String chatId) {
+    public static LocalTime parseSetTimeRespond(String userMessage, String chatId) {
         LocalTime time;
         try {
             time = LocalTime.parse(userMessage);
@@ -82,11 +82,10 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > NoteAdder.remindTypes.length - 1){
+            if (respond > NoteAdder.remindTypes.length - 1) {
                 return -1;
             }
-        }
-        catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             LOGGER.info(String.format("%s: Wrong format in setting remind", chatId));
             return -1;
         }
@@ -97,11 +96,10 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > NoteAdder.remindPeriods.length - 1){
+            if (respond > NoteAdder.remindPeriods.length - 1) {
                 return -1;
             }
-        }
-        catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             LOGGER.info(String.format("%s: Wrong format setting repeating period", chatId));
             return -1;
         }
@@ -123,7 +121,7 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > userNotes.size() || respond <= 0){
+            if (respond > userNotes.size() || respond <= 0) {
                 return -1;
             }
         } catch (NumberFormatException e) {
