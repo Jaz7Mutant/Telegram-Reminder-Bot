@@ -99,7 +99,7 @@ public class JsonNoteSerializer extends AbstractNoteSerializer {
                     }
                     else if ("token".equals(fieldName)){
                         String token = reader.nextString();
-                        if (token == "null"){
+                        if (token.equals("null")){
                             token = null;
                         }
                         notes.add(new Note(chatId, noteText, eventDate, remindDate, remindPeriod, token));
