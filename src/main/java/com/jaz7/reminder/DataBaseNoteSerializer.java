@@ -17,9 +17,9 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     private static final Logger LOGGER = Logger.getLogger("DBSerializer");
 
     @Override
-    //более тупой варик, просто удаляю всю таблицу и с 0 заполняю заново
     public void serializeNotes(SortedSet<Note> notes) {
         try {
+            reconnectToDataBase();
             LOGGER.info("Serializing notes...");
             connection.createStatement().executeUpdate("TRUNCATE TABLE Notes");
             for (Note note : notes) {
@@ -41,6 +41,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
                 thenComparing(Note::getChatId).
                 thenComparing(Note::hashCode));
         try {
+            reconnectToDataBase();
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Notes");
             while (result.next()) {
                 notes.add(new Note(result.getString("ChatId"),
@@ -57,34 +58,13 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
         return notes;
     }
 
-    //public void serializeNotes1(SortedSet<Note> notes) {
-    //try {
-    //LOGGER.info("Serializing notes...");
-    //for (Note note : notes) {
-    //int rowsUpdated = connection.createStatement().executeUpdate(
-    //я не знаю что именно может измениться, поэтому обновляю все
-    //можешь удалить отсюда те поля, которые не изменяются
-    //предположил что token и chatId и не меняются
-    //String.format(
-    //"UPDATE Notes SET Text = '%s', EventDate = '%s', " +
-    //"RemindDate = '%s', RemindPeriod = %d " +
-    //"WHERE Token = '%s' AND ChatId = '%s'",
-    //note.getText(), note.getEventDate().format(formatter),
-    //note.getRemindDate().format(formatter), note.getRemindPeriod(),
-    //note.getToken(), note.getChatId()));
-    //if (rowsUpdated == 0)
-    //connection.createStatement().executeUpdate(
-    //String.format("INSERT Notes(Token, ChatId, Text, EventDate, RemindDate, RemindPeriod)" +
-    //"VALUES (%s)", note.toStringValue()));
-    //}
-    //LOGGER.info("Notes has been serialized");
-    //} catch (SQLException e) {
-    //LOGGER.log(Level.WARNING, "Notes serializing error:" + e.getMessage(), e);
-    //}
-    //}
+    private static void reconnectToDataBase() throws SQLException {
+        while (!connection.isValid(610))
+            connectToDataBase();
+    }
 
     public static void connectToDataBase() throws SQLException {
-        String url = "jdbc:mysql://remotemysql.com/N8QPpqMaSc?serverTimezone=Europe/Moscow&autoReconnect=True";
+        String url = "jdbc:mysql://remotemysql.com/N8QPpqMaSc";
         String username = "N8QPpqMaSc";
         String password = "KPt1jX9vmH";
         try {
