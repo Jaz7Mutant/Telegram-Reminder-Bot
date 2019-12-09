@@ -250,60 +250,59 @@ public class NoteAdder {
 
     private void finishAddNote() {
         LOGGER.info(String.format("%s: Adding new note...", chatId));
-        synchronized (reminder.notes) {
-            Note newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, newNoteRemindPeriod, null);
-            if (isMeeting) {
-                LOGGER.info(String.format("%s: Setting meeting token", chatId));
-                newNote.setToken();
-            }
-
-            reminder.notes.add(newNote);
-            int stringLimit = 20;
-            if (newNoteText.length() < 20) {
-                stringLimit = newNoteText.length();
-            }
-            if (isMeeting) {
-                userIO.showMessage(
-                        String.format(
-                                "%s%s%s%s",
-                                BotOptions.botAnswers.get("NewMeeting"),
-                                newNoteText.substring(0, stringLimit),
-                                BotOptions.botAnswers.get("WithRemind"),
-                                newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
-                        chatId);
-                userIO.showMessage(BotOptions.botAnswers.get("YourToken"), chatId);
-                userIO.showMessage(newNote.getToken(), chatId);
-                userIO.showMessage(BotOptions.botAnswers.get("ShareToken"), chatId);
-            } else {
-                userIO.showMessage(
-                        String.format(
-                                "%s%s%s%s",
-                                BotOptions.botAnswers.get("NewNote"),
-                                newNoteText.substring(0, stringLimit),
-                                BotOptions.botAnswers.get("WithRemind"),
-                                newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
-                        chatId);
-            }
-
-            if (user.companionChatId != null) {
-                userIO.showOnClickButton(
-                        String.format(
-                                "%s\n%s%s%s",
-                                BotOptions.botAnswers.get("OfferToJoin"),
-                                newNoteText.substring(0, stringLimit),
-                                BotOptions.botAnswers.get("WithRemind"),
-                                newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
-                        yesNoAnswers,
-                        user.companionChatId);
-                Reminder.users.get(user.companionChatId).noteKeeper.offeredNote = newNote.copy(user.companionChatId);
-                Reminder.users.get(user.companionChatId).currentState = UserState.RESPOND_TO_OFFER;
-            }
-            noteSerializer.serializeNotes(reminder.notes);
-            if (newNoteRemindPeriod != 0) {
-                userIO.showMessage(
-                        BotOptions.botAnswers.get("RemindPeriodInDays") + newNoteRemindPeriod, chatId);
-            }
+        Note newNote = new Note(chatId, newNoteText, newNoteDate, newNoteRemindDate, newNoteRemindPeriod, null);
+        if (isMeeting) {
+            LOGGER.info(String.format("%s: Setting meeting token", chatId));
+            newNote.setToken();
         }
+
+        reminder.notes.add(newNote);
+        int stringLimit = 20;
+        if (newNoteText.length() < 20) {
+            stringLimit = newNoteText.length();
+        }
+        if (isMeeting) {
+            userIO.showMessage(
+                    String.format(
+                            "%s%s%s%s",
+                            BotOptions.botAnswers.get("NewMeeting"),
+                            newNoteText.substring(0, stringLimit),
+                            BotOptions.botAnswers.get("WithRemind"),
+                            newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
+                    chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("YourToken"), chatId);
+            userIO.showMessage(newNote.getToken(), chatId);
+            userIO.showMessage(BotOptions.botAnswers.get("ShareToken"), chatId);
+        } else {
+            userIO.showMessage(
+                    String.format(
+                            "%s%s%s%s",
+                            BotOptions.botAnswers.get("NewNote"),
+                            newNoteText.substring(0, stringLimit),
+                            BotOptions.botAnswers.get("WithRemind"),
+                            newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
+                    chatId);
+        }
+
+        if (user.companionChatId != null) {
+            userIO.showOnClickButton(
+                    String.format(
+                            "%s\n%s%s%s",
+                            BotOptions.botAnswers.get("OfferToJoin"),
+                            newNoteText.substring(0, stringLimit),
+                            BotOptions.botAnswers.get("WithRemind"),
+                            newNoteRemindDate.format(NotePrinter.dateTimeFormatter)),
+                    yesNoAnswers,
+                    user.companionChatId);
+            Reminder.users.get(user.companionChatId).noteKeeper.offeredNote = newNote.copy(user.companionChatId);
+            Reminder.users.get(user.companionChatId).currentState = UserState.RESPOND_TO_OFFER;
+        }
+        noteSerializer.serializeNotes(reminder.notes);
+        if (newNoteRemindPeriod != 0) {
+            userIO.showMessage(
+                    BotOptions.botAnswers.get("RemindPeriodInDays") + newNoteRemindPeriod, chatId);
+        }
+
         LOGGER.info(String.format("%s: New note has been added", chatId));
         addingState = AddingState.IDLE;
         user.currentState = UserState.IDLE;

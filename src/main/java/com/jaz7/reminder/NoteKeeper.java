@@ -29,34 +29,32 @@ public class NoteKeeper {
     }
 
     public UserState joinMeeting(String userMessage) {
-        synchronized (reminder.notes) {
-            for (Note currNote : reminder.notes) {
-                if (currNote.getToken() == null) {
-                    continue;
-                }
-                if (currNote.getToken().equals(userMessage)) {
-                    reminder.notes.add(currNote.copy(chatId));
-                    reminder.notePrinter.run();
-                    int stringLimit = 20;
-                    if (currNote.getText().length() < 20) {
-                        stringLimit = currNote.getText().length();
-                    }
-                    userIO.showMessage(
-                            String.format(
-                                    "%s%s%s%s",
-                                    BotOptions.botAnswers.get("NewNote"),
-                                    currNote.getText().substring(0, stringLimit),
-                                    BotOptions.botAnswers.get("WithRemind"),
-                                    currNote.getRemindDate().format(NotePrinter.dateTimeFormatter)),
-                            chatId);
-                    noteSerializer.serializeNotes(reminder.notes);
-                    LOGGER.info(String.format("%s: Joined meeting", chatId));
-                    return UserState.IDLE;
-                }
+        for (Note currNote : reminder.notes) {
+            if (currNote.getToken() == null) {
+                continue;
             }
-            userIO.showMessage("Wrong token", chatId);
-            return UserState.IDLE;
+            if (currNote.getToken().equals(userMessage)) {
+                reminder.notes.add(currNote.copy(chatId));
+                reminder.notePrinter.run();
+                int stringLimit = 20;
+                if (currNote.getText().length() < 20) {
+                    stringLimit = currNote.getText().length();
+                }
+                userIO.showMessage(
+                        String.format(
+                                "%s%s%s%s",
+                                BotOptions.botAnswers.get("NewNote"),
+                                currNote.getText().substring(0, stringLimit),
+                                BotOptions.botAnswers.get("WithRemind"),
+                                currNote.getRemindDate().format(NotePrinter.dateTimeFormatter)),
+                        chatId);
+                noteSerializer.serializeNotes(reminder.notes);
+                LOGGER.info(String.format("%s: Joined meeting", chatId));
+                return UserState.IDLE;
+            }
         }
+        userIO.showMessage("Wrong token", chatId);
+        return UserState.IDLE;
     }
 
     public synchronized UserState removeNote(String userMessage) { // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
@@ -69,11 +67,9 @@ public class NoteKeeper {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return UserState.IDLE;
         }
-        synchronized (reminder.notes) {
-            reminder.notes.remove(userNotes.get(respond - 1));
-            userIO.showMessage(BotOptions.botAnswers.get("Removed"), chatId);
-            noteSerializer.serializeNotes(reminder.notes); // TODO Можно убрать, если не хватает производительности
-        }
+        reminder.notes.remove(userNotes.get(respond - 1));
+        userIO.showMessage(BotOptions.botAnswers.get("Removed"), chatId);
+        noteSerializer.serializeNotes(reminder.notes); // TODO Можно убрать, если не хватает производительности
         LOGGER.info(String.format("%s: Note has been removed", chatId));
         return UserState.IDLE;
     }

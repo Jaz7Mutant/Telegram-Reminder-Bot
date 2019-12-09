@@ -40,28 +40,26 @@ public class NotePrinter extends TimerTask {
         LOGGER.info("Printing notes...");
         LocalDateTime currentTime = LocalDateTime.now();
         boolean isRemovedNotes = false;
-        synchronized (notes) {
-            Note currentNote = notes.first();
-            while (currentNote.getRemindDate().minusSeconds(30).isBefore(currentTime)) {
-                {
-                    try {
-                        printNote(currentNote);
-                    } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e);
-                    }
-                    LOGGER.info("Deleting remind...");
-                    currentNote.deleteBeforehandRemind(notes);
-                    if (currentNote.getEventDate().minusSeconds(30).isBefore(currentTime)) {
-                        LOGGER.info("Deleting note...");
-                        notes.remove(currentNote);
-                        isRemovedNotes = true;
-                    }
-                    noteSerializer.serializeNotes(notes);
-                    if (notes.isEmpty()) {
-                        return;
-                    }
-                    currentNote = notes.first();
+        Note currentNote = notes.first();
+        while (currentNote.getRemindDate().minusSeconds(30).isBefore(currentTime)) {
+            {
+                try {
+                    printNote(currentNote);
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e);
                 }
+                LOGGER.info("Deleting remind...");
+                currentNote.deleteBeforehandRemind(notes);
+                if (currentNote.getEventDate().minusSeconds(30).isBefore(currentTime)) {
+                    LOGGER.info("Deleting note...");
+                    notes.remove(currentNote);
+                    isRemovedNotes = true;
+                }
+                noteSerializer.serializeNotes(notes);
+                if (notes.isEmpty()) {
+                    return;
+                }
+                currentNote = notes.first();
             }
         }
         LOGGER.info("Printing notes has been done");
@@ -72,14 +70,12 @@ public class NotePrinter extends TimerTask {
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {
         List<Note> userNotes = new ArrayList<>();
-        synchronized (reminder.notes) {
-            for (Note note : reminder.notes) {
-                if (note.getChatId().equals(chatId)) {
-                    userNotes.add(note);
-                }
+        for (Note note : reminder.notes) {
+            if (note.getChatId().equals(chatId)) {
+                userNotes.add(note);
             }
-            return userNotes;
         }
+        return userNotes;
     }
 
     public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState) {
