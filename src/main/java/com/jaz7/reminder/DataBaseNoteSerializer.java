@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,7 +17,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     private static final Logger LOGGER = Logger.getLogger("DBSerializer");
 
     @Override
-    public void serializeNotes(SortedSet<Note> notes) {
+    public void serializeNotes(SortedSet<Note> notes){
         try {
             reconnectToDataBase();
             LOGGER.info("Serializing notes...");
@@ -36,7 +36,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     @Override
     public SortedSet<Note> deserializeNotes() {
         LOGGER.info("Deserializing notes...");
-        SortedSet<Note> notes = new TreeSet<>(Comparator.comparing(Note::getRemindDate).
+        SortedSet<Note> notes = new ConcurrentSkipListSet<>(Comparator.comparing(Note::getRemindDate).
                 thenComparing(Note::getText).
                 thenComparing(Note::getChatId).
                 thenComparing(Note::hashCode));

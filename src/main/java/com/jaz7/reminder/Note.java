@@ -98,4 +98,19 @@ public class Note {
                 remindDate.format(AbstractNoteSerializer.formatter),
                 remindPeriod);
     }
+
+    @Override
+    public int hashCode() {
+        return (chatId.hashCode() + text.hashCode() + eventDate.hashCode()) ^ remindDate.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Note))
+            return false;
+        Note otherNote = (Note)obj;
+        return chatId.equals(otherNote.chatId) && text.equals(otherNote.text) &&
+            eventDate.equals(otherNote.eventDate) && remindDate.equals(otherNote.remindDate);
+
+    }
 }
