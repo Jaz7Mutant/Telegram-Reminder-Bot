@@ -92,10 +92,10 @@ public class NotePrinter extends TimerTask {
                 printTodayNotes(userNotes, chatId);
                 break;
             case 1:
-                printTenUpcomingNotes(userNotes, chatId);
+                printNotes(userNotes, chatId, Math.min(userNotes.size(), 10));
                 break;
             case 2:
-                printAllNotes(userNotes, chatId);
+                printNotes(userNotes, chatId, userNotes.size());
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + respond);
@@ -117,24 +117,14 @@ public class NotePrinter extends TimerTask {
                         note.getEventDate().format(timeFormatter),
                         note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
                         note.getRemindPeriod()));
-            }
+            } else break;
         }
         userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
     } //todo Через дефолтный форматтер
 
-    private static void printTenUpcomingNotes(List<Note> userNotes, String chatId) {
-        if (userNotes.size() > 10) { // Если меньше 10, то выводятся все заметки
-            String[] upcomingNotes = new String[10];
-            for (int i = 0; i < 10; i++) {
-                upcomingNotes[i] = getFormattedNote(userNotes.get(i));
-            }
-            userIO.showList(BotOptions.botAnswers.get("Show10Upcoming"), upcomingNotes, chatId);
-        } else printAllNotes(userNotes, chatId);
-    }
-
-    private static void printAllNotes(List<Note> userNotes, String chatId) {
-        String[] formattedUserNotes = new String[userNotes.size()];
-        for (int i = 0; i < userNotes.size(); i++) {
+    private static void printNotes(List<Note> userNotes, String chatId, int count) {
+        String[] formattedUserNotes = new String[count];
+        for (int i = 0; i < count; i++) {
             formattedUserNotes[i] = getFormattedNote(userNotes.get(i));
         }
         userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes, chatId);
