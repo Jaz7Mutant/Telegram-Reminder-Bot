@@ -17,9 +17,9 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     private static final Logger LOGGER = Logger.getLogger("DBSerializer");
 
     @Override
-    //просто удаляю всю таблицу и с 0 заполняю заново
     public void serializeNotes(SortedSet<Note> notes) {
         try {
+            reconnectToDataBase();
             LOGGER.info("Serializing notes...");
             connection.createStatement().executeUpdate("TRUNCATE TABLE Notes");
             for (Note note : notes) {
@@ -41,6 +41,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
                 thenComparing(Note::getChatId).
                 thenComparing(Note::hashCode));
         try {
+            reconnectToDataBase();
             ResultSet result = connection.createStatement().executeQuery("SELECT * FROM Notes");
             while (result.next()) {
                 notes.add(new Note(result.getString("ChatId"),
@@ -57,8 +58,14 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
         return notes;
     }
 
+
+    private static void reconnectToDataBase() throws SQLException {
+        while (!connection.isValid(610))
+            connectToDataBase();
+    }
+
     public static void connectToDataBase() throws SQLException {
-        String url = "jdbc:mysql://remotemysql.com/N8QPpqMaSc?serverTimezone=Europe/Moscow&autoReconnect=True";
+        String url = "jdbc:mysql://remotemysql.com/N8QPpqMaSc";
         String username = "N8QPpqMaSc";
         String password = "KPt1jX9vmH";
         try {
