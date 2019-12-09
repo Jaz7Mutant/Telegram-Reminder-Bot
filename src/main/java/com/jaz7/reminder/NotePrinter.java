@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimerTask;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NotePrinter extends TimerTask {
@@ -43,11 +42,7 @@ public class NotePrinter extends TimerTask {
         Note currentNote = notes.first();
         while (currentNote.getRemindDate().minusSeconds(30).isBefore(currentTime)) {
             {
-                try {
-                    printNote(currentNote);
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Error sending message" + e.getMessage(), e);
-                }
+                printNote(currentNote);
                 LOGGER.info("Deleting remind...");
                 currentNote.deleteBeforehandRemind(notes);
                 if (currentNote.getEventDate().minusSeconds(30).isBefore(currentTime)) {

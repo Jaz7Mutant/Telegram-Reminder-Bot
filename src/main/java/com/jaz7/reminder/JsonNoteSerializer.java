@@ -16,13 +16,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class JsonNoteSerializer extends AbstractNoteSerializer {
-    private static final Logger LOGGER = Logger.getLogger(JsonNoteSerializer.class.getSimpleName());
+    private static final Logger LOGGER = Logger.getLogger("JsonSerializer");
 
     @Override
     public void serializeNotes(SortedSet<Note> notes) {
         try {
             LOGGER.info("Serializing notes...");
-            JsonWriter writer = new JsonWriter(new FileWriter("Notes.json"));
+            JsonWriter writer = new JsonWriter(new FileWriter("src/main/resources/Notes.json"));
             writer.beginArray();
             for (Note note : notes) {
                 writer.beginObject();
@@ -63,7 +63,7 @@ public class JsonNoteSerializer extends AbstractNoteSerializer {
                 thenComparing(Note::hashCode));
         String fieldName;
         try {
-            JsonReader reader = new JsonReader(new FileReader("Notes.json"));
+            JsonReader reader = new JsonReader(new FileReader("src/main/resources/Notes.json"));
             reader.beginArray();
             String noteText = null;
             String chatId = null;

@@ -58,6 +58,7 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
         return notes;
     }
 
+
     private static void reconnectToDataBase() throws SQLException {
         while (!connection.isValid(610))
             connectToDataBase();
