@@ -10,10 +10,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +44,11 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         } catch (TelegramApiException e) {
             LOGGER.log(
                     Level.WARNING,
-                    String.format("%s: Error sending message - %s ; %s", chatId, message.replace('\n', ' '), e.getMessage()),
+                    String.format(
+                            "%s: Error sending message - %s ; %s",
+                            chatId,
+                            message.replace('\n', ' '),
+                            e.getMessage()),
                     e);
         }
     }
@@ -53,30 +60,15 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
     @Override
     public void showOnClickButton(String header, String[] buttons, String chatId) {
+        System.out.println(Arrays.toString(buttons));
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
-        int buttonsInRow = 3;
-        if (buttons.length == 12) {
-            buttonsInRow = 3;
-        }
-        if (buttons.length > 20) {
-            buttonsInRow = 7;
-        }
-        for (int i = 0; i < buttons.length; i++) {
-            buttonsRow.add(new InlineKeyboardButton()
-                    .setText(buttons[i])
-                    .setCallbackData(Integer.toString(i)));
-            if (buttonsRow.size() == buttonsInRow) {
-                rowList.add(buttonsRow);
-                buttonsRow = new ArrayList<>();
-            }
-        }
-        if (buttonsRow.size() != 0) {
-            rowList.add(buttonsRow);
+        List<List<InlineKeyboardButton>> rowList;
+        if (header.contains("day")) {
+            rowList = createKeyboard(7, buttons);
+        } else {
+            rowList = createKeyboard(3, buttons);
         }
         inlineKeyboardMarkup.setKeyboard(rowList);
-
         try {
             execute(new SendMessage().setText(header).setChatId(chatId).setReplyMarkup(inlineKeyboardMarkup));
             LOGGER.info(String.format("%s: Buttons shown successfully - %s", chatId, header));
@@ -86,6 +78,24 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
                     String.format("%s: Error showing buttons - %s ; %s", chatId, header, e.getMessage()),
                     e);
         }
+    }
+
+    private List<List<InlineKeyboardButton>> createKeyboard(int buttonsInRow, String[] buttons) {
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
+        for (String button : buttons) {
+            buttonsRow.add(new InlineKeyboardButton()
+                    .setText(button)
+                    .setCallbackData(button));
+            if (buttonsRow.size() == buttonsInRow) {
+                rowList.add(buttonsRow);
+                buttonsRow = new ArrayList<>();
+            }
+        }
+        if (buttonsRow.size() != 0) {
+            rowList.add(buttonsRow);
+        }
+        return rowList;
     }
 
     @Override
