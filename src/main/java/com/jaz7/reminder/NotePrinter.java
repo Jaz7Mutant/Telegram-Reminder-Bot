@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimerTask;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class NotePrinter extends TimerTask {
     public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
@@ -64,13 +65,9 @@ public class NotePrinter extends TimerTask {
     }
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {
-        List<Note> userNotes = new ArrayList<>();
-        for (Note note : reminder.notes) {
-            if (note.getChatId().equals(chatId)) {
-                userNotes.add(note);
-            }
-        }
-        return userNotes;
+        return reminder.notes.stream()
+                .filter(x->x.getChatId().equals(chatId))
+                .collect(Collectors.toList());
     }
 
     public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState) {
@@ -120,7 +117,8 @@ public class NotePrinter extends TimerTask {
             } else break;
         }
         userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
-    } //todo Через дефолтный форматтер
+    }//todo Почему тут new String[0]
+    //todo Через дефолтный форматтер
 
     private static void printNotes(List<Note> userNotes, String chatId, int count) {
         String[] formattedUserNotes = new String[count];

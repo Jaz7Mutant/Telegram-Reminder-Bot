@@ -98,7 +98,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             sb.append("\r\n");
         }
         String text = sb.toString();
-        if (elements.length <= 0) {
+        if (elements.length == 0) {
             text = "No elements";
         }
         try {
