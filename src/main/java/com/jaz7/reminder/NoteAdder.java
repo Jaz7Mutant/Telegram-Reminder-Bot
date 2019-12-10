@@ -142,11 +142,11 @@ public class NoteAdder {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;
         }
-        addingState = DateTimeParser.setMonth(rawDate, respond - 1, chatId, addingState);
+        addingState = DateTimeParser.setMonth(rawDate, respond, chatId, addingState);
     }
 
     private void settingDay(String userMessage, Calendar rawDate) {
-        int respond = RespondParser.parseSetDayRespond(userMessage, chatId, daysInCurrentMonth) + 1;
+        int respond = RespondParser.parseSetDayRespond(userMessage, chatId, daysInCurrentMonth);
         if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return;

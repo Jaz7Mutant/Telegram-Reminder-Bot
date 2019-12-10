@@ -3,6 +3,8 @@ package com.jaz7.reminder;
 import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalTime;
+import java.time.Month;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -20,19 +22,17 @@ public class RespondParser {
 
     public static int parseSetYearRespond(String userMessage, String chatId) {
         int respond;
+        if (userMessage.equals(years[years.length - 1])) {
+            LOGGER.info(String.format("%s: Setting year manually", chatId));
+            return 0;
+        }
         try {
             respond = Integer.parseInt(userMessage);
         } catch (NumberFormatException e) {
             LOGGER.info(String.format("%s: Wrong year format", chatId));
             return -1;
         }
-        if (respond == years.length - 1) {
-            LOGGER.info(String.format("%s: Setting year manually", chatId));
-            return 0;
-        }
-        if (respond < years.length) {
-            respond = Integer.parseInt(years[respond]);
-        } else if (respond < currentDate.getYear() || respond > 2035) {
+        if (respond < currentDate.getYear() || respond > 2035) {
             LOGGER.info(String.format("%s: Illegal year", chatId));
             return -1;
         }
@@ -42,13 +42,17 @@ public class RespondParser {
     public static int parseSetMonthRespond(String userMessage, String chatId) {
         int respond;
         try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > 11 || respond < 0) {
+            respond = Month.valueOf(userMessage.toUpperCase()).getValue();
+        } catch (IllegalArgumentException e) {
+            try {
+                respond = Integer.parseInt(userMessage);
+                if (respond > 12 || respond < 1) {
+                    return -1;
+                }
+            } catch (NumberFormatException ex) {
+                LOGGER.info(String.format("%s: Wrong month format", chatId));
                 return -1;
             }
-        } catch (NumberFormatException e) {
-            LOGGER.info(String.format("%s: Wrong month format", chatId));
-            return -1;
         }
         return respond;
     }
@@ -57,7 +61,7 @@ public class RespondParser {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > days.length || respond < 0) {
+            if (respond > days.length || respond < 1) {
                 return -1;
             }
         } catch (NumberFormatException e) {
@@ -79,27 +83,15 @@ public class RespondParser {
     }
 
     public static int parseSetRemindRespond(String userMessage, String chatId) {
-        int respond;
-        try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > NoteAdder.remindTypes.length - 1) {
-                return -1;
-            }
-        } catch (NumberFormatException e) {
+        int respond = Arrays.asList(NoteAdder.remindTypes).indexOf(userMessage);
+        if (respond == -1)
             LOGGER.info(String.format("%s: Wrong format in setting remind", chatId));
-            return -1;
-        }
         return respond;
     }
 
     public static int parseSetRepeatingPeriodRespond(String userMessage, String chatId) {
-        int respond;
-        try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > NoteAdder.remindPeriods.length - 1) {
-                return -1;
-            }
-        } catch (NumberFormatException e) {
+        int respond = Arrays.asList(NoteAdder.remindTypes).indexOf(userMessage);
+        if (respond == -1) {
             LOGGER.info(String.format("%s: Wrong format setting repeating period", chatId));
             return -1;
         }
