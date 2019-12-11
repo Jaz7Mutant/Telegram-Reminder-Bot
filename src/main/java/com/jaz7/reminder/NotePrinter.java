@@ -61,16 +61,9 @@ public class NotePrinter extends TimerTask {
         }
     }
 
-    public static List<Note> getUserNotes(Reminder reminder, String chatId) {
-        return reminder.notes.stream()
-                .filter(x -> x.getChatId().equals(chatId))
-                .collect(Collectors.toList());
-    }
-    //todo убрать отсюда этот метод, ибо к печатанию заметки он не имеет никакого отношения
-
     public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState) {
         int respond;
-        List<Note> userNotes = getUserNotes(reminder, chatId);
+        List<Note> userNotes = reminder.getUserNotes(chatId);
         if (userNotes.size() == 0) {
             userIO.showMessage(BotOptions.botAnswers.get("NoNotes"), chatId);
             return UserState.IDLE;

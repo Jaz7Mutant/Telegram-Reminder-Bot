@@ -59,7 +59,7 @@ public class NoteKeeper {
 
     public UserState removeNote(String userMessage) { // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
         LOGGER.info(String.format("%s: Removing note...", chatId));
-        userNotes = NotePrinter.getUserNotes(reminder, chatId);
+        userNotes = reminder.getUserNotes(chatId);
         int respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
         if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);

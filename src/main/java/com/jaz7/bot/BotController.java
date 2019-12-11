@@ -150,13 +150,11 @@ public class BotController {
 
     private static void stop(String command, String chatId) {
         LOGGER.info(String.format("%s: Removing user", chatId));
-        synchronized (reminder.notes) {
-            List<Note> userNotes = NotePrinter.getUserNotes(reminder, chatId);
-            for (Note note : userNotes) {
-                reminder.notes.remove(note);
-            }
-            Reminder.users.remove(chatId);
+        List<Note> userNotes = reminder.getUserNotes(chatId);
+        for (Note note : userNotes) {
+            reminder.notes.remove(note);
         }
+        Reminder.users.remove(chatId);
     }
 
     private static void help(String command, String chatId) {
