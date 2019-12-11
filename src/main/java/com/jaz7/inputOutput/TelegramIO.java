@@ -60,7 +60,6 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
 
     @Override
     public void showOnClickButton(String header, String[] buttons, String chatId) {
-        System.out.println(Arrays.toString(buttons));
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList;
         if (header.contains("day")) {

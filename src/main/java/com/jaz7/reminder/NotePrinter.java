@@ -5,10 +5,7 @@ import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -66,9 +63,10 @@ public class NotePrinter extends TimerTask {
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {
         return reminder.notes.stream()
-                .filter(x->x.getChatId().equals(chatId))
+                .filter(x -> x.getChatId().equals(chatId))
                 .collect(Collectors.toList());
     }
+    //todo убрать отсюда этот метод, ибо к печатанию заметки он не имеет никакого отношения
 
     public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState) {
         int respond;
@@ -77,9 +75,13 @@ public class NotePrinter extends TimerTask {
             userIO.showMessage(BotOptions.botAnswers.get("NoNotes"), chatId);
             return UserState.IDLE;
         }
-        try {
-            respond = Integer.parseInt(command);
-        } catch (NumberFormatException e) {
+        String[] values = new String[]{
+                BotOptions.botAnswers.get("ForToday"),
+                BotOptions.botAnswers.get("10Upcoming"),
+                BotOptions.botAnswers.get("All")
+        };
+        respond = Arrays.asList(values).indexOf(command);
+        if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);
             return currentState;
         }

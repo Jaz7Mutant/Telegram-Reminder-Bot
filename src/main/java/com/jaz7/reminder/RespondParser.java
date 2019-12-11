@@ -90,7 +90,7 @@ public class RespondParser {
     }
 
     public static int parseSetRepeatingPeriodRespond(String userMessage, String chatId) {
-        int respond = Arrays.asList(NoteAdder.remindTypes).indexOf(userMessage);
+        int respond = Arrays.asList(NoteAdder.remindPeriods).indexOf(userMessage);
         if (respond == -1) {
             LOGGER.info(String.format("%s: Wrong format setting repeating period", chatId));
             return -1;
