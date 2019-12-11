@@ -16,7 +16,6 @@ public class DateTimeParser {
     public static String[] years;
     public static LocalDateTime currentDate;
     private static String[] currentYearMonths;
-    private static String[] days;
     private static UserIO userIO;
     private static final Logger LOGGER = Logger.getLogger(DateTimeParser.class.getSimpleName());
 
