@@ -5,8 +5,12 @@ import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TimerTask;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class NotePrinter extends TimerTask {
@@ -111,16 +115,16 @@ public class NotePrinter extends TimerTask {
                         note.getRemindPeriod()));
             } else break;
         }
-        userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
-    }//todo Почему тут new String[0]
+        userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(String[]::new), chatId);
+    }
     //todo Через дефолтный форматтер
 
     private static void printNotes(List<Note> userNotes, String chatId, int count) {
-        String[] formattedUserNotes = new String[count];
-        for (int i = 0; i < count; i++) {
-            formattedUserNotes[i] = getFormattedNote(userNotes.get(i));
-        }
-        userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes, chatId);
+        List<String> formattedUserNotes = userNotes.stream()
+                .limit(count)
+                .map(NotePrinter::getFormattedNote)
+                .collect(Collectors.toList());
+        userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes.toArray(String[]::new), chatId);
     }
 
     private static String getFormattedNote(Note note) {
