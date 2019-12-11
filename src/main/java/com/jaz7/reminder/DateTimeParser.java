@@ -6,9 +6,11 @@ import com.jaz7.inputOutput.UserIO;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 public class DateTimeParser {
     public static String[] years;
@@ -63,7 +65,7 @@ public class DateTimeParser {
     public static AddingState setMonth(Calendar rawDate, int month, String chatId, AddingState addingState) {
         rawDate.set(Calendar.MONTH, month - 1);
         LOGGER.info(String.format("%s: Month has been set", chatId));
-        int daysInMonth = getDaysInMonth(rawDate);
+        int daysInMonth = rawDate.getActualMaximum(Calendar.DAY_OF_MONTH);
         Reminder.users.get(chatId).noteKeeper.noteAdder.daysInCurrentMonth = daysInMonth;
         //todo разобраться зачем здесь это присовение, какое дальнейший смысл оно имеет
         String[] daysForMonth = getDaysForMonth(rawDate, daysInMonth);
@@ -126,9 +128,5 @@ public class DateTimeParser {
         } else {
             return AddingState.SET_REPEATING_PERIOD;
         }
-    }
-
-    private static int getDaysInMonth(Calendar calendar) {
-        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 }
