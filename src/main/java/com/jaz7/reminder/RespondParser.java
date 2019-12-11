@@ -57,11 +57,11 @@ public class RespondParser {
         return respond;
     }
 
-    public static int parseSetDayRespond(String userMessage, String chatId, String[] days) {
+    public static int parseSetDayRespond(String userMessage, String chatId, int daysAmount) {
         int respond;
         try {
             respond = Integer.parseInt(userMessage);
-            if (respond > days.length || respond < 1) {
+            if (respond > daysAmount || respond < 1) {
                 return -1;
             }
         } catch (NumberFormatException e) {

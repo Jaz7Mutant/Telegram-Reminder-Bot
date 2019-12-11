@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 public class NoteAdder {
     public AddingState addingState;
-    public String[] daysInCurrentMonth;
+    public int daysInCurrentMonth;
     public static String[] remindPeriods;
     public static String[] remindTypes;
     public static String[] yesNoAnswers;
