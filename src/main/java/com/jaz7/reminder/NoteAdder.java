@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 public class NoteAdder {
     public AddingState addingState;
-    public String[] daysInCurrentMonth;
+    public int daysInCurrentMonth;
     public static String[] remindPeriods;
     public static String[] remindTypes;
     public static String[] yesNoAnswers;
@@ -227,10 +227,7 @@ public class NoteAdder {
         }
 
         reminder.notes.add(newNote);
-        int stringLimit = 20;
-        if (newNoteText.length() < 20) {
-            stringLimit = newNoteText.length();
-        }
+        int stringLimit = Math.min(newNoteText.length(), 20);
         if (isMeeting) {
             userIO.showMessage(
                     String.format(

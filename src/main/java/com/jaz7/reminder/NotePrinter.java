@@ -5,7 +5,10 @@ import com.jaz7.inputOutput.UserIO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -61,16 +64,9 @@ public class NotePrinter extends TimerTask {
         }
     }
 
-    public static List<Note> getUserNotes(Reminder reminder, String chatId) {
-        return reminder.notes.stream()
-                .filter(x -> x.getChatId().equals(chatId))
-                .collect(Collectors.toList());
-    }
-    //todo убрать отсюда этот метод, ибо к печатанию заметки он не имеет никакого отношения
-
     public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState) {
         int respond;
-        List<Note> userNotes = getUserNotes(reminder, chatId);
+        List<Note> userNotes = reminder.getUserNotes(chatId);
         if (userNotes.size() == 0) {
             userIO.showMessage(BotOptions.botAnswers.get("NoNotes"), chatId);
             return UserState.IDLE;
@@ -108,30 +104,25 @@ public class NotePrinter extends TimerTask {
 
     private static void printTodayNotes(List<Note> userNotes, String chatId) {
         LocalDateTime currentDate = LocalDateTime.now();
-        List<String> todayNotes = new ArrayList<>();
-        for (Note note : userNotes) {
-            if (note.getEventDate().getDayOfYear() == currentDate.getDayOfYear()
-                    && note.getEventDate().getYear() == currentDate.getYear()) {
-                todayNotes.add(String.format("%s %s every %s day(s)",
-                        note.getEventDate().format(timeFormatter),
-                        note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
-                        note.getRemindPeriod()));
-            } else break;
-        }
-        userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
-    }//todo Почему тут new String[0]
+        List<String> todayNotes = userNotes.stream()
+                .takeWhile(x -> x.getEventDate().getDayOfYear() == currentDate.getDayOfYear() &&
+                        x.getEventDate().getYear() == currentDate.getYear())
+                .map(x -> getFormattedNote(x, timeFormatter))
+                .collect(Collectors.toList());
+        userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(String[]::new), chatId);
+    }
     //todo Через дефолтный форматтер
 
     private static void printNotes(List<Note> userNotes, String chatId, int count) {
-        String[] formattedUserNotes = new String[count];
-        for (int i = 0; i < count; i++) {
-            formattedUserNotes[i] = getFormattedNote(userNotes.get(i));
-        }
-        userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes, chatId);
+        List<String> formattedUserNotes = userNotes.stream()
+                .limit(count)
+                .map(x -> getFormattedNote(x, dateTimeFormatter))
+                .collect(Collectors.toList());
+        userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes.toArray(String[]::new), chatId);
     }
 
-    private static String getFormattedNote(Note note) {
-        return String.format("%s %s%s", note.getEventDate().format(dateTimeFormatter),
+    private static String getFormattedNote(Note note, DateTimeFormatter formatter) {
+        return String.format("%s %s%s", note.getEventDate().format(formatter),
                 note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
                 note.isRepeatable() ? String.format("... every %s day(s)", note.getRemindPeriod()) : "");
 

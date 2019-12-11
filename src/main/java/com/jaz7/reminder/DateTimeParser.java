@@ -6,15 +6,16 @@ import com.jaz7.inputOutput.UserIO;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 public class DateTimeParser {
     public static String[] years;
     public static LocalDateTime currentDate;
     private static String[] currentYearMonths;
-    private static String[] days;
     private static UserIO userIO;
     private static final Logger LOGGER = Logger.getLogger(DateTimeParser.class.getSimpleName());
 
@@ -63,12 +64,8 @@ public class DateTimeParser {
     public static AddingState setMonth(Calendar rawDate, int month, String chatId, AddingState addingState) {
         rawDate.set(Calendar.MONTH, month - 1);
         LOGGER.info(String.format("%s: Month has been set", chatId));
-        int daysInMonth = getDaysInMonth(rawDate);
-        days = new String[daysInMonth];
-        for (int i = 0; i < daysInMonth; i++) {
-            days[i] = Integer.toString(i + 1);
-        }
-        Reminder.users.get(chatId).noteKeeper.noteAdder.daysInCurrentMonth = days;
+        int daysInMonth = rawDate.getActualMaximum(Calendar.DAY_OF_MONTH);
+        Reminder.users.get(chatId).noteKeeper.noteAdder.daysInCurrentMonth = daysInMonth;
         //todo разобраться зачем здесь это присовение, какое дальнейший смысл оно имеет
         String[] daysForMonth = getDaysForMonth(rawDate, daysInMonth);
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseDay"), daysForMonth, chatId);
@@ -81,14 +78,19 @@ public class DateTimeParser {
 
     private static String[] getDaysForMonth(Calendar rawDate, int daysInMonth) {
         List<String> days = new ArrayList<>();
-        if (currentDate.getMonthValue() - 1 != rawDate.get(Calendar.MONTH) ||
-                currentDate.getYear() != rawDate.get(Calendar.YEAR))
+        if (currentDate.getMonthValue() - 1 == rawDate.get(Calendar.MONTH) &&
+                currentDate.getYear() == rawDate.get(Calendar.YEAR))
+            rawDate.set(Calendar.DAY_OF_MONTH, currentDate.getDayOfMonth());
+        else
             rawDate.set(Calendar.DAY_OF_MONTH, 1);
         int startDayOfWeek = rawDate.get(Calendar.DAY_OF_WEEK) == 1 ? 7 : rawDate.get(Calendar.DAY_OF_WEEK) - 1;
         for (int i = 1; i < startDayOfWeek; i++)
             days.add(" ");
         for (int i = rawDate.get(Calendar.DAY_OF_MONTH); i <= daysInMonth; i++)
             days.add(Integer.toString(i));
+        int daysInLastWeek = days.size() / 7 * 7 == days.size() ? 7 : days.size() - days.size() / 7 * 7;
+        for (int i = daysInLastWeek; i < 7; i++)
+            days.add(" ");
         return days.toArray(String[]::new);
     }
 
@@ -127,9 +129,5 @@ public class DateTimeParser {
         } else {
             return AddingState.SET_REPEATING_PERIOD;
         }
-    }
-
-    private static int getDaysInMonth(Calendar calendar) {
-        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 }

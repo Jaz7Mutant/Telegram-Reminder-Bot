@@ -27,26 +27,25 @@ public class NoteKeeper {
         this.noteAdder = new NoteAdder(userIO, noteSerializer, reminder, chatId, user);
         LOGGER.info(String.format("%s: NoteKeeper has been created", chatId));
     }
-
     public UserState joinMeeting(String userMessage) {
-        for (Note currNote : reminder.notes) {
-            if (currNote.getToken() == null) {
+        for (Note currentNote : reminder.notes) {
+            if (currentNote.getToken() == null) {
                 continue;
             }
-            if (currNote.getToken().equals(userMessage)) {
-                reminder.notes.add(currNote.copy(chatId));
+            if (currentNote.getToken().equals(userMessage)) {
+                reminder.notes.add(currentNote.copy(chatId));
                 reminder.notePrinter.run();
                 int stringLimit = 20;
-                if (currNote.getText().length() < 20) {
-                    stringLimit = currNote.getText().length();
+                if (currentNote.getText().length() < 20) {
+                    stringLimit = currentNote.getText().length();
                 }
                 userIO.showMessage(
                         String.format(
                                 "%s%s%s%s",
                                 BotOptions.botAnswers.get("NewNote"),
-                                currNote.getText().substring(0, stringLimit),
+                                currentNote.getText().substring(0, stringLimit),
                                 BotOptions.botAnswers.get("WithRemind"),
-                                currNote.getRemindDate().format(NotePrinter.dateTimeFormatter)),
+                                currentNote.getRemindDate().format(NotePrinter.dateTimeFormatter)),
                         chatId);
                 noteSerializer.serializeNotes(reminder.notes);
                 LOGGER.info(String.format("%s: Joined meeting", chatId));
@@ -59,7 +58,7 @@ public class NoteKeeper {
 
     public UserState removeNote(String userMessage) { // TODO Если владелец удаляет заметку, удалять все заметки с таким же токеном, без слова MEET в начале
         LOGGER.info(String.format("%s: Removing note...", chatId));
-        userNotes = NotePrinter.getUserNotes(reminder, chatId);
+        userNotes = reminder.getUserNotes(chatId);
         int respond = RespondParser.parseRemoveNoteRespond(userMessage, userNotes, chatId);
         if (respond == -1) {
             userIO.showMessage(BotOptions.botAnswers.get("WrongFormat"), chatId);

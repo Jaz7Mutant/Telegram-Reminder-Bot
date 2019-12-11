@@ -5,11 +5,13 @@ import com.jaz7.inputOutput.UserIO;
 import com.jaz7.user.User;
 
 
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class Reminder {
     public final SortedSet<Note> notes; //Все заметки
@@ -64,7 +66,7 @@ public class Reminder {
         LOGGER.info(String.format("%s: Switch to removing note state", chatId));
         users.get(chatId).currentState = UserState.REMOVING;
         NotePrinter.showUsersNotes(BotOptions.botAnswers.get("All"), chatId, this, UserState.REMOVING);
-        if (NotePrinter.getUserNotes(this, chatId).size() <= 0) {
+        if (getUserNotes(chatId).size() <= 0) {
             users.get(chatId).currentState = UserState.IDLE;
         } else {
             userIO.showMessage(BotOptions.botAnswers.get("Delete"), chatId);
@@ -82,5 +84,11 @@ public class Reminder {
                         BotOptions.botAnswers.get("10Upcoming"),
                         BotOptions.botAnswers.get("All")
                 }, chatId);
+    }
+
+    public List<Note> getUserNotes(String chatId) {
+        return notes.stream()
+                .filter(x -> x.getChatId().equals(chatId))
+                .collect(Collectors.toList());
     }
 }
