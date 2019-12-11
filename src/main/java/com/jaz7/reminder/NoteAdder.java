@@ -227,10 +227,7 @@ public class NoteAdder {
         }
 
         reminder.notes.add(newNote);
-        int stringLimit = 20;
-        if (newNoteText.length() < 20) {
-            stringLimit = newNoteText.length();
-        }
+        int stringLimit = Math.min(newNoteText.length(), 20);
         if (isMeeting) {
             userIO.showMessage(
                     String.format(

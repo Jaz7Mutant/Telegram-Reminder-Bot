@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimerTask;
 import java.util.logging.Logger;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class NotePrinter extends TimerTask {
