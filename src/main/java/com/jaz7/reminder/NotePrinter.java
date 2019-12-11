@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimerTask;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class NotePrinter extends TimerTask {
     public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
@@ -64,13 +65,9 @@ public class NotePrinter extends TimerTask {
     }
 
     public static List<Note> getUserNotes(Reminder reminder, String chatId) {
-        List<Note> userNotes = new ArrayList<>();
-        for (Note note : reminder.notes) {
-            if (note.getChatId().equals(chatId)) {
-                userNotes.add(note);
-            }
-        }
-        return userNotes;
+        return reminder.notes.stream()
+                .filter(x->x.getChatId().equals(chatId))
+                .collect(Collectors.toList());
     }
 
     public static UserState showUsersNotes(String command, String chatId, Reminder reminder, UserState currentState) {
@@ -92,10 +89,10 @@ public class NotePrinter extends TimerTask {
                 printTodayNotes(userNotes, chatId);
                 break;
             case 1:
-                printTenUpcomingNotes(userNotes, chatId);
+                printNotes(userNotes, chatId, Math.min(userNotes.size(), 10));
                 break;
             case 2:
-                printAllNotes(userNotes, chatId);
+                printNotes(userNotes, chatId, userNotes.size());
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + respond);
@@ -117,24 +114,15 @@ public class NotePrinter extends TimerTask {
                         note.getEventDate().format(timeFormatter),
                         note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
                         note.getRemindPeriod()));
-            }
+            } else break;
         }
         userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(new String[0]), chatId);
-    } //todo Через дефолтный форматтер
+    }//todo Почему тут new String[0]
+    //todo Через дефолтный форматтер
 
-    private static void printTenUpcomingNotes(List<Note> userNotes, String chatId) {
-        if (userNotes.size() > 10) { // Если меньше 10, то выводятся все заметки
-            String[] upcomingNotes = new String[10];
-            for (int i = 0; i < 10; i++) {
-                upcomingNotes[i] = getFormattedNote(userNotes.get(i));
-            }
-            userIO.showList(BotOptions.botAnswers.get("Show10Upcoming"), upcomingNotes, chatId);
-        } else printAllNotes(userNotes, chatId);
-    }
-
-    private static void printAllNotes(List<Note> userNotes, String chatId) {
-        String[] formattedUserNotes = new String[userNotes.size()];
-        for (int i = 0; i < userNotes.size(); i++) {
+    private static void printNotes(List<Note> userNotes, String chatId, int count) {
+        String[] formattedUserNotes = new String[count];
+        for (int i = 0; i < count; i++) {
             formattedUserNotes[i] = getFormattedNote(userNotes.get(i));
         }
         userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes, chatId);

@@ -4,20 +4,24 @@ import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
 import com.jaz7.user.User;
 
-import java.util.*;
+
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 public class Reminder {
     public final SortedSet<Note> notes; //Все заметки
     public NotePrinter notePrinter;
     public DateTimeParser dateTimeParser;
-    public static final Map<String, User> users = new HashMap<String, User>(); //Все пользователи
+    public static final Map<String, User> users = new ConcurrentHashMap<>(); //Все пользователи
     private UserIO userIO;
     private static final Logger LOGGER = Logger.getLogger(Reminder.class.getSimpleName());
 
     public Reminder(UserIO userIO, int notePrinterPeriodInSeconds, NoteSerializer noteSerializer) {
         this.userIO = userIO;
-        notes = Collections.synchronizedSortedSet(noteSerializer.deserializeNotes());
+        notes = noteSerializer.deserializeNotes();
         notePrinter = new NotePrinter(userIO, notes, noteSerializer);
         dateTimeParser = new DateTimeParser(userIO);
         LOGGER.info("Reminder has been created");
