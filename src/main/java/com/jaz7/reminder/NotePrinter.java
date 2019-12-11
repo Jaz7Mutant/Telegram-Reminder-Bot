@@ -105,16 +105,11 @@ public class NotePrinter extends TimerTask {
 
     private static void printTodayNotes(List<Note> userNotes, String chatId) {
         LocalDateTime currentDate = LocalDateTime.now();
-        List<String> todayNotes = new ArrayList<>();
-        for (Note note : userNotes) {
-            if (note.getEventDate().getDayOfYear() == currentDate.getDayOfYear()
-                    && note.getEventDate().getYear() == currentDate.getYear()) {
-                todayNotes.add(String.format("%s %s every %s day(s)",
-                        note.getEventDate().format(timeFormatter),
-                        note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
-                        note.getRemindPeriod()));
-            } else break;
-        }
+        List<String> todayNotes = userNotes.stream()
+                .takeWhile(x -> x.getEventDate().getDayOfYear() == currentDate.getDayOfYear() &&
+                        x.getEventDate().getYear() == currentDate.getYear())
+                .map(x -> getFormattedNote(x, timeFormatter))
+                .collect(Collectors.toList());
         userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(String[]::new), chatId);
     }
     //todo Через дефолтный форматтер
@@ -122,13 +117,13 @@ public class NotePrinter extends TimerTask {
     private static void printNotes(List<Note> userNotes, String chatId, int count) {
         List<String> formattedUserNotes = userNotes.stream()
                 .limit(count)
-                .map(NotePrinter::getFormattedNote)
+                .map(x -> getFormattedNote(x, dateTimeFormatter))
                 .collect(Collectors.toList());
         userIO.showList(BotOptions.botAnswers.get("ShowAllNotes"), formattedUserNotes.toArray(String[]::new), chatId);
     }
 
-    private static String getFormattedNote(Note note) {
-        return String.format("%s %s%s", note.getEventDate().format(dateTimeFormatter),
+    private static String getFormattedNote(Note note, DateTimeFormatter formatter) {
+        return String.format("%s %s%s", note.getEventDate().format(formatter),
                 note.getText().length() >= 10 ? note.getText().substring(0, 10) : note.getText(),
                 note.isRepeatable() ? String.format("... every %s day(s)", note.getRemindPeriod()) : "");
 
