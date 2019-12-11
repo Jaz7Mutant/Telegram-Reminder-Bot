@@ -63,7 +63,7 @@ public class Reminder {
 
         LOGGER.info(String.format("%s: Switch to removing note state", chatId));
         users.get(chatId).currentState = UserState.REMOVING;
-        NotePrinter.showUsersNotes("2", chatId, this, UserState.REMOVING);
+        NotePrinter.showUsersNotes(BotOptions.botAnswers.get("All"), chatId, this, UserState.REMOVING);
         if (NotePrinter.getUserNotes(this, chatId).size() <= 0) {
             users.get(chatId).currentState = UserState.IDLE;
         } else {
