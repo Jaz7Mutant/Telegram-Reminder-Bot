@@ -79,8 +79,10 @@ public class DateTimeParser {
 
     private static String[] getDaysForMonth(Calendar rawDate, int daysInMonth) {
         List<String> days = new ArrayList<>();
-        if (currentDate.getMonthValue() - 1 != rawDate.get(Calendar.MONTH) ||
-                currentDate.getYear() != rawDate.get(Calendar.YEAR))
+        if (currentDate.getMonthValue() - 1 == rawDate.get(Calendar.MONTH) &&
+                currentDate.getYear() == rawDate.get(Calendar.YEAR))
+            rawDate.set(Calendar.DAY_OF_MONTH, currentDate.getDayOfMonth());
+        else
             rawDate.set(Calendar.DAY_OF_MONTH, 1);
         int startDayOfWeek = rawDate.get(Calendar.DAY_OF_WEEK) == 1 ? 7 : rawDate.get(Calendar.DAY_OF_WEEK) - 1;
         for (int i = 1; i < startDayOfWeek; i++)
