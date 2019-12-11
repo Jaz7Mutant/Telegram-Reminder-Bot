@@ -63,9 +63,9 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList;
         if (header.contains("day")) {
-            rowList = createKeyboard(7, buttons);
+            rowList = createKeyboard(7, buttons, header);
         } else {
-            rowList = createKeyboard(3, buttons);
+            rowList = createKeyboard(3, buttons, header);
         }
         inlineKeyboardMarkup.setKeyboard(rowList);
         try {
@@ -79,7 +79,7 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
         }
     }
 
-    private List<List<InlineKeyboardButton>> createKeyboard(int buttonsInRow, String[] buttons) {
+    private List<List<InlineKeyboardButton>> createKeyboard(int buttonsInRow, String[] buttons, String header) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         List<InlineKeyboardButton> buttonsRow = new ArrayList<>();
         for (String button : buttons) {
@@ -92,6 +92,12 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             }
         }
         if (buttonsRow.size() != 0) {
+            if (header.contains("day"))
+                while (buttonsRow.size() != buttonsInRow) {
+                    buttonsRow.add(new InlineKeyboardButton()
+                            .setText(" ")
+                            .setCallbackData(" "));
+                }
             rowList.add(buttonsRow);
         }
         return rowList;
