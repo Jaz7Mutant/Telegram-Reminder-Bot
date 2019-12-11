@@ -92,12 +92,6 @@ public class TelegramIO extends TelegramLongPollingBot implements UserIO {
             }
         }
         if (buttonsRow.size() != 0) {
-            if (header.contains("day"))
-                while (buttonsRow.size() != buttonsInRow) {
-                    buttonsRow.add(new InlineKeyboardButton()
-                            .setText(" ")
-                            .setCallbackData(" "));
-                }
             rowList.add(buttonsRow);
         }
         return rowList;

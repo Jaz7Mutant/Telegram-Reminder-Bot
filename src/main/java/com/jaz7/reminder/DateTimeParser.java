@@ -64,11 +64,7 @@ public class DateTimeParser {
         rawDate.set(Calendar.MONTH, month - 1);
         LOGGER.info(String.format("%s: Month has been set", chatId));
         int daysInMonth = getDaysInMonth(rawDate);
-        days = new String[daysInMonth];
-        for (int i = 0; i < daysInMonth; i++) {
-            days[i] = Integer.toString(i + 1);
-        }
-        Reminder.users.get(chatId).noteKeeper.noteAdder.daysInCurrentMonth = days;
+        Reminder.users.get(chatId).noteKeeper.noteAdder.daysInCurrentMonth = daysInMonth;
         //todo разобраться зачем здесь это присовение, какое дальнейший смысл оно имеет
         String[] daysForMonth = getDaysForMonth(rawDate, daysInMonth);
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseDay"), daysForMonth, chatId);
@@ -89,6 +85,9 @@ public class DateTimeParser {
             days.add(" ");
         for (int i = rawDate.get(Calendar.DAY_OF_MONTH); i <= daysInMonth; i++)
             days.add(Integer.toString(i));
+        int daysInLastWeek = days.size() / 7 * 7 == days.size() ? 7 : days.size() - days.size() / 7 * 7;
+        for (int i = daysInLastWeek; i < 7; i++)
+            days.add(" ");
         return days.toArray(String[]::new);
     }
 
