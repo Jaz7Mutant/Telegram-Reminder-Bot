@@ -124,13 +124,8 @@ public class RespondParser {
     }
 
     public static boolean parseRespondToOfferRespond(String userMessage, String chatId) {
-        int respond;
-        try {
-            respond = Integer.parseInt(userMessage);
-            if (respond > 1) {
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException e) {
+        int respond = Arrays.asList(NoteAdder.yesNoAnswers).indexOf(userMessage);
+        if (respond == -1) {
             LOGGER.info(String.format("%s: Wrong format in responding to offer", chatId));
             throw new IllegalArgumentException();
         }

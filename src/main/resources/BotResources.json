@@ -64,6 +64,16 @@
     "CompanionDeclineYourOffer": "User declined your offer",
     "OfferToJoin": "Would you like to accept the remind?",
     "Accept": "Accept",
-    "Decline": "Decline"
+    "Decline": "Decline",
+    "EventInfo": "Тайный, мать его санта. Туды сюды, описание.",
+    "EventInvite": "Would you like to join this event?",
+    "JoinEvent": "You have been joined the event",
+    "YouShouldJoinEventFirst": "You should join event first",
+    "ItsTooLate": "You have missed the deadline, fool",
+    "ReadyToWish": "Are you ready to leave a wish for someone?",
+    "WriteWish": "Write your wish",
+    "WishHasBeenSet": "Your wish has been set",
+    "WriteWishRemind": "Write your wish to your secret friend",
+    "YouHaveMessage": "You have message from your secret friend"
   }
 ]

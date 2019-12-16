@@ -1,6 +1,8 @@
 package com.jaz7.bot;
 
 import com.jaz7.chatRoulette.ChatRoulette;
+import com.jaz7.event.EventBase;
+import com.jaz7.event.SecretSanta;
 import com.jaz7.inputOutput.ConsoleIO;
 import com.jaz7.inputOutput.TelegramIO;
 import com.jaz7.inputOutput.UserIO;
@@ -27,6 +29,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class BotController {
+    public static EventBase currentEvent;
     private static BotOptions botOptions = new BotOptions(); // Инициализация всех параметров
     private static String botHelp = BotOptions.botAnswers.get("BotHelp");
     private static String welcomeText = BotOptions.botAnswers.get("WelcomeText");
@@ -54,6 +57,10 @@ public class BotController {
         setUserIO(BotOptions.botOptions.get("BotType"));
         new RespondParser(userIO);
         chatRoulette = new ChatRoulette(userIO);
+        currentEvent = new SecretSanta(userIO, reminder,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(10),
+                LocalDateTime.now().plusMinutes(10));
 
         commands.put("/new", reminder::addNote);
         commands.put("/meeting", reminder::addMeeting);
@@ -68,6 +75,8 @@ public class BotController {
         commands.put("/chat", chatRoulette::startChatting);
         commands.put("/leave", chatRoulette::stopChatting);
         commands.put("/next", chatRoulette::switchCompanion);
+        commands.put("/event", currentEvent::eventInfo);
+        commands.put("/wish", currentEvent::doAction);
         LOGGER.info("Command list has been initialized");
 
         userIO.listenCommands(commands);
@@ -109,9 +118,9 @@ public class BotController {
                 ApiContextInitializer.init();
                 TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
                 DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
-//                botOptions.setProxyHost(PROXY_HOST);
-//                botOptions.setProxyPort(PROXY_PORT);
-//                botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
+                botOptions.setProxyHost(PROXY_HOST);
+                botOptions.setProxyPort(PROXY_PORT);
+                botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
                 TelegramIO myBot = new TelegramIO(botOptions);
                 userIO = myBot;
                 reminder = new Reminder(myBot, notePrinterPeriodInSeconds, noteSerializer);
