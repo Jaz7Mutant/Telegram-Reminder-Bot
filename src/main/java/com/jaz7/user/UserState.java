@@ -1,4 +1,4 @@
-package com.jaz7.reminder;
+package com.jaz7.user;
 
 public enum UserState {
     IDLE,

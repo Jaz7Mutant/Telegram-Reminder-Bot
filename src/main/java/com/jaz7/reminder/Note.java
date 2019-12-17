@@ -1,5 +1,7 @@
 package com.jaz7.reminder;
 
+import com.jaz7.serializer.AbstractNoteSerializer;
+
 import java.time.LocalDateTime;
 import java.util.SortedSet;
 import java.util.UUID;

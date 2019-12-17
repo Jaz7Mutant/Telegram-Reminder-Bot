@@ -1,12 +1,15 @@
 package com.jaz7.bot;
 
 import com.jaz7.chatRoulette.ChatRoulette;
-import com.jaz7.event.EventBase;
+import com.jaz7.event.BotEvent;
 import com.jaz7.event.SecretSanta;
 import com.jaz7.inputOutput.ConsoleIO;
 import com.jaz7.inputOutput.TelegramIO;
 import com.jaz7.inputOutput.UserIO;
 import com.jaz7.reminder.*;
+import com.jaz7.serializer.DataBaseNoteSerializer;
+import com.jaz7.serializer.JsonNoteSerializer;
+import com.jaz7.serializer.NoteSerializer;
 import com.jaz7.user.User;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -29,7 +32,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class BotController {
-    public static EventBase currentEvent;
+    public static BotEvent currentEvent;
     private static BotOptions botOptions = new BotOptions(); // Инициализация всех параметров
     private static String botHelp = BotOptions.botAnswers.get("BotHelp");
     private static String welcomeText = BotOptions.botAnswers.get("WelcomeText");
@@ -59,8 +62,8 @@ public class BotController {
         chatRoulette = new ChatRoulette(userIO);
         currentEvent = new SecretSanta(userIO, reminder,
                 LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(10),
-                LocalDateTime.now().plusMinutes(10));
+                LocalDateTime.now().plusMinutes(3),
+                LocalDateTime.now().plusMinutes(3));
 
         commands.put("/new", reminder::addNote);
         commands.put("/meeting", reminder::addMeeting);
@@ -89,9 +92,7 @@ public class BotController {
             LOGGER.info(chatId + ": Added new user");
         }
         // Исполнение команды
-        if (commands.containsKey(command.split(" ")[0])
-            //&& Reminder.userStates.get(chatId).currentState == UserState.IDLE) // Todo Надо тестить. Если не упадет -- можно удалить
-        ) {
+        if (commands.containsKey(command.split(" ")[0])) {
             LOGGER.info(chatId + ": New command from user" + " - " + command);
             commands.get(command.split(" ")[0]).accept(command, chatId);
         } else {

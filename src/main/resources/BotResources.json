@@ -65,6 +65,7 @@
     "OfferToJoin": "Would you like to accept the remind?",
     "Accept": "Accept",
     "Decline": "Decline",
+    "JoinChatFirst": "You should start chatting first. Type \"/chat\"",
     "EventInfo": "Тайный, мать его санта. Туды сюды, описание.",
     "EventInvite": "Would you like to join this event?",
     "JoinEvent": "You have been joined the event",

@@ -66,7 +66,6 @@ public class DateTimeParser {
         LOGGER.info(String.format("%s: Month has been set", chatId));
         int daysInMonth = rawDate.getActualMaximum(Calendar.DAY_OF_MONTH);
         Reminder.users.get(chatId).noteKeeper.noteAdder.daysInCurrentMonth = daysInMonth;
-        //todo разобраться зачем здесь это присовение, какое дальнейший смысл оно имеет
         String[] daysForMonth = getDaysForMonth(rawDate, daysInMonth);
         userIO.showOnClickButton(BotOptions.botAnswers.get("ChooseDay"), daysForMonth, chatId);
         if (addingState == AddingState.SET_MONTH) {

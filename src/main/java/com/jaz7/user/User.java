@@ -3,6 +3,7 @@ package com.jaz7.user;
 import com.jaz7.bot.BotController;
 import com.jaz7.inputOutput.UserIO;
 import com.jaz7.reminder.*;
+import com.jaz7.serializer.NoteSerializer;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -35,9 +36,9 @@ public class User {
                 }
                 return;
             case ADDING:
-                isWorking = true; // todo ?
+                isWorking = true;
                 noteKeeper.noteAdder.doNextAddingStep(userMessage);
-                isWorking = false; //todo ?
+                isWorking = false;
                 return;
             case SHOWING:
                 LOGGER.info(String.format("%s: Showing notes", chatId));
