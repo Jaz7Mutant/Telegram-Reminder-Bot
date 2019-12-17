@@ -1,4 +1,6 @@
-package com.jaz7.reminder;
+package com.jaz7.serializer;
+
+import com.jaz7.reminder.Note;
 
 import java.util.SortedSet;
 
