@@ -1,7 +1,9 @@
 package com.jaz7.user;
 
+import com.jaz7.bot.BotController;
 import com.jaz7.inputOutput.UserIO;
 import com.jaz7.reminder.*;
+import com.jaz7.serializer.NoteSerializer;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -13,6 +15,7 @@ public class User {
     public UserState currentState = UserState.IDLE;
     public String chatId;
     public String companionChatId;
+    public String wish = new String();
     public Queue<String> bannedUsers = new LinkedList<>();
 
     private UserIO userIO;
@@ -33,9 +36,9 @@ public class User {
                 }
                 return;
             case ADDING:
-                isWorking = true; // todo ?
+                isWorking = true;
                 noteKeeper.noteAdder.doNextAddingStep(userMessage);
-                isWorking = false; //todo ?
+                isWorking = false;
                 return;
             case SHOWING:
                 LOGGER.info(String.format("%s: Showing notes", chatId));
@@ -53,6 +56,21 @@ public class User {
                 return;
             case RESPOND_TO_OFFER:
                 currentState = noteKeeper.respondToOffer(userMessage);
+                return;
+            case RESPOND_TO_EVENT_INVITE:
+                try {
+                    System.out.println("HUIIII");
+                    currentState = BotController.currentEvent.respondToInvite(this, userMessage);
+                }
+                catch (Exception e){
+                    throw e;
+                }
+                return;
+            case RESPOND_TO_DO_WISH_OFFER:
+                currentState = BotController.currentEvent.respondToDoWish(this, userMessage);
+                return;
+            case SET_WISH:
+                currentState = BotController.currentEvent.setWish(this, userMessage);
                 return;
         }
     }

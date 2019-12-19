@@ -2,7 +2,9 @@ package com.jaz7.reminder;
 
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
+import com.jaz7.serializer.NoteSerializer;
 import com.jaz7.user.User;
+import com.jaz7.user.UserState;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;

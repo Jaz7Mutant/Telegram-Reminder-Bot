@@ -1,8 +1,9 @@
-package com.jaz7.reminder;
+package com.jaz7.serializer;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import com.jaz7.reminder.Note;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;

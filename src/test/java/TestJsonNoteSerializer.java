@@ -1,6 +1,6 @@
 import org.junit.Assert;
 import org.junit.Test;
-import com.jaz7.reminder.JsonNoteSerializer;
+import com.jaz7.serializer.JsonNoteSerializer;
 import com.jaz7.reminder.Note;
 
 import java.io.BufferedReader;

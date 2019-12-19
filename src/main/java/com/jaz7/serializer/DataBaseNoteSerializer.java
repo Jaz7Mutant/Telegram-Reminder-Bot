@@ -1,4 +1,6 @@
-package com.jaz7.reminder;
+package com.jaz7.serializer;
+
+import com.jaz7.reminder.Note;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;

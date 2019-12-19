@@ -2,6 +2,8 @@ package com.jaz7.reminder;
 
 import com.jaz7.bot.BotOptions;
 import com.jaz7.inputOutput.UserIO;
+import com.jaz7.serializer.NoteSerializer;
+import com.jaz7.user.UserState;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -111,7 +113,6 @@ public class NotePrinter extends TimerTask {
                 .collect(Collectors.toList());
         userIO.showList(BotOptions.botAnswers.get("ShowTodayNotes"), todayNotes.toArray(String[]::new), chatId);
     }
-    //todo Через дефолтный форматтер
 
     private static void printNotes(List<Note> userNotes, String chatId, int count) {
         List<String> formattedUserNotes = userNotes.stream()
