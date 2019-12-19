@@ -60,14 +60,14 @@ public class User {
             case RESPOND_TO_EVENT_INVITE:
                 try {
                     System.out.println("HUIIII");
-                    currentState = BotController.currentEvent.parseRespondToInvite(this, userMessage);
+                    currentState = BotController.currentEvent.respondToInvite(this, userMessage);
                 }
                 catch (Exception e){
                     throw e;
                 }
                 return;
             case RESPOND_TO_DO_WISH_OFFER:
-                currentState = BotController.currentEvent.parseRespondToDoWish(this, userMessage);
+                currentState = BotController.currentEvent.respondToDoWish(this, userMessage);
                 return;
             case SET_WISH:
                 currentState = BotController.currentEvent.setWish(this, userMessage);

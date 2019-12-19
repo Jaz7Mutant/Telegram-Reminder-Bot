@@ -5,14 +5,18 @@ import com.jaz7.inputOutput.UserIO;
 import com.jaz7.reminder.Note;
 import com.jaz7.reminder.Reminder;
 import com.jaz7.reminder.RespondParser;
-import com.jaz7.user.UserState;
 import com.jaz7.user.User;
+import com.jaz7.user.UserState;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -26,7 +30,7 @@ public class SecretSanta implements BotEvent {
     private  LocalDateTime eventLockDate;
     private static String[] yesNoAnswers;
     private static String eventInfo = BotOptions.botAnswers.get("EventInfo");
-    private static List<User> participants = Collections.synchronizedList(new ArrayList<>());
+    private static List<User> participants = new CopyOnWriteArrayList<>();
 
     public SecretSanta(
             UserIO userIO,
@@ -96,7 +100,7 @@ public class SecretSanta implements BotEvent {
     }
 
     @Override
-    public UserState parseRespondToInvite(User user, String userMessage){
+    public UserState respondToInvite(User user, String userMessage){
         LOGGER.info(String.format("%s: Parsing invite respond", user.chatId));
         boolean respond;
         try {
@@ -123,7 +127,7 @@ public class SecretSanta implements BotEvent {
     }
 
     @Override
-    public UserState parseRespondToDoWish(User user, String userMessage){
+    public UserState respondToDoWish(User user, String userMessage){
         LOGGER.info(String.format("%s: Parsing respond to do wish", user.chatId));
         boolean respond;
         try {

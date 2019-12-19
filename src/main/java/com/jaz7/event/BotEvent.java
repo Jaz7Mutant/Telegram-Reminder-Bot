@@ -8,9 +8,9 @@ public interface BotEvent {
 
     void doAction(String chatId, String userMessage);
 
-    UserState parseRespondToInvite(User user, String userMessage);
+    UserState respondToInvite(User user, String userMessage);
 
-    UserState parseRespondToDoWish(User user, String userMessage);
+    UserState respondToDoWish(User user, String userMessage);
 
     UserState setWish(User user, String userMessage);
 }
