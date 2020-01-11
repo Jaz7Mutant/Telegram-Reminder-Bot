@@ -7,10 +7,7 @@ import com.jaz7.user.UserState;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -47,11 +44,13 @@ public class NotePrinter extends TimerTask {
             {
                 printNote(currentNote);
                 LOGGER.info("Deleting remind...");
-                currentNote.deleteBeforehandRemind(notes);
                 if (currentNote.getEventDate().minusSeconds(30).isBefore(currentTime)) {
                     LOGGER.info("Deleting note...");
                     notes.remove(currentNote);
                     isRemovedNotes = true;
+                }
+                else {
+                    currentNote.deleteBeforehandRemind(notes);
                 }
                 noteSerializer.serializeNotes(notes);
                 if (notes.isEmpty()) {

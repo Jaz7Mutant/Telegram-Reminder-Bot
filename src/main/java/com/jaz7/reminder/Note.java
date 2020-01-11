@@ -73,10 +73,10 @@ public class Note {
 
     public void deleteBeforehandRemind(SortedSet<Note> notes) {
         LOGGER.info(chatId + ": Shifting remind...");
+        notes.remove(this);
         if (!isRepeatable) {
             remindDate = eventDate;
         } else {
-            notes.remove(this);
             if (remindPeriod == 30) {
                 eventDate = eventDate.plusMonths(1);
                 remindDate = remindDate.plusMonths(1);
@@ -86,8 +86,8 @@ public class Note {
                 eventDate = eventDate.plusDays(remindPeriod); //todo Для тестов периодических напоминаний
                 remindDate = remindDate.plusDays(remindPeriod);
             }
-            notes.add(this);
         }
+        notes.add(this.copy(this.chatId));
     }
 
     public String toStringValue() {
