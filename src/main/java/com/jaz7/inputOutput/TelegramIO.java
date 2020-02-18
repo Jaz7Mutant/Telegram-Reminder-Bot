@@ -10,19 +10,16 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.time.Month;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TelegramIO extends TelegramLongPollingBot implements UserIO {
     private static final String botUserName = "SimpleAutoReminderBot";
-    private static final String botToken = "932793430:AAEe098f_fG7JYPrBupkqaxKRqcarQvUNKo";
+    private static final String botToken = null;
     private static final Logger LOGGER = Logger.getLogger(TelegramIO.class.getSimpleName());
 
     public TelegramIO(DefaultBotOptions botOptions) {

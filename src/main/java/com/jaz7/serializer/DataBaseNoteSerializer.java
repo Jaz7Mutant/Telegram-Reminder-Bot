@@ -67,9 +67,9 @@ public class DataBaseNoteSerializer extends AbstractNoteSerializer {
     }
 
     public static void connectToDataBase() throws SQLException {
-        String url = "jdbc:mysql://remotemysql.com/N8QPpqMaSc";
-        String username = "N8QPpqMaSc";
-        String password = "KPt1jX9vmH";
+        String url = null;
+        String username = null;
+        String password = null;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         } catch (InstantiationException | InvocationTargetException |

@@ -65,8 +65,8 @@ public class ChatRoulette {
         }
         users.get(chatId).companionChatId = companion;
         users.get(companion).companionChatId = chatId;
-        userIO.showMessage(BotOptions.botAnswers.get("ChattingWith") + chatId, companion);
-        userIO.showMessage(BotOptions.botAnswers.get("ChattingWith") + companion, chatId);
+        userIO.showMessage(BotOptions.botAnswers.get("ChattingWith") + chatId.substring(2,6), companion);
+        userIO.showMessage(BotOptions.botAnswers.get("ChattingWith") + chatId.substring(2,6), chatId);
         readyToChatUsers.remove(chatId);
         readyToChatUsers.remove(companion);
         LOGGER.info(String.format("%s: Connection completed with %s", chatId, companion));
