@@ -1,9 +1,9 @@
-# Telegram reminder bot
+# Telegram Reminder Bot
 ### Бот для созданий напоминаний и встреч
 Версия 1.0
 Авторы:
 - Даниил [JazzMutant](https://t.me/JazzMutant) Толстоухов
-- Артемий [Arteec](https://vk.com/arteeck24) Гордон
+- Артемий [Arteeck](https://vk.com/arteeck24) Гордон
 - Софья [HebiSan](https://vk.com/hebi_san) Горбунова
 
 ## Описание
